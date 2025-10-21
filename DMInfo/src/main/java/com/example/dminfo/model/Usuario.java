@@ -1,12 +1,65 @@
 package com.example.dminfo.model;
 
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.Date;
 
+@Entity
+@Table(name = "usuario")
 public class Usuario {
-    private String nome, senha, usuario, telefone, email, rua, cidade, bairro, uf, cpf;
-    private Date dtIni, dtFim, dtNasc;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    public Usuario(String nome, String senha, String usuario, String telefone, String email, String rua, String cidade, String bairro, String uf, String cpf, Date dtIni, Date dtFim, Date dtNasc){
+    @Column(name = "id_usuario")
+    private Integer id;
+
+    @Column(name = "nome")
+    private String nome;
+
+    @Column(name = "senha")
+    private String senha;
+
+    @Column(name = "usuario")
+    private String usuario;
+
+    @Column(name = "telefone")
+    private String telefone;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "rua")
+    private String rua;
+
+    @Column(name = "cidade")
+    private String cidade;
+
+    @Column(name = "bairro")
+    private String bairro;
+
+    @Column(name = "cep")
+    private String cep;
+
+    @Column(name = "uf")
+    private String uf;
+
+    @Column(name = "cpf")
+    private String cpf;
+
+    @Column(name = "dtini")
+    private LocalDate dtIni;
+
+    @Column(name = "dtfim")
+    private LocalDate dtFim;
+
+    @Column(name = "dtnasc")
+    private LocalDate dtNasc;
+
+    public Usuario() {
+    }
+
+    public Usuario(String nome, String senha, String usuario, String telefone, String email, String rua, String cidade, String bairro, String uf, String cpf, LocalDate dtIni, LocalDate dtFim, LocalDate dtNasc){
         this.nome = nome;
         this.senha = senha;
         this.usuario = usuario;
@@ -102,27 +155,27 @@ public class Usuario {
         this.cpf = cpf;
     }
 
-    public Date getDtIni() {
+    public LocalDate getDtIni() {
         return dtIni;
     }
 
-    public void setDtIni(Date dtIni) {
+    public void setDtIni(LocalDate dtIni) {
         this.dtIni = dtIni;
     }
 
-    public Date getDtFim() {
+    public LocalDate getDtFim() {
         return dtFim;
     }
 
-    public void setDtFim(Date dtFim) {
+    public void setDtFim(LocalDate dtFim) {
         this.dtFim = dtFim;
     }
 
-    public Date getDtNasc() {
+    public LocalDate getDtNasc() {
         return dtNasc;
     }
 
-    public void setDtNasc(Date dtNasc) {
+    public void setDtNasc(LocalDate dtNasc) {
         this.dtNasc = dtNasc;
     }
 }

@@ -1,44 +1,63 @@
 package com.example.dminfo.model;
 
-import java.util.Date;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
-public class Membro extends Usuario{
-    private int idMembro;
-    private Date dtIniMembro, dtFimMembro;
+@Entity
+@Table(name = "membro")
+public class Membro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Column(name = "id_membro")
+    private Integer id;
+
+    @Column(name = "dtini")
+    private LocalDate dtIni;
+
+    @Column(name = "dtfim")
+    private LocalDate dtFim;
+
+    @Column(name = "observacao")
     private String observacao;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    public Membro(int idMembro, Date dtIniMembro, Date dtFimMembro, String observacao, Usuario usuario) {
-        super(usuario.getNome(), usuario.getSenha(), usuario.getUsuario(), usuario.getTelefone(), usuario.getEmail(), usuario.getRua(), usuario.getCidade(), usuario.getBairro(), usuario.getUf(), usuario.getCpf(), usuario.getDtIni(), usuario.getDtFim(), usuario.getDtNasc());
-        this.idMembro = idMembro;
-        this.dtIniMembro = dtIniMembro;
-        this.dtFimMembro = dtFimMembro;
+    public Membro() {
+    }
+
+    public Membro(int iddm, LocalDate dtIni, LocalDate dtFim, String observacao, Usuario usuario) {
+        this.id = iddm;
+        this.dtIni = dtIni;
+        this.dtFim = dtFim;
         this.observacao = observacao;
-
+        this.usuario = usuario;
     }
 
-    public int getIdMembro() {
-        return idMembro;
+    public Integer getId() {
+        return id;
     }
 
-    public void setIdMembro(int idMembro) {
-        this.idMembro = idMembro;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public Date getDtIniMembro() {
-        return dtIniMembro;
+    public LocalDate getDtIni() {
+        return dtIni;
     }
 
-    public void setDtIniMembro(Date dtIniMembro) {
-        this.dtIniMembro = dtIniMembro;
+    public void setDtIni(LocalDate dtIni) {
+        this.dtIni = dtIni;
     }
 
-    public Date getDtFimMembro() {
-        return dtFimMembro;
+    public LocalDate getDtFim() {
+        return dtFim;
     }
 
-    public void setDtFimMembro(Date dtFimMembro) {
-        this.dtFimMembro = dtFimMembro;
+    public void setDtFim(LocalDate dtFim) {
+        this.dtFim = dtFim;
     }
 
     public String getObservacao() {
@@ -49,4 +68,11 @@ public class Membro extends Usuario{
         this.observacao = observacao;
     }
 
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 }

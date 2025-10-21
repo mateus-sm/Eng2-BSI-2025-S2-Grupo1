@@ -1,0 +1,25 @@
+version: '3.8' # Define a versão da sintaxe do Docker Compose
+
+services:
+  # 'postgres-db' é o nome que estamos dando ao serviço
+  postgres-db:
+    image: postgres:15-alpine  # A imagem oficial do Postgres (versão 15, leve)
+    container_name: dminfo-bsi # Nome fixo para o container
+
+    environment:
+      POSTGRES_USER: Admin
+      POSTGRES_PASSWORD: Admin@123
+      POSTGRES_DB: dminfo_db
+
+    ports:
+      # Mapeia a porta 5432 do seu PC (localhost) para a porta 5432 do container
+      - "5432:5432"
+
+    volumes:
+      # Garante que os dados do banco sejam salvos fora do container
+      # Assim, se você parar ou apagar o container, seus dados não somem.
+      - postgres_data:/var/lib/postgresql/data
+
+# Declaração do volume que usamos acima
+volumes:
+  postgres_data:

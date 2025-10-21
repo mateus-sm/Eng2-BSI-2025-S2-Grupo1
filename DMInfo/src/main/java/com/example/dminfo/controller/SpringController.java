@@ -3,11 +3,13 @@ package com.example.dminfo.controller;
 
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.model.Usuario;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @RestController
@@ -27,14 +29,14 @@ public class SpringController {
                 "Bairro C",
                 "SP",
                 "123.456.789-00",
-                new Date(), // dtIni
+                LocalDate.now(), // dtIni
                 null,       // dtFim
-                new Date()  // dtNasc
+                LocalDate.of(2003, 7, 30)  // dtNasc
         );
 
         Membro membro = new Membro(
-                1,
-                new Date(), // dtIniMembro
+                262321025,
+                LocalDate.of(9,12,2020), // dtIniMembro
                 null,       // dtFimMembro
                 "Membro ativo",
                 user        // <-- aqui passa o Usuario

@@ -3,11 +3,12 @@ package com.example.dminfo.controller;
 
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.model.Usuario;
+import com.example.dminfo.services.MembroService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,35 +16,21 @@ import java.util.Date;
 @RestController
 @RequestMapping(value = "app")
 public class SpringController {
+    @Autowired
+    private MembroService membroService;
 
-    @GetMapping(value = "/membro")
-    public ResponseEntity<Membro> membro(){
-        Usuario user = new Usuario(
-                "Kaiky",
-                "12345",
-                "kaiky_user",
-                "11999999999",
-                "kaiky@email.com",
-                "Rua A",
-                "Cidade B",
-                "Bairro C",
-                "SP",
-                "123.456.789-00",
-                LocalDate.now(), // dtIni
-                null,       // dtFim
-                LocalDate.of(2003, 7, 30)  // dtNasc
-        );
+    @PostMapping(value = "/membro")
+    public ResponseEntity<Membro> inserirMembro() {
+        Membro membroSalvo = membroService.criarMembro();
+        return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
+    }
 
-        Membro membro = new Membro(
-                262321025,
-                LocalDate.of(9,12,2020), // dtIniMembro
-                null,       // dtFimMembro
-                "Membro ativo",
-                user        // <-- aqui passa o Usuario
-        );
-
+    @GetMapping(value = "/membro/{id}")
+    public ResponseEntity<Membro> exibirMembro(@PathVariable Integer id) {
+        Membro membro = membroService.buscarMembroPorId(id);
         return ResponseEntity.ok(membro);
     }
+
 
     @GetMapping(value = "/index")
     public ResponseEntity<Object> index(){

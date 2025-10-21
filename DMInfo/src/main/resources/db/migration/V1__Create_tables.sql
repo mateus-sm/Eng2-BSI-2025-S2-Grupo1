@@ -1,423 +1,423 @@
 -- -----------------------------------------------------
--- Table Usuario
+-- Table usuario
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Usuario (
-                                       Id_usuario SERIAL PRIMARY KEY,
-                                       Nome VARCHAR(80) NULL,
-    Senha VARCHAR(30) NULL,
-    Usuario VARCHAR(30) NULL,
-    Telefone VARCHAR(14) NULL,
-    Email VARCHAR(80) NULL,
-    Rua VARCHAR(100) NULL,
-    Cidade VARCHAR(70) NULL,
-    Bairro VARCHAR(50) NULL,
-    CEP VARCHAR(9) NULL,
-    UF VARCHAR(2) NULL,
-    CPF VARCHAR(14) NULL,
-    DtNasc DATE NULL,
-    DtIni DATE NULL,
-    DtFim DATE NULL
+CREATE TABLE IF NOT EXISTS usuario (
+                                       id_usuario SERIAL PRIMARY KEY,
+                                       nome VARCHAR(80) NULL,
+    senha VARCHAR(30) NULL,
+    usuario VARCHAR(30) NULL,
+    telefone VARCHAR(14) NULL,
+    email VARCHAR(80) NULL,
+    rua VARCHAR(100) NULL,
+    cidade VARCHAR(70) NULL,
+    bairro VARCHAR(50) NULL,
+    cep VARCHAR(9) NULL,
+    uf VARCHAR(2) NULL,
+    cpf VARCHAR(14) NULL,
+    dtnasc DATE NULL,
+    dtini DATE NULL,
+    dtfim DATE NULL
     );
 
 -- -----------------------------------------------------
--- Table Administrador
+-- Table administrador
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Administrador (
-                                             Id_admin SERIAL PRIMARY KEY,
-                                             Id_usuario INT NULL,
-                                             DtIni DATE NULL,
-                                             DtFim DATE NULL,
-                                             CONSTRAINT fk_Administrador_Usuario
-                                             FOREIGN KEY (Id_usuario)
-    REFERENCES Usuario (Id_usuario)
+CREATE TABLE IF NOT EXISTS administrador (
+                                             id_admin SERIAL PRIMARY KEY,
+                                             id_usuario INT NULL,
+                                             dtini DATE NULL,
+                                             dtfim DATE NULL,
+                                             CONSTRAINT fk_administrador_usuario
+                                             FOREIGN KEY (id_usuario)
+    REFERENCES usuario (id_usuario)
     );
 
-CREATE INDEX idx_Administrador_Id_usuario ON Administrador (Id_usuario ASC);
+CREATE INDEX idx_administrador_id_usuario ON administrador (id_usuario ASC);
 
 -- -----------------------------------------------------
--- Table Membro
+-- Table membro
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Membro (
-                                      Id_membro SERIAL PRIMARY KEY,
-                                      Id_usuario INT NULL,
-                                      DtIni DATE NULL,
-                                      DtFim DATE NULL,
-                                      Observacao VARCHAR(150) NULL,
-    CONSTRAINT fk_Membro_Usuario
-    FOREIGN KEY (Id_usuario)
-    REFERENCES Usuario (Id_usuario)
+CREATE TABLE IF NOT EXISTS membro (
+                                      id_membro SERIAL PRIMARY KEY,
+                                      id_usuario INT NULL,
+                                      dtini DATE NULL,
+                                      dtfim DATE NULL,
+                                      observacao VARCHAR(150) NULL,
+    CONSTRAINT fk_membro_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuario (id_usuario)
     );
 
-CREATE INDEX idx_Membro_Id_usuario ON Membro (Id_usuario ASC);
+CREATE INDEX idx_membro_id_usuario ON membro (id_usuario ASC);
 
 -- -----------------------------------------------------
--- Table Evento
+-- Table evento
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Evento (
-                                      Id_evento SERIAL PRIMARY KEY,
-                                      Id_admin INT NULL,
-                                      Titulo VARCHAR(50) NULL,
-    Descricao VARCHAR(50) NULL,
-    CONSTRAINT fk_Evento_Administrador
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+CREATE TABLE IF NOT EXISTS evento (
+                                      id_evento SERIAL PRIMARY KEY,
+                                      id_admin INT NULL,
+                                      titulo VARCHAR(50) NULL,
+    descricao VARCHAR(50) NULL,
+    CONSTRAINT fk_evento_administrador
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     );
 
-CREATE INDEX idx_Evento_Id_admin ON Evento (Id_admin ASC);
+CREATE INDEX idx_evento_id_admin ON evento (id_admin ASC);
 
 -- -----------------------------------------------------
--- Table Atividade
+-- Table atividade
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Atividade (
-                                         Id_atividade SERIAL PRIMARY KEY,
-                                         Id_evento INT NULL,
-                                         Descricao VARCHAR(50) NULL,
-    CONSTRAINT fk_Atividade_Evento
-    FOREIGN KEY (Id_evento)
-    REFERENCES Evento (Id_evento)
+CREATE TABLE IF NOT EXISTS atividade (
+                                         id_atividade SERIAL PRIMARY KEY,
+                                         id_evento INT NULL,
+                                         descricao VARCHAR(50) NULL,
+    CONSTRAINT fk_atividade_evento
+    FOREIGN KEY (id_evento)
+    REFERENCES evento (id_evento)
     );
 
-CREATE INDEX idx_Atividade_Id_evento ON Atividade (Id_evento ASC);
+CREATE INDEX idx_atividade_id_evento ON atividade (id_evento ASC);
 
 -- -----------------------------------------------------
--- Table Doador
+-- Table doador
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Doador (
-                                      Id_Doador SERIAL PRIMARY KEY,
-                                      Nome VARCHAR(80) NULL,
-    Documento VARCHAR(18) NULL,
-    Rua VARCHAR(100) NULL,
-    Bairro VARCHAR(50) NULL,
-    Cidade VARCHAR(80) NULL,
-    UF VARCHAR(2) NULL,
-    CEP VARCHAR(9) NULL,
-    Email VARCHAR(80) NULL,
-    Telefone VARCHAR(14) NULL,
-    Contato VARCHAR(80) NULL
+CREATE TABLE IF NOT EXISTS doador (
+                                      id_doador SERIAL PRIMARY KEY,
+                                      nome VARCHAR(80) NULL,
+    documento VARCHAR(18) NULL,
+    rua VARCHAR(100) NULL,
+    bairro VARCHAR(50) NULL,
+    cidade VARCHAR(80) NULL,
+    uf VARCHAR(2) NULL,
+    cep VARCHAR(9) NULL,
+    email VARCHAR(80) NULL,
+    telefone VARCHAR(14) NULL,
+    contato VARCHAR(80) NULL
     );
 
 -- -----------------------------------------------------
--- Table Doacao
+-- Table doacao
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Doacao (
-                                      Id_Doacao INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY, assumindo que não é auto-increment
-                                      Id_Doador INT NULL,
-                                      Id_admin INT NULL,
-                                      Data DATE NULL,
-                                      Valor DECIMAL(10,2) NULL,
-    Observacao VARCHAR(150) NULL,
-    CONSTRAINT fk_Doacao_Administrador1
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+CREATE TABLE IF NOT EXISTS doacao (
+                                      id_doacao INT NOT NULL PRIMARY KEY,
+                                      id_doador INT NULL,
+                                      id_admin INT NULL,
+                                      data DATE NULL,
+                                      valor double precision NULL, -- <<< ALTERADO AQUI
+                                      observacao VARCHAR(150) NULL,
+    CONSTRAINT fk_doacao_administrador1
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_Doacao_Doador1
-    FOREIGN KEY (Id_Doador)
-    REFERENCES Doador (Id_Doador)
+    CONSTRAINT fk_doacao_doador1
+    FOREIGN KEY (id_doador)
+    REFERENCES doador (id_doador)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_Doacao_Administrador1_idx ON Doacao (Id_admin ASC);
-CREATE INDEX fk_Doacao_Doador1_idx ON Doacao (Id_Doador ASC);
+CREATE INDEX fk_doacao_administrador1_idx ON doacao (id_admin ASC);
+CREATE INDEX fk_doacao_doador1_idx ON doacao (id_doador ASC);
 
 -- -----------------------------------------------------
--- Table Recurso
+-- Table recurso
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Recurso (
-                                       Id_recurso SERIAL PRIMARY KEY,
-                                       Id_Doacao INT NULL,
-                                       Descricao VARCHAR(50) NULL,
-    Tipo VARCHAR(40) NULL,
-    Quantidade INT NULL,
-    CONSTRAINT fk_Recurso_Doacao1
-    FOREIGN KEY (Id_Doacao)
-    REFERENCES Doacao (Id_Doacao)
+CREATE TABLE IF NOT EXISTS recurso (
+                                       id_recurso SERIAL PRIMARY KEY,
+                                       id_doacao INT NULL,
+                                       descricao VARCHAR(50) NULL,
+    tipo VARCHAR(40) NULL,
+    quantidade INT NULL,
+    CONSTRAINT fk_recurso_doacao1
+    FOREIGN KEY (id_doacao)
+    REFERENCES doacao (id_doacao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_Recurso_Doacao1_idx ON Recurso (Id_Doacao ASC);
+CREATE INDEX fk_recurso_doacao1_idx ON recurso (id_doacao ASC);
 
 -- -----------------------------------------------------
--- Table Mensalidade
+-- Table mensalidade
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Mensalidade (
-                                           Id_mensalidade SERIAL PRIMARY KEY,
-                                           Id_membro INT NULL,
-                                           Mes INT NULL,
-                                           Ano INT NULL,
-                                           Valor DECIMAL(10,2) NULL,
-    DataPagamento DATE NULL,
-    CONSTRAINT fk_Mensalidade_Membro1
-    FOREIGN KEY (Id_membro)
-    REFERENCES Membro (Id_membro)
+CREATE TABLE IF NOT EXISTS mensalidade (
+                                           id_mensalidade SERIAL PRIMARY KEY,
+                                           id_membro INT NULL,
+                                           mes INT NULL,
+                                           ano INT NULL,
+                                           valor double precision NULL, -- <<< ALTERADO AQUI
+                                           datapagamento DATE NULL,
+                                           CONSTRAINT fk_mensalidade_membro1
+                                           FOREIGN KEY (id_membro)
+    REFERENCES membro (id_membro)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_Mensalidade_Membro1_idx ON Mensalidade (Id_membro ASC);
+CREATE INDEX fk_mensalidade_membro1_idx ON mensalidade (id_membro ASC);
 
 -- -----------------------------------------------------
--- Table Conquista
+-- Table conquista
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Conquista (
-                                         Id_conquista SERIAL PRIMARY KEY,
-                                         Descricao VARCHAR(50) NULL
+CREATE TABLE IF NOT EXISTS conquista (
+                                         id_conquista SERIAL PRIMARY KEY,
+                                         descricao VARCHAR(50) NULL
     );
 
 -- -----------------------------------------------------
--- Table CriarRealizacaoAtividades (Nome corrigido)
+-- Table criar_realizacao_atividades
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS CriarRealizacaoAtividades (
-                                                         Id_Criacao INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                                         Id_admin INT NULL,
-                                                         Id_atividade INT NULL,
-                                                         Horario TIME NULL,
-                                                         Local VARCHAR(100) NULL,
-    Observacoes VARCHAR(150) NULL,
-    DtIni DATE NULL,
-    DtFim DATE NULL,
-    custoPrevisto DECIMAL(10,2) NULL,
-    custoReal DECIMAL(10,2) NULL,
-    CONSTRAINT fk_CriarRealizacaoAtividades_Atividade1
-    FOREIGN KEY (Id_atividade)
-    REFERENCES Atividade (Id_atividade)
+CREATE TABLE IF NOT EXISTS criar_realizacao_atividades (
+                                                           id_criacao INT NOT NULL PRIMARY KEY,
+                                                           id_admin INT NULL,
+                                                           id_atividade INT NULL,
+                                                           horario TIME NULL,
+                                                           local VARCHAR(100) NULL,
+    observacoes VARCHAR(150) NULL,
+    dtini DATE NULL,
+    dtfim DATE NULL,
+    custoprevisto double precision NULL, -- <<< ALTERADO AQUI
+    custoreal double precision NULL, -- <<< ALTERADO AQUI
+    CONSTRAINT fk_criar_realizacao_atividades_atividade1
+    FOREIGN KEY (id_atividade)
+    REFERENCES atividade (id_atividade)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_CriarRealizacaoAtividades_Administrador1
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+    CONSTRAINT fk_criar_realizacao_atividades_administrador1
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_CriarRealizacaoAtividades_Atividade1_idx ON CriarRealizacaoAtividades (Id_atividade ASC);
-CREATE INDEX fk_CriarRealizacaoAtividades_Administrador1_idx ON CriarRealizacaoAtividades (Id_admin ASC);
+CREATE INDEX fk_criar_realizacao_atividades_atividade1_idx ON criar_realizacao_atividades (id_atividade ASC);
+CREATE INDEX fk_criar_realizacao_atividades_administrador1_idx ON criar_realizacao_atividades (id_admin ASC);
 
 -- -----------------------------------------------------
--- Table EnviarFotosAtividade
+-- Table enviar_fotos_atividade
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS EnviarFotosAtividade (
-                                                    Id_Foto INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                                    Id_membro INT NULL,
-                                                    Id_atividade INT NULL,
-                                                    Foto VARCHAR(150) NULL,
-    Data DATE NULL,
-    CONSTRAINT fk_EnviarFotosAtividade_Atividade1
-    FOREIGN KEY (Id_atividade)
-    REFERENCES Atividade (Id_atividade)
+CREATE TABLE IF NOT EXISTS enviar_fotos_atividade (
+                                                      id_foto INT NOT NULL PRIMARY KEY,
+                                                      id_membro INT NULL,
+                                                      id_atividade INT NULL,
+                                                      foto VARCHAR(150) NULL,
+    data DATE NULL,
+    CONSTRAINT fk_enviar_fotos_atividade_atividade1
+    FOREIGN KEY (id_atividade)
+    REFERENCES atividade (id_atividade)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_EnviarFotosAtividade_Membro1
-    FOREIGN KEY (Id_membro)
-    REFERENCES Membro (Id_membro)
+    CONSTRAINT fk_enviar_fotos_atividade_membro1
+    FOREIGN KEY (id_membro)
+    REFERENCES membro (id_membro)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_EnviarFotosAtividade_Atividade1_idx ON EnviarFotosAtividade (Id_atividade ASC);
-CREATE INDEX fk_EnviarFotosAtividade_Membro1_idx ON EnviarFotosAtividade (Id_membro ASC);
+CREATE INDEX fk_enviar_fotos_atividade_atividade1_idx ON enviar_fotos_atividade (id_atividade ASC);
+CREATE INDEX fk_enviar_fotos_atividade_membro1_idx ON enviar_fotos_atividade (id_membro ASC);
 
 -- -----------------------------------------------------
--- Table Calendario (Nome corrigido)
+-- Table calendario
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Calendario (
-                                          Id_Calendario INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                          Id_Criacao INT NULL,
-                                          CONSTRAINT fk_Calendario_CriarRealizacaoAtividades1
-                                          FOREIGN KEY (Id_Criacao)
-    REFERENCES CriarRealizacaoAtividades (Id_Criacao)
+CREATE TABLE IF NOT EXISTS calendario (
+                                          id_calendario INT NOT NULL PRIMARY KEY,
+                                          id_criacao INT NULL,
+                                          CONSTRAINT fk_calendario_criar_realizacao_atividades1
+                                          FOREIGN KEY (id_criacao)
+    REFERENCES criar_realizacao_atividades (id_criacao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_Calendario_CriarRealizacaoAtividades1_idx ON Calendario (Id_Criacao ASC);
+CREATE INDEX fk_calendario_criar_realizacao_atividades1_idx ON calendario (id_criacao ASC);
 
 -- -----------------------------------------------------
--- Table NotificarAtividade
+-- Table notificar_atividade
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS NotificarAtividade (
-                                                  Id_Notificacao INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                                  Id_Calendario INT NULL,
-                                                  Id_admin INT NULL,
-                                                  Data DATE NULL,
-                                                  Status VARCHAR(5) NULL,
-    Titulo VARCHAR(100) NULL,
-    Descricao VARCHAR(150) NULL,
-    CONSTRAINT fk_NotificarAtividade_Calendario1
-    FOREIGN KEY (Id_Calendario)
-    REFERENCES Calendario (Id_Calendario)
+CREATE TABLE IF NOT EXISTS notificar_atividade (
+                                                   id_notificacao INT NOT NULL PRIMARY KEY,
+                                                   id_calendario INT NULL,
+                                                   id_admin INT NULL,
+                                                   data DATE NULL,
+                                                   status VARCHAR(5) NULL,
+    titulo VARCHAR(100) NULL,
+    descricao VARCHAR(150) NULL,
+    CONSTRAINT fk_notificar_atividade_calendario1
+    FOREIGN KEY (id_calendario)
+    REFERENCES calendario (id_calendario)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_NotificarAtividade_Administrador1
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+    CONSTRAINT fk_notificar_atividade_administrador1
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_NotificarAtividade_Calendario1_idx ON NotificarAtividade (Id_Calendario ASC);
-CREATE INDEX fk_NotificarAtividade_Administrador1_idx ON NotificarAtividade (Id_admin ASC);
+CREATE INDEX fk_notificar_atividade_calendario1_idx ON notificar_atividade (id_calendario ASC);
+CREATE INDEX fk_notificar_atividade_administrador1_idx ON notificar_atividade (id_admin ASC);
 
 -- -----------------------------------------------------
--- Table AtribuirConquistaMembro
+-- Table atribuir_conquista_membro
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS AtribuirConquistaMembro (
-                                                       Id_AtribuirConquista INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                                       Id_admin INT NULL,
-                                                       Id_membro INT NULL,
-                                                       Id_conquista INT NULL,
-                                                       Data DATE NULL,
-                                                       Observacao VARCHAR(150) NULL,
-    CONSTRAINT fk_AtribuirConquistaMembro_Conquista1
-    FOREIGN KEY (Id_conquista)
-    REFERENCES Conquista (Id_conquista)
+CREATE TABLE IF NOT EXISTS atribuir_conquista_membro (
+                                                         id_atribuir_conquista INT NOT NULL PRIMARY KEY,
+                                                         id_admin INT NULL,
+                                                         id_membro INT NULL,
+                                                         id_conquista INT NULL,
+                                                         data DATE NULL,
+                                                         observacao VARCHAR(150) NULL,
+    CONSTRAINT fk_atribuir_conquista_membro_conquista1
+    FOREIGN KEY (id_conquista)
+    REFERENCES conquista (id_conquista)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_AtribuirConquistaMembro_Membro1
-    FOREIGN KEY (Id_membro)
-    REFERENCES Membro (Id_membro)
+    CONSTRAINT fk_atribuir_conquista_membro_membro1
+    FOREIGN KEY (id_membro)
+    REFERENCES membro (id_membro)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_AtribuirConquistaMembro_Administrador1
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+    CONSTRAINT fk_atribuir_conquista_membro_administrador1
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_AtribuirConquistaMembro_Conquista1_idx ON AtribuirConquistaMembro (Id_conquista ASC);
-CREATE INDEX fk_AtribuirConquistaMembro_Membro1_idx ON AtribuirConquistaMembro (Id_membro ASC);
-CREATE INDEX fk_AtribuirConquistaMembro_Administrador1_idx ON AtribuirConquistaMembro (Id_admin ASC);
+CREATE INDEX fk_atribuir_conquista_membro_conquista1_idx ON atribuir_conquista_membro (id_conquista ASC);
+CREATE INDEX fk_atribuir_conquista_membro_membro1_idx ON atribuir_conquista_membro (id_membro ASC);
+CREATE INDEX fk_atribuir_conquista_membro_administrador1_idx ON atribuir_conquista_membro (id_admin ASC);
 
 -- -----------------------------------------------------
--- Table Parametros
+-- Table parametros
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Parametros (
-                                          ID_Parametro INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                          Razao_Social VARCHAR(100) NULL, -- Removido espaço
-    Nome_Fantasia VARCHAR(100) NULL, -- Removido espaço
-    Descricao VARCHAR(150) NULL,
-    Rua VARCHAR(100) NULL,
-    Bairro VARCHAR(50) NULL,
-    Cidade VARCHAR(70) NULL,
-    CEP VARCHAR(9) NULL,
-    UF VARCHAR(2) NULL,
-    Telefone VARCHAR(14) NULL,
-    Site VARCHAR(80) NULL,
-    Email VARCHAR(80) NULL,
-    CNPJ VARCHAR(18) NULL,
-    LogoTipoGrande VARCHAR(150) NULL,
-    LogoTipoPequeno VARCHAR(150) NULL
+CREATE TABLE IF NOT EXISTS parametros (
+                                          id_parametro INT NOT NULL PRIMARY KEY,
+                                          razao_social VARCHAR(100) NULL,
+    nome_fantasia VARCHAR(100) NULL,
+    descricao VARCHAR(150) NULL,
+    rua VARCHAR(100) NULL,
+    bairro VARCHAR(50) NULL,
+    cidade VARCHAR(70) NULL,
+    cep VARCHAR(9) NULL,
+    uf VARCHAR(2) NULL,
+    telefone VARCHAR(14) NULL,
+    site VARCHAR(80) NULL,
+    email VARCHAR(80) NULL,
+    cnpj VARCHAR(18) NULL,
+    logotipogrande VARCHAR(150) NULL,
+    logotipopequeno VARCHAR(150) NULL
     );
 
 -- -----------------------------------------------------
--- Table CriarRealizacaoAtividades_Recurso
+-- Table criar_realizacao_atividades_recurso
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS CriarRealizacaoAtividades_Recurso (
-                                                                 CriarRealizacaoAtividades_Id_Criacao INT NOT NULL,
-                                                                 Recurso_Id_recurso INT NOT NULL,
-                                                                 Quantidade INT NULL,
-                                                                 PRIMARY KEY (CriarRealizacaoAtividades_Id_Criacao, Recurso_Id_recurso),
-    CONSTRAINT fk_CriarRealizacaoAtividades_has_Recurso_CriarRealizacaoA1
-    FOREIGN KEY (CriarRealizacaoAtividades_Id_Criacao)
-    REFERENCES CriarRealizacaoAtividades (Id_Criacao)
+CREATE TABLE IF NOT EXISTS criar_realizacao_atividades_recurso (
+                                                                   criar_realizacao_atividades_id_criacao INT NOT NULL,
+                                                                   recurso_id_recurso INT NOT NULL,
+                                                                   quantidade INT NULL,
+                                                                   PRIMARY KEY (criar_realizacao_atividades_id_criacao, recurso_id_recurso),
+    CONSTRAINT fk_criar_realizacao_atividades_has_recurso_criar_realizacaoa1
+    FOREIGN KEY (criar_realizacao_atividades_id_criacao)
+    REFERENCES criar_realizacao_atividades (id_criacao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_CriarRealizacaoAtividades_has_Recurso_Recurso1
-    FOREIGN KEY (Recurso_Id_recurso)
-    REFERENCES Recurso (Id_recurso)
+    CONSTRAINT fk_criar_realizacao_atividades_has_recurso_recurso1
+    FOREIGN KEY (recurso_id_recurso)
+    REFERENCES recurso (id_recurso)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_CriarRealizacaoAtividades_has_Recurso_Recurso1_idx ON CriarRealizacaoAtividades_Recurso (Recurso_Id_recurso ASC);
-CREATE INDEX fk_CriarRealizacaoAtividades_has_Recurso_CriarRealizaca_idx ON CriarRealizacaoAtividades_Recurso (CriarRealizacaoAtividades_Id_Criacao ASC);
+CREATE INDEX fk_criar_realizacao_atividades_has_recurso_recurso1_idx ON criar_realizacao_atividades_recurso (recurso_id_recurso ASC);
+CREATE INDEX fk_criar_realizacao_atividades_has_recurso_criar_realizaca_idx ON criar_realizacao_atividades_recurso (criar_realizacao_atividades_id_criacao ASC);
 
 -- -----------------------------------------------------
--- Table NotificarAtividade_Membro
+-- Table notificar_atividade_membro
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS NotificarAtividade_Membro (
-                                                         NotificarAtividade_Id_Notificacao INT NOT NULL,
-                                                         Membro_Id_membro INT NOT NULL,
-                                                         PRIMARY KEY (NotificarAtividade_Id_Notificacao, Membro_Id_membro),
-    CONSTRAINT fk_NotificarAtividade_has_Membro_NotificarAtividade1
-    FOREIGN KEY (NotificarAtividade_Id_Notificacao)
-    REFERENCES NotificarAtividade (Id_Notificacao)
+CREATE TABLE IF NOT EXISTS notificar_atividade_membro (
+                                                          notificar_atividade_id_notificacao INT NOT NULL,
+                                                          membro_id_membro INT NOT NULL,
+                                                          PRIMARY KEY (notificar_atividade_id_notificacao, membro_id_membro),
+    CONSTRAINT fk_notificar_atividade_has_membro_notificar_atividade1
+    FOREIGN KEY (notificar_atividade_id_notificacao)
+    REFERENCES notificar_atividade (id_notificacao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_NotificarAtividade_has_Membro_Membro1
-    FOREIGN KEY (Membro_Id_membro)
-    REFERENCES Membro (Id_membro)
+    CONSTRAINT fk_notificar_atividade_has_membro_membro1
+    FOREIGN KEY (membro_id_membro)
+    REFERENCES membro (id_membro)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_NotificarAtividade_has_Membro_Membro1_idx ON NotificarAtividade_Membro (Membro_Id_membro ASC);
-CREATE INDEX fk_NotificarAtividade_has_Membro_NotificarAtividade1_idx ON NotificarAtividade_Membro (NotificarAtividade_Id_Notificacao ASC);
+CREATE INDEX fk_notificar_atividade_has_membro_membro1_idx ON notificar_atividade_membro (membro_id_membro ASC);
+CREATE INDEX fk_notificar_atividade_has_membro_notificar_atividade1_idx ON notificar_atividade_membro (notificar_atividade_id_notificacao ASC);
 
 -- -----------------------------------------------------
--- Table CriarRealizacaoAtividades_Membro
+-- Table criar_realizacao_atividades_membro
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS CriarRealizacaoAtividades_Membro (
-                                                                CriarRealizacaoAtividades_Id_Criacao INT NOT NULL,
-                                                                Membro_Id_membro INT NOT NULL,
-                                                                StatusFrequencia VARCHAR(5) NULL,
-    PRIMARY KEY (CriarRealizacaoAtividades_Id_Criacao, Membro_Id_membro),
-    CONSTRAINT fk_CriarRealizacaoAtividades_has_Membro_CriarRealizacaoAt1
-    FOREIGN KEY (CriarRealizacaoAtividades_Id_Criacao)
-    REFERENCES CriarRealizacaoAtividades (Id_Criacao)
+CREATE TABLE IF NOT EXISTS criar_realizacao_atividades_membro (
+                                                                  criar_realizacao_atividades_id_criacao INT NOT NULL,
+                                                                  membro_id_membro INT NOT NULL,
+                                                                  statusfrequencia VARCHAR(5) NULL,
+    PRIMARY KEY (criar_realizacao_atividades_id_criacao, membro_id_membro),
+    CONSTRAINT fk_criar_realizacao_atividades_has_membro_criar_realizacaoat1
+    FOREIGN KEY (criar_realizacao_atividades_id_criacao)
+    REFERENCES criar_realizacao_atividades (id_criacao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_CriarRealizaAtividades_has_Membro_Membro1
-    FOREIGN KEY (Membro_Id_membro)
-    REFERENCES Membro (Id_membro)
+    CONSTRAINT fk_criar_realiza_atividades_has_membro_membro1
+    FOREIGN KEY (membro_id_membro)
+    REFERENCES membro (id_membro)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_CriarRealizacaoAtividades_has_Membro_Membro1_idx ON CriarRealizacaoAtividades_Membro (Membro_Id_membro ASC);
-CREATE INDEX fk_CriarRealizacaoAtividades_has_Membro_CriarRealizacao_idx ON CriarRealizacaoAtividades_Membro (CriarRealizacaoAtividades_Id_Criacao ASC);
+CREATE INDEX fk_criar_realizacao_atividades_has_membro_membro1_idx ON criar_realizacao_atividades_membro (membro_id_membro ASC);
+CREATE INDEX fk_criar_realizacao_atividades_has_membro_criar_realizacao_idx ON criar_realizacao_atividades_membro (criar_realizacao_atividades_id_criacao ASC);
 
 -- -----------------------------------------------------
--- Table DistribuicaoDeRecursos
+-- Table distribuicao_de_recursos
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS DistribuicaoDeRecursos (
-                                                      Id_Distribuicao INT NOT NULL PRIMARY KEY, -- Mudado para PRIMARY KEY
-                                                      Id_admin INT NULL,
-                                                      Data DATE NULL,
-                                                      Descricao VARCHAR(50) NULL,
-    InstituicaoReceptora VARCHAR(100) NULL,
-    Valor DECIMAL(10,2) NULL,
-    CONSTRAINT fk_DistribuicaoDeRecursos_Administrador1
-    FOREIGN KEY (Id_admin)
-    REFERENCES Administrador (Id_admin)
+CREATE TABLE IF NOT EXISTS distribuicao_de_recursos (
+                                                        id_distribuicao INT NOT NULL PRIMARY KEY,
+                                                        id_admin INT NULL,
+                                                        data DATE NULL,
+                                                        descricao VARCHAR(50) NULL,
+    instituicaoreceptora VARCHAR(100) NULL,
+    valor double precision NULL, -- <<< ALTERADO AQUI
+    CONSTRAINT fk_distribuicao_de_recursos_administrador1
+    FOREIGN KEY (id_admin)
+    REFERENCES administrador (id_admin)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_DistribuicaoDeRecursos_Administrador1_idx ON DistribuicaoDeRecursos (Id_admin ASC);
+CREATE INDEX fk_distribuicao_de_recursos_administrador1_idx ON distribuicao_de_recursos (id_admin ASC);
 
 -- -----------------------------------------------------
--- Table Recurso_has_DistribuicaoDeRecursos
+-- Table recurso_has_distribuicao_de_recursos
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS Recurso_has_DistribuicaoDeRecursos (
-                                                                  Recurso_Id_recurso INT NOT NULL,
-                                                                  DistribuicaoDeRecursos_Id_Distribuicao INT NOT NULL,
-                                                                  Quantidade INT NULL,
-                                                                  PRIMARY KEY (Recurso_Id_recurso, DistribuicaoDeRecursos_Id_Distribuicao),
-    CONSTRAINT fk_Recurso_has_DistribuicaoDeRecursos_Recurso1
-    FOREIGN KEY (Recurso_Id_recurso)
-    REFERENCES Recurso (Id_recurso)
+CREATE TABLE IF NOT EXISTS recurso_has_distribuicao_de_recursos (
+                                                                    recurso_id_recurso INT NOT NULL,
+                                                                    distribuicao_de_recursos_id_distribuicao INT NOT NULL,
+                                                                    quantidade INT NULL,
+                                                                    PRIMARY KEY (recurso_id_recurso, distribuicao_de_recursos_id_distribuicao),
+    CONSTRAINT fk_recurso_has_distribuicao_de_recursos_recurso1
+    FOREIGN KEY (recurso_id_recurso)
+    REFERENCES recurso (id_recurso)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-    CONSTRAINT fk_Recurso_has_DistribuicaoDeRecursos_DistribuicaoDeRecursos1
-    FOREIGN KEY (DistribuicaoDeRecursos_Id_Distribuicao)
-    REFERENCES DistribuicaoDeRecursos (Id_Distribuicao)
+    CONSTRAINT fk_recurso_has_distribuicao_de_recursos_distribuicao_de_recursos1
+    FOREIGN KEY (distribuicao_de_recursos_id_distribuicao)
+    REFERENCES distribuicao_de_recursos (id_distribuicao)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
     );
 
-CREATE INDEX fk_Recurso_has_DistribuicaoDeRecursos_DistribuicaoDeRecurso_idx ON Recurso_has_DistribuicaoDeRecursos (DistribuicaoDeRecursos_Id_Distribuicao ASC);
-CREATE INDEX fk_Recurso_has_DistribuicaoDeRecursos_Recurso1_idx ON Recurso_has_DistribuicaoDeRecursos (Recurso_Id_recurso ASC);
+CREATE INDEX fk_recurso_has_distribuicao_de_recursos_distribuicao_de_recurso_idx ON recurso_has_distribuicao_de_recursos (distribuicao_de_recursos_id_distribuicao ASC);
+CREATE INDEX fk_recurso_has_distribuicao_de_recursos_recurso1_idx ON recurso_has_distribuicao_de_recursos (recurso_id_recurso ASC);

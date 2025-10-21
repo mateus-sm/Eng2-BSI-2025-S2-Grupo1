@@ -10,7 +10,10 @@ public class Membro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     @Column(name = "id_membro")
-    private Integer id;
+    private int id;
+
+    @Column(name = "codigo_membro", unique = true, nullable = false)
+    private int codigo;
 
     @Column(name = "dtini")
     private LocalDate dtIni;
@@ -29,7 +32,7 @@ public class Membro {
     }
 
     public Membro(int iddm, LocalDate dtIni, LocalDate dtFim, String observacao, Usuario usuario) {
-        this.id = iddm;
+        this.codigo = iddm;
         this.dtIni = dtIni;
         this.dtFim = dtFim;
         this.observacao = observacao;
@@ -42,6 +45,14 @@ public class Membro {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
     }
 
     public LocalDate getDtIni() {
@@ -75,4 +86,6 @@ public class Membro {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
+
+
 }

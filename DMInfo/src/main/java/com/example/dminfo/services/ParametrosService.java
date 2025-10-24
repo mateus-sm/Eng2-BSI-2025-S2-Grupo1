@@ -15,7 +15,7 @@ public class ParametrosService {
 
     public List<Parametros> exibir() { return parametrosRepository.findAll(); }
 
-    public Parametros salvar(){
+    public static Parametros salvar(){
         Parametros unico = new Parametros(
                 "Capítulo Ivair Salomão Liboni",
                 "Capítulo Ivair Salomão Liboni",

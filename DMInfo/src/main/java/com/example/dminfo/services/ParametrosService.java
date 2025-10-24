@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class ParametrosService {
     @Autowired
-    private ParametrosRepository parametrosRepository;
+    private static ParametrosRepository parametrosRepository;
 
     public List<Parametros> exibir() { return parametrosRepository.findAll(); }
 

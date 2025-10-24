@@ -23,6 +23,11 @@ public class TesteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
     }
 
+    @GetMapping(value = "/usuarios")
+    public ResponseEntity<Object> usuarios(){
+        return ResponseEntity.ok(testeService.listarUsuarios());
+    }
+
     @GetMapping(value = "/index")
     public ResponseEntity<Object> index(){
         return ResponseEntity.ok("Testando INDEX");

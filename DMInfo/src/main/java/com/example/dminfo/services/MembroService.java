@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class MembroService {
@@ -17,6 +18,18 @@ public class MembroService {
 
     @Autowired
     private MembroRepository membroRepository;
+
+    public List<Membro> listar() {
+        return membroRepository.findAll();
+    }
+
+    public Membro salvar(Membro membro) {
+        return membroRepository.save(membro);
+    }
+
+    public void excluir(Integer id) {
+        membroRepository.deleteById(id);
+    }
 
     @Transactional // Isso garante que ou salva os dois (Usuario e Membro), ou não salva nenhum
     public Membro criarMembro() {

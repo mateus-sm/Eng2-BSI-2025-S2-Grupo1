@@ -2,35 +2,26 @@ package com.example.dminfo.controller;
 
 
 import com.example.dminfo.model.Membro;
-import com.example.dminfo.model.Usuario;
 import com.example.dminfo.services.MembroService;
+import com.example.dminfo.services.TesteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.Date;
-
 @RestController
 @RequestMapping(value = "app")
-public class SpringController {
+public class TesteController {
     @Autowired
     private MembroService membroService;
+    @Autowired
+    private TesteService testeService;
 
-    //@PostMapping(value = "/membro")
-    //public ResponseEntity<Membro> inserirMembro() {
-        //Membro membroSalvo = membroService.criarMembro();
-        //return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
-    //}
-
-    @GetMapping(value = "/membro/{id}")
-    public ResponseEntity<Membro> exibirMembro(@PathVariable Integer id) {
-        Membro membro = membroService.getById(id);
-        return ResponseEntity.ok(membro);
+    @PostMapping(value = "/membro")
+    public ResponseEntity<Membro> inserirMembro() {
+        Membro membroSalvo = testeService.criarMembro();
+        return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
     }
-
 
     @GetMapping(value = "/index")
     public ResponseEntity<Object> index(){

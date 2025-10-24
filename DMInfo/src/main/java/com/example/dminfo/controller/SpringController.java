@@ -19,15 +19,15 @@ public class SpringController {
     @Autowired
     private MembroService membroService;
 
-    @PostMapping(value = "/membro")
-    public ResponseEntity<Membro> inserirMembro() {
-        Membro membroSalvo = membroService.criarMembro();
-        return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
-    }
+    //@PostMapping(value = "/membro")
+    //public ResponseEntity<Membro> inserirMembro() {
+        //Membro membroSalvo = membroService.criarMembro();
+        //return ResponseEntity.status(HttpStatus.CREATED).body(membroSalvo);
+    //}
 
     @GetMapping(value = "/membro/{id}")
     public ResponseEntity<Membro> exibirMembro(@PathVariable Integer id) {
-        Membro membro = membroService.buscarMembroPorId(id);
+        Membro membro = membroService.getById(id);
         return ResponseEntity.ok(membro);
     }
 

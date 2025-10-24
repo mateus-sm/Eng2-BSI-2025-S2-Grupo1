@@ -23,50 +23,39 @@ public class MembroService {
         return membroRepository.findAll();
     }
 
-    public Membro salvar(Membro membro) {
-        return membroRepository.save(membro);
+    public Membro salvar(Usuario usuario) {
+        //Só cria membro caso exista um usuario para ser associado e esse usuario
+        //  não tenha nenhum outro membro
+        if (usuario != null) {
+            Membro membro = membroRepository.findByUsuario(usuario).orElse(null);
+
+            if (membro == null) {
+                membro = new Membro();
+                membro.setDtIni(LocalDate.now());
+                membro.setUsuario(usuario);
+                return membroRepository.save(membro);
+            }
+        }
+
+        return null;
     }
 
-    public void excluir(Integer id) {
-        membroRepository.deleteById(id);
+    public Membro getById(Integer id) {
+        Membro membro;
+        membro = membroRepository.findById(id).orElse(null);
+        return membro;
     }
 
-    @Transactional // Isso garante que ou salva os dois (Usuario e Membro), ou não salva nenhum
-    public Membro criarMembro() {
+    public boolean excluir(Integer id) {
+        Membro membro;
 
-        // 3. Criar o objeto Usuario
-        Usuario user = new Usuario(
-                "Kaiky",
-                "Kaiky@123",
-                "KaikyTf",
-                "18997544959",
-                "kaiky.multiaco@gmail.com",
-                "Rua Augusto Cesar Pires",
-                "Regente Feijo",
-                "Jardim Tenis Clube",
-                "SP",
-                "426.443.278-22",
-                LocalDate.now(), // dtIni
-                null,       // dtFim
-                LocalDate.of(2003, 7, 30)  // dtNasc
-        );
+        membro = membroRepository.findById(id).orElse(null);
+        if  (membro != null) {
+            membroRepository.deleteById(id);
+            return true;
+        }
 
-        Usuario usuarioSalvo = usuarioRepository.save(user);
-
-        Membro membro = new Membro(
-                262321025,
-                LocalDate.of(2020,12,9), // dtIniMembro
-                null,       // dtFimMembro
-                "Membro ativo",
-                usuarioSalvo
-        );
-
-        return membroRepository.save(membro);
-    }
-
-    public Membro buscarMembroPorId(Integer id) {
-        // O .findById() executa o SELECT... WHERE id = ?
-        return membroRepository.findById(id).orElseThrow(() -> new RuntimeException("Membro não encontrado com ID: " + id));
+        return false;
     }
 
 }

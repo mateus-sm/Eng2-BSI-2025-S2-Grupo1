@@ -10,7 +10,6 @@ import java.util.Date;
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_usuario")
     private int id;
 
@@ -59,7 +58,7 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nome, String senha, String usuario, String telefone, String email, String rua, String cidade, String bairro, String uf, String cpf, LocalDate dtIni, LocalDate dtFim, LocalDate dtNasc){
+    public Usuario(String nome, String senha, String usuario, String telefone, String email, String rua, String cidade, String bairro, String cep, String uf, String cpf, LocalDate dtIni, LocalDate dtFim, LocalDate dtNasc){
         this.nome = nome;
         this.senha = senha;
         this.usuario = usuario;
@@ -68,6 +67,7 @@ public class Usuario {
         this.rua = rua;
         this.cidade = cidade;
         this.bairro = bairro;
+        this.cep = cep;
         this.uf = uf;
         this.cpf = cpf;
         this.dtIni = dtIni;
@@ -137,6 +137,14 @@ public class Usuario {
 
     public void setBairro(String bairro) {
         this.bairro = bairro;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
     }
 
     public String getUf() {

@@ -8,7 +8,6 @@ import java.time.LocalDate;
 public class Membro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id_membro")
     private int id;
 
@@ -31,8 +30,8 @@ public class Membro {
     public Membro() {
     }
 
-    public Membro(int iddm, LocalDate dtIni, LocalDate dtFim, String observacao, Usuario usuario) {
-        this.codigo = iddm;
+    public Membro(int codigo, LocalDate dtIni, LocalDate dtFim, String observacao, Usuario usuario) {
+        this.codigo = codigo;
         this.dtIni = dtIni;
         this.dtFim = dtFim;
         this.observacao = observacao;

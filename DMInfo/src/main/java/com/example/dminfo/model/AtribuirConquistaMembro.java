@@ -10,7 +10,7 @@ public class AtribuirConquistaMembro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_atribuir_conquista")
-    private int id_atribuir_conquista;
+    private int id;
 
     @Column(name = "id_admin")
     private int id_admin;
@@ -32,7 +32,7 @@ public class AtribuirConquistaMembro {
     }
 
     public AtribuirConquistaMembro(int id_atribuir_conquista, int id_admin, int id_membro, int id_conquista, Date data, String observacao) {
-        this.id_atribuir_conquista = id_atribuir_conquista;
+        this.id = id_atribuir_conquista;
         this.id_admin = id_admin;
         this.id_membro = id_membro;
         this.id_conquista = id_conquista;
@@ -40,12 +40,12 @@ public class AtribuirConquistaMembro {
         this.observacao = observacao;
     }
 
-    public int getId_atribuir_conquista() {
-        return id_atribuir_conquista;
+    public int getId() {
+        return id;
     }
 
-    public void setId_atribuir_conquista(int id_atribuir_conquista) {
-        this.id_atribuir_conquista = id_atribuir_conquista;
+    public void setId(int id_atribuir_conquista) {
+        this.id = id_atribuir_conquista;
     }
 
     public int getId_admin() {

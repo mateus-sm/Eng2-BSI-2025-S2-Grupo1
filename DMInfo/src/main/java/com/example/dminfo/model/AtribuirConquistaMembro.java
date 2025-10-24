@@ -31,8 +31,7 @@ public class AtribuirConquistaMembro {
     public AtribuirConquistaMembro() {
     }
 
-    public AtribuirConquistaMembro(int id_atribuir_conquista, int id_admin, int id_membro, int id_conquista, Date data, String observacao) {
-        this.id = id_atribuir_conquista;
+    public AtribuirConquistaMembro(int id_admin, int id_membro, int id_conquista, Date data, String observacao) {
         this.id_admin = id_admin;
         this.id_membro = id_membro;
         this.id_conquista = id_conquista;

@@ -16,8 +16,7 @@ public class Conquista {
     public Conquista() {
     }
 
-    public Conquista(int id, String descricao) {
-        this.id = id;
+    public Conquista(String descricao) {
         this.descricao = descricao;
     }
 

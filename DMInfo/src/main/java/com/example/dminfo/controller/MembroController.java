@@ -26,7 +26,7 @@ public class MembroController {
             try {
                 return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(usuario));
             } catch (Exception e) {
-                return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Não foi possível salvar"));
+                return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Não foi possível salvar: " + e.getMessage()));
             }
         }
 

@@ -3,6 +3,8 @@ package com.example.dminfo.services;
 
 import com.example.dminfo.model.Parametros;
 import com.example.dminfo.repositories.ParametrosRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -11,7 +13,7 @@ public class ParametrosService {
     @Autowired
     private ParametrosRepository parametrosRepository;
 
-    public List<Parametros> exibir { return parametrosRepository.findAll(); }
+    public List<Parametros> exibir() { return parametrosRepository.findAll(); }
 
     public Parametros salvar(){
         Parametros unico = new Parametros(

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gerenciamento de Eventos</title>
+    <link rel="stylesheet" href="styles/evento.css" />
+</head>
+<body>
+
+<h1>Eventos</h1>
+
+<form id="eventoForm">
+    <label for="titulo">Título</label>
+    <input type="text" id="titulo" name="titulo" required />
+
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" required></textarea>
+
+    <label for="idAdmin">ID do Administrador</label>
+    <input type="number" id="idAdmin" name="idAdmin" required />
+
+    <button type="submit">Criar Evento</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Descrição</th>
+        <th>Administrador</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody id="eventosTable"></tbody>
+</table>
+
+<script src="js/evento.js"></script>
+</body>
+</html>

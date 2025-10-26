@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/conquista")
 public class ConquistaController {
@@ -22,14 +24,19 @@ public class ConquistaController {
     @PostMapping
     ResponseEntity<Object> create(@RequestBody Conquista conquista) {
         if (conquista != null) {
-            try {
-                return ResponseEntity.status(HttpStatus.CREATED).body(conquistaService.salvar(conquista));
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(new Erro("Erro de Banco", e.getMessage()));
+            Optional<Conquista> conq = conquistaService.consultar(conquista.getDescricao());
+            if (conq.isPresent()) {
+                return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Conquista ja existe"));
+            } else {
+                try {
+                    return ResponseEntity.status(HttpStatus.CREATED).body(conquistaService.salvar(conquista));
+                } catch (Exception e) {
+                    return ResponseEntity.badRequest().body(new Erro("Erro de Banco", e.getMessage()));
+                }
             }
         }
 
-        return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Objeto Membro inconsistente"));
+        return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Objeto Conquista inconsistente"));
     }
 
     @GetMapping(value="get-by-id/{id}")
@@ -40,7 +47,7 @@ public class ConquistaController {
             return ResponseEntity.ok(conquista);
         }
 
-        return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Usuario não encontrado"));
+        return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Conquista não encontrada"));
     }
 
     @PutMapping

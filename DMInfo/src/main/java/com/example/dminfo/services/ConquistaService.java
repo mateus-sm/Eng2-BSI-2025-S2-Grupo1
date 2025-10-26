@@ -17,10 +17,26 @@ public class ConquistaService {
     }
 
     public Conquista salvar(Conquista conquista) {
-        return repo.save(conquista);
+        if (conquista != null) {
+            return repo.save(conquista);
+        }
+
+        return null;
     }
 
-    public void excluir(Integer id) {
-        repo.deleteById(id);
+    public Conquista getById(Integer id) {
+        Conquista conquista;
+        conquista = repo.findById(id).orElse(null);
+        return conquista;
+    }
+
+    public boolean excluir(Integer id) {
+        Conquista conquista = repo.findById(id).orElse(null);
+        if (conquista != null) {
+            repo.deleteById(id);
+            return true;
+        }
+
+        return false;
     }
 }

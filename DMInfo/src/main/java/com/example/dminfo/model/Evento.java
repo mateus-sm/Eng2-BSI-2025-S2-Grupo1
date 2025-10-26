@@ -1,5 +1,6 @@
 package com.example.dminfo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,10 +12,9 @@ public class Evento {
     @Column(name = "id_evento")
     private int id;
 
-
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_admin")
+    @JsonIgnore
     private Administrador adm;
 
     @Column(name = "titulo")

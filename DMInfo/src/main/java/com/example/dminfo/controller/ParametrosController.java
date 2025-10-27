@@ -20,8 +20,9 @@ public class ParametrosController {
     }
 
     @PostMapping
-    public ResponseEntity<Parametros> salvar() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ParametrosService.salvar());
+    public ResponseEntity<Parametros> salvar(@RequestBody Parametros parametros) {
+        Parametros salvo = service.salvar(parametros);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @DeleteMapping("/{id}")

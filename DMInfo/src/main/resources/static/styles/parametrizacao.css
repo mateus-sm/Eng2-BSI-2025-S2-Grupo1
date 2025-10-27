@@ -1,0 +1,61 @@
+/* Estilos gerais */
+body {
+    font-family: sans-serif;
+    margin: 2rem;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Estilos da Tabela (da página de exibição) */
+.dados-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.dados-tabela th, .dados-tabela td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+.dados-tabela td:first-child {
+    width: 25%;
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+.dados-tabela th {
+    background-color: #f0f0f0;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+/* Mensagens de status */
+#loading {
+    font-style: italic;
+}
+#erro {
+    color: red;
+    font-weight: bold;
+}
+
+/* Classe de erro (do seu formulário) */
+.error-message {
+    font-size: 0.875em; /* Tamanho de fonte um pouco menor */
+    margin-top: 0.25rem; /* Espaçamento */
+}
+
+/* Botão Excluir (O CSS que você mandou) */
+.btn-excluir {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.btn-container {
+    text-align: center;
+    margin-top: 25px;
+}

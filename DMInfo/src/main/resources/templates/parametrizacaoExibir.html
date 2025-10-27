@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exibir Parametrização</title>
+    <link rel="stylesheet" th:href="@{/styles/parametrizacao.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Parâmetros</h1>
+
+    <div id="loading">Carregando dados...</div>
+    <div id="erro" style="display: none;"></div>
+
+    <table id="dados-container" class="dados-tabela" style="display: none;">
+        <thead>
+        <tr>
+            <th colspan="2">Dados Principais</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><strong>ID:</strong></td>
+            <td><span id="id"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Nome Fantasia:</strong></td>
+            <td><span id="nomeFantasia"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Razão Social:</strong></td>
+            <td><span id="razaoSocial"></span></td>
+        </tr>
+        <tr>
+            <td><strong>CNPJ:</strong></td>
+            <td><span id="cnpj"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Descrição:</strong></td>
+            <td><span id="descricao"></span></td>
+        </tr>
+
+        <tr>
+            <th colspan="2">Endereço</th>
+        </tr>
+        <tr>
+            <td><strong>Rua:</strong></td>
+            <td><span id="rua"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Bairro:</strong></td>
+            <td><span id="bairro"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Cidade:</strong></td>
+            <td><span id="cidade"></span></td>
+        </tr>
+        <tr>
+            <td><strong>UF:</strong></td>
+            <td><span id="uf"></span></td>
+        </tr>
+        <tr>
+            <td><strong>CEP:</strong></td>
+            <td><span id="cep"></span></td>
+        </tr>
+
+        <tr>
+            <th colspan="2">Contato</th>
+        </tr>
+        <tr>
+            <td><strong>Telefone:</strong></td>
+            <td><span id="telefone"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Email:</strong></td>
+            <td><span id="email"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Site:</strong></td>
+            <td><span id="site"></span></td>
+        </tr>
+
+        <tr>
+            <th colspan="2">Logos</th>
+        </tr>
+        <tr>
+            <td><strong>Logo Grande (Path):</strong></td>
+            <td><span id="logoGrande"></span></td>
+        </tr>
+        <tr>
+            <td><strong>Logo Pequeno (Path):</strong></td>
+            <td><span id="logoPequeno"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="btn-container">
+        <button id="btnExcluir" class="btn-excluir" style="display: none;">
+            Excluir Registro
+        </button>
+    </div>
+</div>
+<script th:src="@{/js/parametrizacaoExibir.js}" defer></script>
+</body>
+</html>

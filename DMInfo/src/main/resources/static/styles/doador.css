@@ -1,0 +1,28 @@
+body {
+    background-color: #f8f9fa; /* Um cinza claro para o fundo */
+}
+
+.container {
+    max-width: 1200px; /* Limita a largura para melhor leitura */
+}
+
+.form-container, .table-container {
+    background-color: #ffffff;
+    border-radius: 8px; /* Bordas arredondadas */
+}
+
+/* Estilo para os botões de ação na tabela */
+#tabelaDoadores .btn {
+    margin-right: 5px;
+}
+
+/* Adiciona um "ponteiro" ao passar o mouse sobre as linhas da tabela */
+#tabelaDoadores tr:hover {
+    cursor: default;
+    background-color: #eceeef;
+}
+
+/* Garante que a tabela se ajuste em telas menores */
+.table-responsive {
+    overflow-x: auto;
+}

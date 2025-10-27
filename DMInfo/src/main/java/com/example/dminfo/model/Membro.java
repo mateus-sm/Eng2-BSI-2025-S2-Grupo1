@@ -23,7 +23,7 @@ public class Membro {
     @Column(name = "observacao")
     private String observacao;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 

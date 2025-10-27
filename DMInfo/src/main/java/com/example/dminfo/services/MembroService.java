@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MembroService {
@@ -19,31 +20,46 @@ public class MembroService {
     @Autowired
     private MembroRepository membroRepository;
 
-    public List<Membro> listar() {
-        return membroRepository.findAll();
-    }
-
-    public Membro salvar(Usuario usuario) {
-        //Só cria membro caso exista um usuario para ser associado e esse usuario
-        //  não tenha nenhum outro membro
-        if (usuario != null) {
-            Membro membro = membroRepository.findByUsuario(usuario).orElse(null);
-
-            if (membro == null) {
-                membro = new Membro();
-                membro.setDtIni(LocalDate.now());
-                membro.setUsuario(usuario);
-                return membroRepository.save(membro);
-            }
-        }
-
-        return null;
-    }
-
     public Membro getById(Integer id) {
         Membro membro;
         membro = membroRepository.findById(id).orElse(null);
         return membro;
+    }
+
+    public List<Membro> listar() {
+        return membroRepository.findAll();
+    }
+
+    public Membro salvar(Membro membro) {
+
+        // Busca o usuário pelo ID fornecido no JSON
+        Usuario usuario = usuarioRepository.findById(membro.getUsuario().getId()).orElse(null);
+        if (usuario == null)
+            throw new RuntimeException("Usuário não encontrado para o ID fornecido.");
+
+        // Verifica se o usuário já é um membro
+        Membro membroExistente = membroRepository.findByUsuario(usuario).orElse(null);
+        if (membroExistente != null) {
+            throw new RuntimeException("Este usuário já está associado a um membro.");
+        }
+
+        // Define os dados do novo membro
+        membro.setUsuario(usuario);
+        membro.setDtIni(LocalDate.now());
+        return membroRepository.save(membro);
+    }
+
+    public Membro update(Integer id, Membro membroDetails) {
+        Membro membro = membroRepository.findById(id).orElse(null);
+        if (membro == null) {
+            throw new RuntimeException("Membro não encontrado com ID: " + id);
+        }
+
+        // Atualiza os campos
+        membro.setObservacao(membroDetails.getObservacao());
+        membro.setDtFim(membroDetails.getDtFim());
+
+        return membroRepository.save(membro);
     }
 
     public boolean excluir(Integer id) {
@@ -57,5 +73,4 @@ public class MembroService {
 
         return false;
     }
-
 }

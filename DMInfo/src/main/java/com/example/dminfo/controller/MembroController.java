@@ -21,16 +21,18 @@ public class MembroController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody Usuario usuario) {
-        if (usuario != null) {
-            try {
-                return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(usuario));
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Não foi possível salvar: " + e.getMessage()));
-            }
-        }
+    public ResponseEntity<Object> create(@RequestBody Membro membro) {
 
-        return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Objeto Membro inconsistente"));
+        if (membro.getUsuario() == null || membro.getUsuario().getId() == 0)
+            return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "ID do Usuário é obrigatório."));
+
+        try {
+            // O 'codigo' deve ser enviado no corpo do objeto 'membro'
+            Membro novoMembro = service.salvar(membro);
+            return ResponseEntity.status(HttpStatus.CREATED).body(novoMembro);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Erro("Erro de Negócio", e.getMessage()));
+        }
     }
 
     @GetMapping(value="get-by-id/{id}")
@@ -44,17 +46,14 @@ public class MembroController {
         return ResponseEntity.ok(membro);
     }
 
-    @PutMapping
-    public ResponseEntity<Object> update(@RequestBody Usuario usuario) {
-        if (usuario != null) {
-            try {
-                return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(usuario));
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Não foi possível atualizar"));
-            }
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody Membro membroDetails) {
+        try {
+            Membro membroAtualizado = service.update(id, membroDetails);
+            return ResponseEntity.ok(membroAtualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Erro("Erro de Banco", "Não foi possível atualizar"));
         }
-
-        return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Objeto Membro inconsistente"));
     }
 
     @DeleteMapping("/{id}")

@@ -1,0 +1,14 @@
+body {
+    background-color: #f8f9fa;
+}
+
+#tabela-membros .btn-group {
+    min-width: 100px; /* Garante que os botões de ação não quebrem a linha */
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Esconde o campo Data Fim no modo "Adicionar" */
+#form-membro:not(.edit-mode) #campo-dtFim {
+    display: none;
+}

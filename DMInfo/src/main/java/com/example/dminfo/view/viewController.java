@@ -27,4 +27,9 @@ public class viewController {
     public String paginaListarAtividades() {
         return "finalizarAtividades";
     }
+
+    @GetMapping("/app/membros")
+    public String paginaGerenciarMembros() {
+        return "membros";
+    }
 }

@@ -18,9 +18,13 @@ public class viewController {
             return "parametrizacao";
     }
 
-
     @GetMapping("/app/parametrizacao/exibir")
     public String paginaExibirParametrizacao() {
         return "parametrizacaoExibir";
+    }
+
+    @GetMapping("/app/finalizar-atividades")
+    public String paginaListarAtividades() {
+        return "finalizarAtividades";
     }
 }

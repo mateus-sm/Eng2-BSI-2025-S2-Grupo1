@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
+
+.atividades-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.atividades-tabela thead {
+    background-color: #34495e;
+    color: #ffffff;
+}
+
+.atividades-tabela th,
+.atividades-tabela td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap; /* Impede que o texto quebre linha */
+}
+
+.atividades-tabela tbody tr:nth-of-type(even) {
+    background-color: #f9f9f9;
+}
+
+.atividades-tabela tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.status-loading,
+.status-error,
+.status-empty {
+    text-align: center !important;
+    font-style: italic;
+    color: #888;
+}
+.status-error {
+    color: #dc3545;
+    font-weight: bold;
+}

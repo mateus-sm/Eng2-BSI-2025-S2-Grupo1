@@ -43,8 +43,7 @@ public class Doador {
     public Doador() {
     }
 
-    public Doador(int id, String nome, String documento, String rua, String bairro, String cidade, String uf, String cep, String email, String telefone, String contato) {
-        this.id = id;
+    public Doador(String nome, String documento, String rua, String bairro, String cidade, String uf, String cep, String email, String telefone, String contato) {
         this.nome = nome;
         this.documento = documento;
         this.rua = rua;

@@ -17,8 +17,7 @@ public class Calendario {
     public Calendario() {
     }
 
-    public Calendario(int id_calendario, int id_criacao) {
-        this.id_calendario = id_calendario;
+    public Calendario(int id_criacao) {
         this.id_criacao = id_criacao;
     }
 

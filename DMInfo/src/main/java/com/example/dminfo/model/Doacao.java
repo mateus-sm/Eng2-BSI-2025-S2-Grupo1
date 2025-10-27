@@ -17,7 +17,7 @@ public class Doacao {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_admin")
-    private int id_admin;
+    private Administrador id_admin;
 
     @Column(name = "data")
     private LocalDate data;
@@ -31,7 +31,7 @@ public class Doacao {
     public Doacao() {
     }
 
-    public Doacao(Doador id_doador, int id_admin, LocalDate data, double valor, String observacao) {
+        public Doacao(Doador id_doador, Administrador id_admin, LocalDate data, double valor, String observacao) {
         this.id_doador = id_doador;
         this.id_admin = id_admin;
         this.data = data;
@@ -45,8 +45,8 @@ public class Doacao {
     public Doador getId_doador() {return id_doador;}
     public void setId_doador(Doador id_doador) {this.id_doador = id_doador;}
 
-    public int getId_admin() {return id_admin;}
-    public void setId_admin(int id_admin) {this.id_admin = id_admin;}
+    public Administrador getId_admin() {return id_admin;}
+    public void setId_admin(Administrador id_admin) {this.id_admin = id_admin;}
 
     public LocalDate getData() {return data;}
     public void setData(LocalDate data) {this.data = data;}

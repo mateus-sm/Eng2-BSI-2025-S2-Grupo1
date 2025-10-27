@@ -12,18 +12,18 @@ public class Calendario {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_criacao")
-    private int id_criacao;
+    private CriarRealizacaoAtividades id_criacao;
 
     public Calendario() {
     }
 
-    public Calendario(int id_criacao) {
+    public Calendario(CriarRealizacaoAtividades id_criacao) {
         this.id_criacao = id_criacao;
     }
 
     public int getId_calendario() {return id_calendario;}
     public void setId_calendario(int id_calendario) {this.id_calendario = id_calendario;}
 
-    public int getId_criacao() {return id_criacao;}
-    public void setId_criacao(int id_criacao) {this.id_criacao = id_criacao;}
+    public CriarRealizacaoAtividades getId_criacao() {return id_criacao;}
+    public void setId_criacao(CriarRealizacaoAtividades id_criacao) {this.id_criacao = id_criacao;}
 }

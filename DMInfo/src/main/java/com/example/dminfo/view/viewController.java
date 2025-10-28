@@ -42,4 +42,7 @@ public class viewController {
     public String paginaGerenciarDoador() {
         return "doador";
     }
+
+    @GetMapping("/app/conquista")
+    public String paginaGerenciarConquista() { return "conquista"; }
 }

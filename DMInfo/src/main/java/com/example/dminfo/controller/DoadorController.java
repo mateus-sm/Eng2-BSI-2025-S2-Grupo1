@@ -21,7 +21,7 @@ public class DoadorController {
         Optional<Doador> doador = service.buscarPorId(id);
         if(doador.isPresent()){
             return ResponseEntity.ok(doador.get());
-        } else {
+        }else{
             return ResponseEntity.notFound().build();
         }
     }

@@ -30,12 +30,16 @@ public class viewController {
 
     @GetMapping("/app/calendario")
     public String paginaCalendario() {
-        // Isso vai carregar o arquivo 'calendario.html' da pasta 'templates'
         return "calendario";
     }
 
     @GetMapping("/app/membros")
     public String paginaGerenciarMembros() {
         return "membros";
+    }
+
+    @GetMapping("/app/doador")
+    public String paginaGerenciarDoador() {
+        return "doador";
     }
 }

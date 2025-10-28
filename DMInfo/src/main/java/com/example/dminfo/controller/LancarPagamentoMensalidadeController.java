@@ -1,5 +1,6 @@
 package com.example.dminfo.controller;
 
+import com.example.dminfo.model.Erro;
 import com.example.dminfo.model.LancarPagamentoMensalidade;
 import com.example.dminfo.services.LancarPagamentoMensalidadeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +17,27 @@ public class LancarPagamentoMensalidadeController {
     @Autowired LancarPagamentoMensalidadeService LPMservice;
 
     @GetMapping
-    public ResponseEntity<Object> listarAll(){
+    ResponseEntity<Object> listarAll(){
         return ResponseEntity.ok(LPMservice.exibirAll());
     }
 
     @GetMapping
-    public ResponseEntity<Object> listarMesAno(@RequestParam int mes, int ano){
-        return ResponseEntity.ok(LPMservice.exibirMesAndAno(mes, ano));
+    ResponseEntity<Object> listarMesAno(@RequestParam int mes, int ano){
+        return ResponseEntity.ok(LPMservice.consultaMesAndAno(mes, ano));
+    }
+
+    @GetMapping
+    ResponseEntity<Object> listarMembros(@RequestParam int idMembro){
+        return ResponseEntity.ok(LPMservice.consultaMembro(idMembro));
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody LancarPagamentoMensalidade LPM){
+    ResponseEntity<Object> create(@RequestBody LancarPagamentoMensalidade LPM){
         if(LPM != null){
-            Optional<LancarPagamentoMensalidade> mensal = LPMservice
+            Optional<LancarPagamentoMensalidade> mensal = LPMservice.consultaMembro(LPM.getIdMembro());
+            if(mensal.isPresent()){
+                return ResponseEntity.badRequest().body(new Erro("Erro de Objeto", "Conquista ja existe"));
+            }
         }
         return ResponseEntity.status(HttpStatus.CREATED).body((LPMservice.salvar(LPM)));
     }

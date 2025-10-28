@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LancarPagamentoMensalidadeService {
@@ -16,12 +17,16 @@ public class LancarPagamentoMensalidadeService {
         return repository.findAll();
     }
 
-    public List<LancarPagamentoMensalidade> exibirMesAndAno(int mes, int ano){
+    public List<LancarPagamentoMensalidade> consultaMesAndAno(int mes, int ano){
         return repository.findByMesAndAno(mes, ano);
     }
     
-    public List<LancarPagamentoMensalidade> exibirAno(int ano){
+    public List<LancarPagamentoMensalidade> consultaAno(int ano){
         return repository.findByAno(ano);
+    }
+
+    public List<LancarPagamentoMensalidade> consultaMembro(int idMembro){
+        return repository.findByMembro(idMembro);
     }
 
     public boolean salvar(LancarPagamentoMensalidade Lpm){

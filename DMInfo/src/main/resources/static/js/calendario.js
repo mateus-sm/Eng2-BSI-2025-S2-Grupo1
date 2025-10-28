@@ -52,7 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
         eventDisplay: 'block',
-
+        showNonCurrentDates: false,
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        },
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -97,6 +102,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `Início: ${inicio}h\n` +
                 `Fim: ${fim}h`
             );
+        },
+
+        eventContent: function(arg) {
+            let conteudoHtml = '';
+
+            if (arg.isStart && arg.timeText)
+                conteudoHtml += `<span class="fc-event-time">${arg.timeText}</span> `;
+
+            conteudoHtml += `<span class="fc-event-title">${arg.event.title}</span>`;
+
+            return {
+                html: conteudoHtml
+            };
         }
     });
     calendario.render();

@@ -25,11 +25,11 @@ async function carregarMembros() {
             tr.innerHTML = `
                 <td>${membro.id}</td>
                 <td>${membro.codigo}</td>
-                <td>${formatarData(membro.dtIni)}</td>
-                <td>${formatarData(membro.dtFim)}</td>
                 <td>${membro.usuario ? membro.usuario.nome : 'N/A'}</td>
                 <td>${membro.observacao || ''}</td>
-                <td class="text-end">
+                <td>${formatarData(membro.dtIni)}</td>
+                <td>${formatarData(membro.dtFim)}</td>
+                <td class="text-center">
                     <div class="btn-group" role="group">
                         <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${membro.id}">
                             <i class="bi bi-pencil-fill"></i> Editar
@@ -106,6 +106,11 @@ async function salvarMembro(event) {
     const usuarioId = document.getElementById('usuarioId').value;
     const observacao = document.getElementById('observacao').value;
     const dtFim = document.getElementById('dtFim').value || null; // Envia null se vazio
+
+    if (parseInt(codigo) <= 0) {
+        alert("Erro: O Código do Membro deve ser um número positivo.");
+        return;
+    }
 
     const ehUpdate = !!id; // Converte para booleano (true se 'id' não for vazio)
 

@@ -34,12 +34,15 @@ public class MembroService {
 
         // Busca o usuário pelo ID fornecido no JSON
         Usuario usuario = usuarioRepository.findById(membro.getUsuario().getId()).orElse(null);
-        if (usuario == null)
+        if(usuario == null)
             throw new RuntimeException("Usuário não encontrado para o ID fornecido.");
+
+        if(membro.getCodigo() <= 0)
+            throw new RuntimeException("O Código do Membro deve ser um número positivo.");
 
         // Verifica se o usuário já é um membro
         Membro membroExistente = membroRepository.findByUsuario(usuario).orElse(null);
-        if (membroExistente != null) {
+        if(membroExistente != null) {
             throw new RuntimeException("Este usuário já está associado a um membro.");
         }
 
@@ -51,9 +54,11 @@ public class MembroService {
 
     public Membro update(Integer id, Membro membroDetails) {
         Membro membro = membroRepository.findById(id).orElse(null);
-        if (membro == null) {
+        if(membro == null)
             throw new RuntimeException("Membro não encontrado com ID: " + id);
-        }
+
+        if(membroDetails.getCodigo() <= 0)
+            throw new RuntimeException("O Código do Membro deve ser um número positivo.");
 
         // Atualiza os campos
         membro.setObservacao(membroDetails.getObservacao());

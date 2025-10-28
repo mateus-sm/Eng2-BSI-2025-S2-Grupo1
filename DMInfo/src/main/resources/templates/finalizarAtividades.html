@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exibir atividades</title>
+    <title>Finalizar Atividades</title>
     <link rel="stylesheet" th:href="@{/styles/finalizarAtividades.css}">
 </head>
 <body>
+
 <div class="container">
     <h1>Atividades Cadastradas</h1>
     <table class="atividades-tabela">
@@ -18,15 +19,21 @@
             <th>Horário</th>
             <th>Data Início</th>
             <th>Data Fim</th>
-            <th>Custo Previsto</th> </tr>
+            <th>Custo Previsto</th>
+            <th>Custo Real</th>
+            <th>Observações</th>
+            <th>Ação</th>
+        </tr>
         </thead>
         <tbody id="tabela-corpo">
         <tr>
-            <td colspan="7" class="status-loading">Carregando atividades...</td>
+            <td colspan="10" class="status-loading">Carregando atividades...</td>
         </tr>
         </tbody>
     </table>
+
 </div>
+
 <script th:src="@{/js/finalizarAtividades.js}" defer></script>
 </body>
 </html>

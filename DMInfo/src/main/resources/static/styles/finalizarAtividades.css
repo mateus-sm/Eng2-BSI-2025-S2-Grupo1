@@ -4,48 +4,65 @@ body {
     color: #333;
     padding: 20px;
 }
-
 .container {
-    max-width: 1200px;
+    max-width: 1400px; /* Aumentado para mais colunas */
     margin: 0 auto;
     background-color: #fff;
     padding: 20px 30px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    overflow-x: auto; /* Adiciona scroll horizontal se necessário */
 }
-
 h1 {
     text-align: center;
-    color: #2c3e50;
+    color: #3d3f40;
     margin-bottom: 25px;
 }
 
+/* Tabela */
 .atividades-tabela {
     width: 100%;
     border-collapse: collapse;
 }
-
 .atividades-tabela thead {
     background-color: #34495e;
     color: #ffffff;
 }
-
 .atividades-tabela th,
 .atividades-tabela td {
     padding: 12px 15px;
     border: 1px solid #ddd;
     text-align: left;
-    white-space: nowrap; /* Impede que o texto quebre linha */
+    /* white-space: nowrap; (Removido para não quebrar o layout) */
 }
-
 .atividades-tabela tbody tr:nth-of-type(even) {
     background-color: #f9f9f9;
 }
-
 .atividades-tabela tbody tr:hover {
     background-color: #f1f1f1;
 }
 
+/* Input de Data */
+.input-data-fim {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    background-color: transparent;
+    min-width: 150px; /* Garante espaço para o seletor */
+}
+.input-data-fim.salvando {
+    border: 2px solid #fd7e14;
+    opacity: 0.7;
+}
+.input-data-fim.sucesso {
+    border: 2px solid #28a745;
+}
+.input-data-fim.erro {
+    border: 2px solid #dc3545;
+}
+
+/* Status */
 .status-loading,
 .status-error,
 .status-empty {
@@ -56,4 +73,27 @@ h1 {
 .status-error {
     color: #dc3545;
     font-weight: bold;
+}
+
+.btn-salvar-linha {
+    background-color: #284768; /* Azul */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2em; /* Tamanho do ícone */
+    padding: 8px 12px;
+    line-height: 1; /* Alinha o ícone */
+}
+.btn-salvar-linha:hover {
+    background-color: #284768;
+}
+
+/* Feedback visual de salvamento */
+.btn-salvar-linha.salvando {
+    background-color: #fd7e14; /* Laranja */
+    cursor: wait;
+}
+.btn-salvar-linha.sucesso {
+    background-color: #28a745; /* Verde */
 }

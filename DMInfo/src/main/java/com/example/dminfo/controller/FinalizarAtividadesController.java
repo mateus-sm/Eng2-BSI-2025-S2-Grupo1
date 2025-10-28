@@ -4,9 +4,7 @@ import com.example.dminfo.model.CriarRealizacaoAtividades;
 import com.example.dminfo.services.CriarRealizacaoAtividadesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,5 +17,16 @@ public class FinalizarAtividadesController {
     @GetMapping
     public ResponseEntity<List<CriarRealizacaoAtividades>> listar() {
         return ResponseEntity.ok(service.listar());
+    }
+
+    @PutMapping("/{id}/data-fim")
+    public ResponseEntity<Object> atualizarData(@PathVariable int id, @RequestBody(required = false) String dataFinalStr) {
+        try {
+            service.atualizarDataFim(id, dataFinalStr);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 }

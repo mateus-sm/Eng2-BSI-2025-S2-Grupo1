@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Atividades</title>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+
+    <link rel="stylesheet" th:href="@{/styles/calendario.css}">
+</head>
+<body>
+<div class="container">
+    <div id="calendario"></div>
+</div>
+<script th:src="@{/js/calendario.js}" defer></script>
+</body>
+</html>

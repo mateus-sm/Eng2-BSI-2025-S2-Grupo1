@@ -29,14 +29,12 @@ public class LancarPagamentoMensalidadeService {
         return repository.findByMembro(idMembro);
     }
 
-    public boolean salvar(LancarPagamentoMensalidade Lpm){
-        boolean retorno = false;
+    public LancarPagamentoMensalidade salvar(LancarPagamentoMensalidade Lpm){
+        return repository.save(Lpm);
+    }
 
-        if(repository.existsById(Lpm.getIdMensalidade())){
-            repository.save(Lpm);
-            retorno =  true;
-        }
-        return retorno;
+    public Optional<LancarPagamentoMensalidade> consultarPagamentoUnico(int idMembro, int mes, int ano) {
+        return repository.findByIdMembroAndMesAndAno(idMembro, mes, ano);
     }
 
     public boolean excluir(Integer id){

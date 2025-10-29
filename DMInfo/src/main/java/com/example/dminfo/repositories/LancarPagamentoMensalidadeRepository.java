@@ -10,4 +10,6 @@ public interface LancarPagamentoMensalidadeRepository extends JpaRepository<Lanc
     List<LancarPagamentoMensalidade> findByMesAndAno(int mes, int ano);
     List<LancarPagamentoMensalidade> findByAno(int ano);
     List<LancarPagamentoMensalidade> findByMembro(int membro);
+    Optional<LancarPagamentoMensalidade> findByIdMembroAndMesAndAno(int idMembro, int mes, int ano);
+
 }

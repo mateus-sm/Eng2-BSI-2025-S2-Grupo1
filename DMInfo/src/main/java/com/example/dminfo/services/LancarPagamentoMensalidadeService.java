@@ -26,7 +26,7 @@ public class LancarPagamentoMensalidadeService {
     }
 
     public List<LancarPagamentoMensalidade> consultaMembro(int idMembro){
-        return repository.findByMembro(idMembro);
+        return repository.findByIdMembro(idMembro);
     }
 
     public LancarPagamentoMensalidade salvar(LancarPagamentoMensalidade Lpm){

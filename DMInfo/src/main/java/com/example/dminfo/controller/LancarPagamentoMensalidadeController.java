@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-    @RequestMapping("/lancar-pagamento-mensalidade")
+    @RequestMapping("/mensalidade")
 public class LancarPagamentoMensalidadeController {
     @Autowired LancarPagamentoMensalidadeService LPMservice;
 

@@ -1,132 +1,103 @@
-// para os modais do Bootstrap
+const API_URL = '/administrador';
+
 let administradorModal, deleteModal;
+let administradores = [];
 let idParaExcluir = null;
 
-// URL base da sua API
-const API_URL = '/administrador';
 
 async function carregarAdministradores() {
     try {
         const response = await fetch(API_URL);
-        if (!response.ok)
-            throw new Error('Falha ao carregar administrador.');
+        if (!response.ok) {
+            throw new Error('Erro ao carregar administradores.');
+        }
 
-        const administradores = await response.json();
-        const tabelaBody = document.getElementById('tabela-administradores');
-        tabelaBody.innerHTML = ''; // Limpa a tabela
+        administradores = await response.json();
+
+        const tabela = document.getElementById('tabela-administradores');
+        tabela.innerHTML = '';
 
         if (administradores.length === 0) {
-            tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum administrador encontrado.</td></tr>';
+            tabela.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum administrador encontrado.</td></tr>';
             return;
         }
 
-        administradores.forEach(administrador => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${administrador.id}</td>
-                <td>${administrador.usuario ? administrador.usuario.nome : 'N/A'}</td>
-                <td>${formatarData(administrador.dtIni)}</td>
-                <td>${formatarData(administrador.dtFim)}</td>
-                <td class="text-center">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${administrador.id}">
-                            <i class="bi bi-pencil-fill"></i> Editar
+        administradores.forEach(admin => {
+            const row = `
+                <tr>
+                    <td>${admin.id}</td>
+                    <td>${admin.usuario.nome}</td>
+                    <td>${formatarData(admin.dtIni)}</td>
+                    <td>${formatarData(admin.dtFim)}</td>
+                    <td class="text-center btn-group">
+                        <button class="btn btn-warning btn-sm" onclick="abrirModalEdicao(${admin.id})">
+                            <i class="bi bi-pencil"></i> Editar
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${administrador.id}">
-                            <i class="bi bi-trash-fill"></i> Excluir
+                        <button class="btn btn-danger btn-sm" onclick="abrirModalDelete(${admin.id})">
+                            <i class="bi bi-trash"></i> Excluir
                         </button>
-                    </div>
-                </td>
+                    </td>
+                </tr>
             `;
-            tabelaBody.appendChild(tr);
+            tabela.innerHTML += row;
         });
-
-        // Adiciona listeners aos novos botões
-        document.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
-        });
-        document.querySelectorAll('.btn-excluir').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
-        });
-
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao carregar administradores.');
-    }
-}
-
-function abrirModalAdicionar() {
-    const form = document.getElementById('form-administrador');
-    form.reset();
-    form.classList.remove('edit-mode'); // Remove a classe de edição
-    document.getElementById('administradorId').value = '';
-    document.getElementById('administradorModalLabel').innerText = 'Adicionar Administrador';
-
-    // Habilita o campo 'usuarioId' que é desabilitado na edição
-    document.getElementById('usuarioId').disabled = false;
-
-    administradorModal.show();
-}
-
-async function abrirModalEditar(id) {
-    try {
-        const response = await fetch(`${API_URL}/get-by-id/${id}`);
-        if (!response.ok) {
-            throw new Error('Administrador não encontrado.');
-        }
-        const administrador = await response.json();
-
-        // Preenche o formulário
-        const form = document.getElementById('form-administrador');
-        form.classList.add('edit-mode'); // Adiciona a classe de edição
-        document.getElementById('administradorModalLabel').innerText = 'Editar Administrador';
-
-        document.getElementById('administradorId').value = administrador.id;
-        document.getElementById('codigo').value = administrador.codigo;
-        document.getElementById('dtFim').value = administrador.dtFim || '';
-
-        administradorModal.show();
-
-    } catch (error) {
-        console.error('Erro ao buscar Administrador:', error);
-        alert(error.message);
+        console.error(error);
+        const tabela = document.getElementById('tabela-administradores');
+        tabela.innerHTML = `<tr><td colspan="5" class="text-center text-danger">${error.message}</td></tr>`;
     }
 }
 
 async function salvarAdministrador(event) {
     event.preventDefault();
 
+    document.getElementById('modal-error-message').classList.add('d-none');
+    document.getElementById('dtFim-error').classList.add('d-none');
+
     const id = document.getElementById('administradorId').value;
     const usuarioId = document.getElementById('usuarioId').value;
-    const dtFim = document.getElementById('dtFim').value || null; // Envia null se vazio
+    const dtFim = document.getElementById('dtFim').value || null;
 
-    const ehUpdate = !!id; // Converte para booleano (true se 'id' não for vazio)
-
+    const ehUpdate = !!id;
     let url = API_URL;
-    let method = 'POST';
-    let administradorJson = {}; // Objeto JSON que será enviado
+    let method = ehUpdate ? 'PUT' : 'POST';
+    let bodyJson = {};
 
     if (ehUpdate) {
-        // --- UPDATE (PUT) ---
         url = `${API_URL}/${id}`;
         method = 'PUT';
 
-        // O seu service.update espera o usuario e dtFim
-        administradorJson = {
-            usuario: { id: parseInt(usuarioId) }, // O ID do usuário não muda
-            dtFim: dtFim
+
+        if (dtFim) {
+
+            const adminOriginal = administradores.find(a => a.id == id);
+            const dtIni = adminOriginal.dtIni;
+
+            if (dtFim <= dtIni) {
+
+                const errorDiv = document.getElementById('dtFim-error');
+                errorDiv.textContent = 'A data fim deve ser maior que a data de início.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+        }
+
+
+        bodyJson = {
+            dtFim: dtFim,
+            usuario: { id: parseInt(usuarioId) }
         };
 
     } else {
-        // --- CREATE (POST) ---
+
         if (!usuarioId) {
-            alert("Erro: O ID do Usuário é obrigatório.");
+
+            const errorDiv = document.getElementById('modal-error-message');
+            errorDiv.textContent = 'O ID do Usuário é obrigatório.';
+            errorDiv.classList.remove('d-none');
             return;
         }
-        url = API_URL;
-        method = 'POST';
-        // O backend (Controller) espera um objeto 'usuario' aninhado com o 'id'
-        administradorJson = {
+        bodyJson = {
             usuario: { id: parseInt(usuarioId) }
         };
     }
@@ -137,28 +108,28 @@ async function salvarAdministrador(event) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(administradorJson) // Envia o JSON correto
+            body: JSON.stringify(bodyJson)
         });
 
         if (!response.ok) {
             const erro = await response.json();
-            // A sua classe Erro.java tem 'descricao'
-            throw new Error(erro.descricao || 'Falha ao salvar administrador.');
+
+            const errorDiv = document.getElementById('modal-error-message');
+            errorDiv.textContent = erro.descricao || 'Falha ao salvar administrador.';
+            errorDiv.classList.remove('d-none');
+            return;
         }
 
-        // CORREÇÃO: Você também tinha deixado 'membroModal' aqui
         administradorModal.hide();
-        carregarAdministradores(); // Recarrega a tabela
+        carregarAdministradores();
 
     } catch (error) {
         console.error('Erro ao salvar:', error);
-        alert(`Erro: ${error.message}`);
-    }
-}
 
-function abrirModalExcluir(id) {
-    idParaExcluir = id; // Armazena o ID para o botão de confirmação
-    deleteModal.show();
+        const errorDiv = document.getElementById('modal-error-message');
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('d-none');
+    }
 }
 
 async function excluirAdministrador() {
@@ -171,11 +142,11 @@ async function excluirAdministrador() {
 
         if (!response.ok) {
             const erro = await response.json();
-            throw new Error(erro.mensagem || 'Falha ao excluir administrador.');
+            throw new Error(erro.descricao || 'Falha ao excluir.');
         }
 
         deleteModal.hide();
-        carregarAdministradores(); // Recarrega a tabela
+        carregarAdministradores();
         idParaExcluir = null;
 
     } catch (error) {
@@ -184,23 +155,61 @@ async function excluirAdministrador() {
     }
 }
 
+
+function abrirModalAdicionar() {
+    document.getElementById('dtFim-error').classList.add('d-none');
+    document.getElementById('form-administrador').reset();
+    document.getElementById('administradorId').value = '';
+    document.getElementById('usuarioId').removeAttribute('disabled');
+
+    document.getElementById('administradorModalLabel').textContent = 'Adicionar Administrador';
+    document.querySelector('#form-administrador').classList.remove('edit-mode'); // Esconde a data fim
+    document.querySelector('.modal-footer .btn-primary').textContent = 'Salvar';
+
+    administradorModal.show();
+}
+
+function abrirModalEdicao(id) {
+    document.getElementById('dtFim-error').classList.add('d-none');
+    const admin = administradores.find(a => a.id === id);
+    if (!admin) return;
+
+    document.getElementById('administradorId').value = admin.id;
+    document.getElementById('usuarioId').value = admin.usuario.id;
+    document.getElementById('dtFim').value = admin.dtFim || '';
+    document.getElementById('usuarioId').setAttribute('disabled', true); // Não deixa editar o usuário
+
+    document.getElementById('administradorModalLabel').textContent = 'Editar Administrador';
+    document.querySelector('#form-administrador').classList.add('edit-mode'); // Mostra a data fim
+    document.querySelector('.modal-footer .btn-primary').textContent = 'Atualizar';
+
+    administradorModal.show();
+}
+
+function abrirModalDelete(id) {
+    idParaExcluir = id;
+    deleteModal.show();
+}
+
 function formatarData(data) {
-    if (!data) return '';
+    if (!data) {
+        return '';
+    }
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
-// --- INICIALIZAÇÃO ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Instancia os modais do Bootstrap
+window.addEventListener('DOMContentLoaded', () => {
+    carregarAdministradores();
+
+    const form = document.getElementById('form-administrador');
+    const btnNovo = document.getElementById('btn-novo-administrador'); // ID Corrigido
+    const btnConfirmarExclusao = document.getElementById('confirmDelete'); // ID Corrigido
+
     administradorModal = new bootstrap.Modal(document.getElementById('administradorModal'));
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-    // Carrega os administradores na tabela
-    carregarAdministradores();
-
-    // Listeners dos botões principais
-    document.getElementById('btn-novo-administrador').addEventListener('click', abrirModalAdicionar);
-    document.getElementById('form-administrador').addEventListener('submit', salvarAdministrador);
-    document.getElementById('btn-confirmar-exclusao').addEventListener('click', excluirAdministrador);
+    form.addEventListener('submit', salvarAdministrador);
+    btnNovo.addEventListener('click', abrirModalAdicionar);
+    btnConfirmarExclusao.addEventListener('click', excluirAdministrador);
 });

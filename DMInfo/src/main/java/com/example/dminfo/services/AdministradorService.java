@@ -47,17 +47,15 @@ public class AdministradorService {
         return administradorRepository.save(administrador);
     }
 
-    public Administrador update(Integer id, Administrador administradorDetails) {
-        Administrador administrador = administradorRepository.findById(id).orElse(null);
-        if(administrador == null)
-            throw new RuntimeException("Administrador não encontrado com ID: " + id);
+    public Administrador update(Integer id, Administrador adminDetails) {
 
-        // Atualiza os campos
-        administrador.setDtIni(administradorDetails.getDtIni());
-        administrador.setDtFim(administradorDetails.getDtFim());
-        administrador.setUsuario(administradorDetails.getUsuario());
+        Administrador adminBanco = getById(id);
+        if (adminBanco == null) {
+            throw new RuntimeException("Administrador não encontrado para o ID: " + id);
+        }
+        adminBanco.setDtFim(adminDetails.getDtFim());
 
-        return administradorRepository.save(administrador);
+        return administradorRepository.save(adminBanco);
     }
 
     public boolean excluir(Integer id) {

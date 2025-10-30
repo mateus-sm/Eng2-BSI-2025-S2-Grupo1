@@ -1,5 +1,6 @@
 package com.example.dminfo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,7 +14,8 @@ public class Administrador {
     @Column(name = "id_admin")
     private int id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("administrador")
+    @OneToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 

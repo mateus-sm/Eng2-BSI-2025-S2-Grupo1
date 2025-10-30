@@ -46,6 +46,7 @@
             </div>
             <div class="modal-body">
                 <form id="form-administrador">
+                    <div id="modal-error-message" class="alert alert-danger d-none" role="alert"></div>
                     <input type="hidden" id="administradorId">
 
                     <div class="mb-3">
@@ -57,6 +58,8 @@
                     <div class="mb-3" id="campo-dtFim">
                         <label for="dtFim" class="form-label">Data Fim</label>
                         <input type="date" class="form-control" id="dtFim">
+
+                        <div id="dtFim-error" class="text-danger d-none mt-1"></div>
                     </div>
 
                 </form>
@@ -81,7 +84,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="btn-confirmar-exclusao">Excluir</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
             </div>
         </div>
     </div>

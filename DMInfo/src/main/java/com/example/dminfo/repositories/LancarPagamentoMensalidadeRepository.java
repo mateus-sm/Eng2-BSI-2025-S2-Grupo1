@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface LancarPagamentoMensalidadeRepository extends JpaRepository<LancarPagamentoMensalidade, Integer> {
     List<LancarPagamentoMensalidade> findByMesAndAno(int mes, int ano);
     List<LancarPagamentoMensalidade> findByAno(int ano);
-    List<LancarPagamentoMensalidade> findByMembro(int membro);
+    List<LancarPagamentoMensalidade> findByMembro(int idMembro);
     Optional<LancarPagamentoMensalidade> findByIdMembroAndMesAndAno(int idMembro, int mes, int ano);
 
 }

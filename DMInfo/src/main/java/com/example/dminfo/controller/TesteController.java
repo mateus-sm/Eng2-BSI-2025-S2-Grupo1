@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "app")
+@RequestMapping(value = "test")
 public class TesteController {
     @Autowired
     private MembroService membroService;

@@ -38,6 +38,9 @@ public class viewController {
         return "membros";
     }
 
+    @GetMapping("/app/administradores")
+    public String paginaGerenciarAdministradores() {return "administradores";}
+
     @GetMapping("/app/doador")
     public String paginaGerenciarDoador() {
         return "doador";

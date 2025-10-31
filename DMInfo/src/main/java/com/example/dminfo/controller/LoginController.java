@@ -10,7 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController {
 
-    private final String MASTER_TOKEN = "admin@123";
+    private final String MASTER_TOKEN = "Admin@123";
 
     @PostMapping("/login")
     public String processarLogin(

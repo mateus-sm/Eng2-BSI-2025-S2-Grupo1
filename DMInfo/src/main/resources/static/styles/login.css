@@ -1,0 +1,96 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+.container {
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.logo-img {
+    width: 64px; /* ou 60px, ajuste conforme o tamanho desejado */
+    height: auto;
+    filter: brightness(0); /* deixa a imagem totalmente preta */
+    opacity: 1;
+}
+
+/* ===== Textos ===== */
+h1 {
+    font-size: 2.3rem;
+    font-weight: 700;
+    color: #000;
+}
+
+h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #999;
+    margin-bottom: 30px;
+}
+
+/* ===== Form ===== */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.login-form input {
+    width: 280px;
+    height: 45px;
+    border: none;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #555;
+    outline: none;
+}
+
+.login-form input::placeholder {
+    color: #999;
+}
+
+.login-form button {
+    width: 280px;
+    height: 45px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.login-form button:hover {
+    background-color: #333;
+}
+
+/* ===== Mensagem de erro ===== */
+.alert-danger {
+    width: 280px;
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.9rem;
+}

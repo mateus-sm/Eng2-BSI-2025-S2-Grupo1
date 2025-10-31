@@ -48,4 +48,9 @@ public class viewController {
 
     @GetMapping("/app/conquista")
     public String paginaGerenciarConquista() { return "conquista"; }
+
+    @GetMapping("/login")
+    public String paginaLogin() {
+        return "login";
+    }
 }

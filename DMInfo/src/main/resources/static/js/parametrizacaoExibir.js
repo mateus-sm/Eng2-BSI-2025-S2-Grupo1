@@ -1,9 +1,5 @@
-// Conteúdo de: /static/js/parametrizacaoExibir.js
-
-// Executa o script quando o HTML da página estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // Pega todos os elementos da página
     const loadingDiv = document.getElementById('loading');
     const erroDiv = document.getElementById('erro');
     const dadosContainer = document.getElementById('dados-container');
@@ -12,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let idParaExcluir = null; // Variável para guardar o ID
 
     try {
-        // 1. Fazer a chamada GET para o backend
+
         const response = await fetch('/parametrizacao');
 
         if (!response.ok) {
@@ -24,9 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (listaParametros && listaParametros.length > 0) {
             const dados = listaParametros[0];
 
-            idParaExcluir = dados.id; // Salva o ID
+            idParaExcluir = dados.id;
 
-            // 4. Preenche o HTML
             document.getElementById('id').textContent = dados.id;
             document.getElementById('nomeFantasia').textContent = dados.nomeFantasia;
             document.getElementById('razaoSocial').textContent = dados.razaoSocial;
@@ -43,16 +38,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('logoGrande').textContent = dados.logoGrande;
             document.getElementById('logoPequeno').textContent = dados.logoPequeno;
 
-            // Mostra os dados
+
             loadingDiv.style.display = 'none';
             dadosContainer.style.display = 'block';
 
-            // ==========================================
-            // CORREÇÃO: MOSTRA O BOTÃO E ADICIONA O CLIQUE
-            // ==========================================
-            btnExcluir.style.display = 'block'; // 1. Mostra o botão
+            btnExcluir.style.display = 'block';
 
-            // 2. Adiciona o evento de clique SÓ DEPOIS que ele está visível
             btnExcluir.addEventListener('click', async () => {
                 if (!idParaExcluir) {
                     alert('Erro: ID do registro não encontrado.');
@@ -79,14 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
         } else {
-            // Caso o banco esteja vazio
+
             erroDiv.textContent = 'Nenhum parâmetro cadastrado no banco de dados.';
             erroDiv.style.display = 'block';
             loadingDiv.style.display = 'none';
         }
 
     } catch (error) {
-        // Tratar erros de rede ou do fetch
         console.error('Falha na requisição:', error);
         erroDiv.textContent = `Erro ao carregar dados: ${error.message}`;
         erroDiv.style.display = 'block';

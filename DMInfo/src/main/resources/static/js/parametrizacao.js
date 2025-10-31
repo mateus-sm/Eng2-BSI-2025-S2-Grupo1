@@ -92,7 +92,8 @@ function validarForm() {
 }
 
 Object.entries(inputs).forEach(([index, elemento]) => {
-    if (index === 'id') return;
+    if (index === 'id')
+        return;
 
     elemento.addEventListener('blur', () => {
         validarCampo(elemento, index);

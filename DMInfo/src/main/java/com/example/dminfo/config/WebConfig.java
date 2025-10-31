@@ -16,11 +16,13 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(loginInterceptor)
 
-                .addPathPatterns("/**")
-
+                .addPathPatterns("/**")  //não deixa acessar nenhuma pasta até fazer o login
+                //exceto essas
                 .excludePathPatterns("/login")       // A própria página de login
                 .excludePathPatterns("/error")       // Páginas de erro do Spring
-                .excludePathPatterns("/styles/**")   // Nossos arquivos CSS
-                .excludePathPatterns("/js/**");      // Nossos arquivos JS
+                .excludePathPatterns("/styles/**")   // arquivos CSS
+                .excludePathPatterns("/js/**")       // arquivos JS
+                .excludePathPatterns("/images/**");  // Imagens
+
     }
 }

@@ -3,13 +3,54 @@ let membroModal, deleteModal;
 let idParaExcluir = null;
 
 // URL base da sua API
-const API_URL = '/membro';
+const API_URL = '/apis/membro';
 
+/**
+ * Pega o token do localStorage. Se não encontrar, redireciona para o login.
+ */
+function getToken() {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+        alert("Acesso não autorizado. Por favor, faça o login.");
+        window.location.href = '/login.html';
+        return null;
+    }
+    return token;
+}
+
+/**
+ * Lida com erros de autenticação (ex: token expirado)
+ */
+function handleAuthError() {
+    localStorage.removeItem('user_token'); // Limpa o token inválido
+    alert("Sua sessão expirou. Por favor, faça o login novamente.");
+    window.location.href = '/login.html';
+}
+
+/**
+ * Função principal: Carrega os membros da API e popula a tabela
+ */
 async function carregarMembros() {
+    // Pega o token de autenticação
+    const token = getToken();
+    if (!token) return; // Para a execução se não houver token
+
     try {
-        const response = await fetch(API_URL);
-        if (!response.ok)
+        // Envia o token no cabeçalho
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (!response.ok) {
+            // Trata token expirado/inválido
+            if (response.status === 401) {
+                return handleAuthError();
+            }
             throw new Error('Falha ao carregar membros.');
+        }
 
         const membros = await response.json();
         const tabelaBody = document.getElementById('tabela-membros');
@@ -57,6 +98,9 @@ async function carregarMembros() {
     }
 }
 
+/**
+ * Abre o modal para criar um novo membro (limpa o formulário)
+ */
 function abrirModalAdicionar() {
     const form = document.getElementById('form-membro');
     form.reset();
@@ -70,12 +114,31 @@ function abrirModalAdicionar() {
     membroModal.show();
 }
 
+/**
+ * Abre o modal para editar um membro (busca dados e preenche o formulário)
+ */
 async function abrirModalEditar(id) {
+    // Pega o token de autenticação
+    const token = getToken();
+    if (!token) return;
+
     try {
-        const response = await fetch(`${API_URL}/get-by-id/${id}`);
+        // Envia o token no cabeçalho
+        const response = await fetch(`${API_URL}/get-by-id/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        });
+
         if (!response.ok) {
+            // Trata token expirado/inválido
+            if (response.status === 401) {
+                return handleAuthError();
+            }
             throw new Error('Membro não encontrado.');
         }
+
         const membro = await response.json();
 
         // Preenche o formulário
@@ -98,8 +161,15 @@ async function abrirModalEditar(id) {
     }
 }
 
+/**
+ * Salva (Cria ou Atualiza) um membro
+ */
 async function salvarMembro(event) {
     event.preventDefault(); // Impede o submit tradicional do formulário
+
+    // Pega o token de autenticação
+    const token = getToken();
+    if (!token) return;
 
     const id = document.getElementById('membroId').value;
     const codigo = document.getElementById('codigo').value;
@@ -136,17 +206,26 @@ async function salvarMembro(event) {
     }
 
     try {
+        // Envia o token no cabeçalho
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify(membro)
         });
 
         if (!response.ok) {
-            const erro = await response.json(); // Tenta ler a mensagem de erro da API
-            throw new Error(erro.mensagem || 'Falha ao salvar membro.');
+            // Trata token expirado/inválido
+            if (response.status === 401) {
+                return handleAuthError();
+            }
+
+            const erro = await response.json();
+            // Lógica de erro corrigida (procura por 'erro.erro')
+            const mensagemEspecifica = erro.erro || erro.mensagem || erro.detalhe || erro.message;
+            throw new Error(mensagemEspecifica || 'Falha ao salvar membro.');
         }
 
         membroModal.hide();
@@ -158,22 +237,42 @@ async function salvarMembro(event) {
     }
 }
 
+/**
+ * Abre o modal de confirmação de exclusão
+ */
 function abrirModalExcluir(id) {
     idParaExcluir = id; // Armazena o ID para o botão de confirmação
     deleteModal.show();
 }
 
+/**
+ * Executa a exclusão do membro
+ */
 async function excluirMembro() {
     if (!idParaExcluir) return;
 
+    // Pega o token de autenticação
+    const token = getToken();
+    if (!token) return;
+
     try {
+        // Envia o token no cabeçalho
         const response = await fetch(`${API_URL}/${idParaExcluir}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
         });
 
         if (!response.ok) {
+            // Trata token expirado/inválido
+            if (response.status === 401) {
+                return handleAuthError();
+            }
+
             const erro = await response.json();
-            throw new Error(erro.mensagem || 'Falha ao excluir membro.');
+            // Lógica de erro corrigida (procura por 'erro.erro')
+            throw new Error(erro.erro || 'Falha ao excluir membro.');
         }
 
         deleteModal.hide();
@@ -186,6 +285,9 @@ async function excluirMembro() {
     }
 }
 
+/**
+ * Utilitário: Formata data (YYYY-MM-DD) para (DD/MM/YYYY) ou retorna ''
+ */
 function formatarData(data) {
     if (!data) return '';
     const [ano, mes, dia] = data.split('-');
@@ -193,12 +295,13 @@ function formatarData(data) {
 }
 
 // --- INICIALIZAÇÃO ---
+// Aguarda o DOM carregar completamente
 document.addEventListener('DOMContentLoaded', () => {
     // Instancia os modais do Bootstrap
     membroModal = new bootstrap.Modal(document.getElementById('membroModal'));
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-    // Carrega os membros na tabela
+    // Carrega os membros na tabela (isso agora vai exigir um token)
     carregarMembros();
 
     // Listeners dos botões principais

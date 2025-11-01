@@ -2,29 +2,26 @@ package com.example.dminfo.services;
 
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.model.Usuario;
-import com.example.dminfo.repositories.MembroRepository;
-import com.example.dminfo.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
+//@Service
 public class TesteService {
-    @Autowired
+    //@Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired
+    //@Autowired
     private MembroRepository membroRepository;
 
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
 
-    @Transactional // Isso garante que ou salva os dois (Usuario e Membro), ou não salva nenhum
+    //@Transactional // Isso garante que ou salva os dois (Usuario e Membro), ou não salva nenhum
     public Membro criarMembro() {
 
         // Criar o objeto Usuario

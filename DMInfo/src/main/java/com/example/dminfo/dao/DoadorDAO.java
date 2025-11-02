@@ -31,11 +31,10 @@ public class DoadorDAO {
     public Doador get(int id) {
         String sql = "SELECT * FROM doador WHERE id_doador = " + id;
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
+        try{
+            if(rs != null && rs.next())
                 return buildDoador(rs);
-            }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao buscar Doador por ID: " + e.getMessage());
         }
         return null;
@@ -45,10 +44,9 @@ public class DoadorDAO {
         String sql = "SELECT * FROM doador WHERE documento = '" + documento + "'";
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
-            if (rs != null && rs.next()) {
+            if(rs != null && rs.next())
                 return buildDoador(rs);
-            }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao buscar Doador por Documento: " + e.getMessage());
         }
         return null;
@@ -59,18 +57,16 @@ public class DoadorDAO {
         String sql = "SELECT * FROM doador " + filtro;
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
-            if (rs != null) {
-                while (rs.next()) {
+            if (rs != null)
+                while (rs.next())
                     doadores.add(buildDoador(rs));
-                }
-            }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao listar Doadores: " + e.getMessage());
         }
         return doadores;
     }
 
-    public Doador gravar(Doador doador) {
+    public Doador gravar(Doador doador){
         String sql = String.format("INSERT INTO doador (nome, documento, rua, bairro, cidade, uf, cep, email, telefone, contato) " +
                         "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id_doador",
                 doador.getNome(), doador.getDocumento(), doador.getRua(), doador.getBairro(), doador.getCidade(),
@@ -78,12 +74,12 @@ public class DoadorDAO {
         );
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
+        try{
+            if (rs != null && rs.next()){
                 doador.setId(rs.getInt("id_doador"));
                 return doador;
             }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao gravar Doador: " + e.getMessage());
         }
         return null;

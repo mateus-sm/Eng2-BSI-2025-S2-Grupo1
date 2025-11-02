@@ -7,21 +7,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const formTitulo = document.querySelector('.form-container h2');
     const hiddenId = document.getElementById('id');
 
-    const apiUrl = '/doador';
+    const apiUrl = '/apis/doador';
 
-    // Função para carregar os doadores na tabela
+    function getToken() {
+        const token = localStorage.getItem('user_token');
+        if(!token){
+            alert("Acesso não autorizado. Por favor, faça o login.");
+            window.location.href = '/login.html';
+            return null;
+        }
+        return token;
+    }
+
+    function handleAuthError() {
+        localStorage.removeItem('user_token'); // Limpa o token inválido
+        alert("Sua sessão expirou. Por favor, faça o login novamente.");
+        window.location.href = '/login.html';
+    }
+
     async function carregarDoadores() {
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
+        const token = getToken();
+        if(!token)
+            return;
+
+        try{
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token
+                }
+            });
+
+            if(!response.ok){
+                if (response.status === 401) return handleAuthError();
                 throw new Error('Erro ao buscar doadores');
             }
             const doadores = await response.json();
 
-            // Limpa o corpo da tabela
+            //Limpa o corpo da tabela
             tabelaBody.innerHTML = '';
 
-            // Preenche a tabela
+            //Preenche a tabela
             doadores.forEach(doador => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -37,13 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tabelaBody.appendChild(tr);
             });
-        } catch (error) {
+        }catch(error){
             console.error('Falha ao carregar doadores:', error);
             alert('Não foi possível carregar os doadores.');
         }
     }
 
-    // Função para limpar e resetar o formulário
     function resetarFormulario() {
         form.reset();
         hiddenId.value = ''; // Limpa o ID oculto
@@ -52,16 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
         form.querySelector('input').focus();
     }
 
-    // Função para preencher o formulário para edição
     async function preencherFormularioParaEdicao(id) {
+        const token = getToken();
+        if(!token)
+            return;
+
         try {
-            const response = await fetch(`${apiUrl}/${id}`);
-            if (!response.ok) {
+            const response = await fetch(`${apiUrl}/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token
+                }
+            });
+
+            if(!response.ok){
+                if (response.status === 401) return handleAuthError();
                 throw new Error('Doador não encontrado');
             }
             const doador = await response.json();
 
-            // Preenche todos os campos do formulário
+            //Preenche todos os campos do formulário
             document.getElementById('id').value = doador.id;
             document.getElementById('nome').value = doador.nome;
             document.getElementById('documento').value = doador.documento;
@@ -74,22 +109,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('telefone').value = doador.telefone;
             document.getElementById('contato').value = doador.contato;
 
-            // Ajusta a UI para modo de edição
             formTitulo.textContent = 'Editando Doador';
-            btnCancelar.classList.remove('d-none'); // Mostra o botão cancelar
-            window.scrollTo(0, 0); // Rola para o topo (onde está o formulário)
+            btnCancelar.classList.remove('d-none'); //Mostra o botão cancelar
+            window.scrollTo(0, 0); //Rola para o topo
 
-        } catch (error) {
+        }catch(error){
             console.error('Falha ao buscar doador:', error);
             alert('Não foi possível carregar o doador para edição.');
         }
     }
 
-    // Event Listener para Salvar (Criar ou Atualizar)
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Impede o envio tradicional
+        e.preventDefault(); //Impede o envio tradicional
 
-        // Coleta os dados do formulário
+        const token = getToken();
+        if(!token)
+            return;
+
+        //Coleta os dados do formulário
         const formData = new FormData(form);
         const doador = Object.fromEntries(formData.entries());
 
@@ -99,69 +136,84 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = isEdicao ? `${apiUrl}/${id}` : apiUrl;
         const method = isEdicao ? 'PUT' : 'POST';
 
-        try {
+        try{
             const response = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify(doador),
             });
 
-            if (!response.ok) {
+            if(!response.ok){
+                if(response.status === 401)
+                    return handleAuthError();
+
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro ao salvar doador');
+                throw new Error(errorData.erro || 'Erro ao salvar doador');
             }
 
             alert(`Doador ${isEdicao ? 'atualizado' : 'salvo'} com sucesso!`);
             resetarFormulario();
             carregarDoadores();
 
-        } catch (error) {
+        }catch(error){
             console.error('Falha ao salvar:', error);
             alert(`Não foi possível salvar o doador. ${error.message}`);
         }
     });
 
-    // Event Listener para botões na tabela (Editar e Excluir)
     tabelaBody.addEventListener('click', (e) => {
         const target = e.target;
         const id = target.getAttribute('data-id');
 
-        if (target.classList.contains('btn-editar')) {
+        if(target.classList.contains('btn-editar'))
             preencherFormularioParaEdicao(id);
-        }
 
-        if (target.classList.contains('btn-excluir')) {
-            if (confirm('Tem certeza que deseja excluir este doador?')) {
+        if(target.classList.contains('btn-excluir')){
+            if (confirm('Tem certeza que deseja excluir este doador?'))
                 excluirDoador(id);
-            }
         }
     });
 
-    // Função para Excluir
     async function excluirDoador(id) {
-         try {
+        const token = getToken();
+        if(!token)
+            return;
+
+        try{
             const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': token
+                }
             });
 
-            if (!response.ok) {
-                throw new Error('Erro ao excluir doador');
+            if(!response.ok){
+                if (response.status === 401) return handleAuthError();
+
+                //Tenta ler o erro, mas se não tiver (ex: noContent() com erro), usa o fallback
+                let errorMsg = 'Erro ao excluir doador';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.erro || errorMsg;
+                } catch(e) {
+                    //Sem corpo no erro, usa o fallback
+                }
+                throw new Error(errorMsg);
             }
 
             alert('Doador excluído com sucesso!');
             carregarDoadores();
 
-        } catch (error) {
+        }catch(error){
             console.error('Falha ao excluir:', error);
             alert('Não foi possível excluir o doador.');
         }
     }
 
-    // Event Listener para o botão Cancelar
     btnCancelar.addEventListener('click', resetarFormulario);
 
-    // Carga inicial dos dados
     carregarDoadores();
 });

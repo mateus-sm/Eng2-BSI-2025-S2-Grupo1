@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public class DoacaoDAO {
 
-    // Helper para construir a Doacao com Doador e Admin (e Usuário do Admin)
+    //Helper para construir a Doacao com Doador e Admin (e Usuário do Admin)
     private Doacao buildDoacao(ResultSet rs) throws SQLException {
         Doacao doacao = new Doacao();
         doacao.setId_doacao(rs.getInt("id_doacao"));
@@ -23,17 +23,17 @@ public class DoacaoDAO {
         doacao.setValor(rs.getDouble("valor"));
         doacao.setObservacao(rs.getString("observacao"));
 
-        // Monta Doador
+        //Monta Doador
         Doador doador = new Doador();
         doador.setId(rs.getInt("id_doador"));
         doador.setNome(rs.getString("doador_nome"));
         doacao.setId_doador(doador);
 
-        // Monta Admin
+        //Monta Admin
         Administrador admin = new Administrador();
         admin.setId(rs.getInt("id_admin"));
 
-        // Monta Usuário do Admin
+        //Monta Usuário do Admin
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
         usuario.setNome(rs.getString("usuario_nome"));
@@ -56,12 +56,10 @@ public class DoacaoDAO {
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
-            if (rs != null) {
-                while (rs.next()) {
+            if(rs != null)
+                while(rs.next())
                     doacoes.add(buildDoacao(rs));
-                }
-            }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao listar Doações: " + e.getMessage());
         }
         return doacoes;
@@ -78,12 +76,12 @@ public class DoacaoDAO {
         );
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
+        try{
+            if(rs != null && rs.next()){
                 doacao.setId_doacao(rs.getInt("id_doacao"));
                 return doacao;
             }
-        } catch (SQLException e) {
+        }catch(SQLException e){
             System.out.println("Erro ao gravar Doação: " + e.getMessage());
         }
         return null;

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service // É um Service, não um RestController
+@Service
 public class DoadorController {
 
     @Autowired

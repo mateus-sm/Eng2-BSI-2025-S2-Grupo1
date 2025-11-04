@@ -3,7 +3,7 @@ package com.example.dminfo.view;
 import com.example.dminfo.util.MembroErro;
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.controller.MembroController;
-import com.example.dminfo.util.Token; // <-- 1. Importe o Token
+import com.example.dminfo.util.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,8 @@ public class MembroView {
     public ResponseEntity<Object> listar(@RequestHeader("Authorization") String token) {
         // 2. Valida o token
         ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+        if (tokenError != null)
+            return tokenError;
 
         // 3. Se o token for válido, executa a lógica normal
         return ResponseEntity.ok(controller.listar());
@@ -56,9 +57,9 @@ public class MembroView {
         if (tokenError != null) return tokenError;
 
         Membro membro = controller.getById(id);
-        if (membro == null) {
+        if (membro == null)
             return ResponseEntity.badRequest().body(new MembroErro("Membro não encontrado"));
-        }
+
         return ResponseEntity.ok(membro);
     }
 
@@ -81,11 +82,11 @@ public class MembroView {
         if (tokenError != null) return tokenError;
 
         try {
-            if (controller.excluir(id)) {
+            if (controller.excluir(id))
                 return ResponseEntity.noContent().build();
-            } else {
+
+            else
                 return ResponseEntity.badRequest().body(new MembroErro("Erro ao excluir."));
-            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }

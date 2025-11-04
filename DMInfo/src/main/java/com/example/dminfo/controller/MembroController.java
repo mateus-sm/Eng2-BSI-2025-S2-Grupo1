@@ -13,8 +13,6 @@ public class MembroController {
     @Autowired
     private Membro membroModel;
 
-    // Métodos "finos" (pass-through)
-
     public List<Membro> listar() {
         return membroModel.listar();
     }

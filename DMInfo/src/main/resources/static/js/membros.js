@@ -8,15 +8,15 @@ const API_URL = '/apis/membro';
 /**
  * Pega o token do localStorage. Se não encontrar, redireciona para o login.
  */
-function getToken() {
-    const token = localStorage.getItem('user_token');
-    if (!token) {
-        alert("Acesso não autorizado. Por favor, faça o login.");
-        window.location.href = '/app/login';
-        return null;
-    }
-    return token;
-}
+//function getToken() {
+//    const token = localStorage.getItem('user_token');
+//    if (!token) {
+//        alert("Acesso não autorizado. Por favor, faça o login.");
+//        window.location.href = '/app/login';
+//        return null;
+//    }
+//    return token;
+//}
 
 /**
  * Lida com erros de autenticação (ex: token expirado)
@@ -169,7 +169,8 @@ async function salvarMembro(event) {
 
     // Pega o token de autenticação
     const token = getToken();
-    if (!token) return;
+    if (!token)
+        return;
 
     const id = document.getElementById('membroId').value;
     const codigo = document.getElementById('codigo').value;

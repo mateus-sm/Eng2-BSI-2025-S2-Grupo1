@@ -39,7 +39,7 @@ public class Conexao {
         }
     }
 
-    // Metodo para INSERT (com RETURNING) e SELECT
+    // Metodo para INSERT e SELECT
     public ResultSet consultar(String sql) {
         try {
             Statement statement = this.connection.createStatement(
@@ -53,7 +53,7 @@ public class Conexao {
         }
     }
 
-    // Metodo para UPDATE, DELETE, INSERT (sem RETURNING)
+    // Metodo para UPDATE, DELETE, INSERT
     public boolean executar(String sql) {
         try {
             Statement statement = this.connection.createStatement();

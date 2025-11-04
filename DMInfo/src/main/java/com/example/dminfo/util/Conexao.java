@@ -9,8 +9,8 @@ import java.sql.Statement;
 public class Conexao {
     private Connection connection;
 
-    private String USUARIO = "Admin";
-    private String SENHA = "Admin@123";
+    private String USUARIO = "admin";
+    private String SENHA = "admin@123";
     private String URL = "jdbc:postgresql://localhost:5432/dminfo_db";
 
     public Conexao() {

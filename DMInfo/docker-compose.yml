@@ -8,7 +8,7 @@ services:
 
     environment:
       POSTGRES_USER: Admin
-      POSTGRES_PASSWORD: Admin@123
+      POSTGRES_PASSWORD: admin@123
       POSTGRES_DB: dminfo_db
 
     ports:

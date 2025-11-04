@@ -9,7 +9,6 @@ import java.util.List;
 @Service
 public class MembroController {
 
-    // Injeta o "Fat Model"
     @Autowired
     private Membro membroModel;
 

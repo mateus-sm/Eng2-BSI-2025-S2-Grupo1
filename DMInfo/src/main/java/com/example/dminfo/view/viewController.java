@@ -53,8 +53,8 @@ public class viewController {
         return "conquista";
     }
 
-//    @GetMapping("/app/login")
-//    public String paginaLogin() {
-//        return "login";
-//    }
+    @GetMapping("/app/login")
+    public String paginaLogin() {
+        return "login";
+    }
 }

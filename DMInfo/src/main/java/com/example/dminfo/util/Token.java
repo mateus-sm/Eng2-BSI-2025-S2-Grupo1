@@ -23,9 +23,8 @@ public class Token {
      * Isso será usado para proteger seus endpoints.
      */
     public static boolean validarToken(String token) {
-        if (token == null || token.isEmpty()) {
+        if (token == null || token.isEmpty())
             return false;
-        }
 
         try {
             // Tenta decodificar o token

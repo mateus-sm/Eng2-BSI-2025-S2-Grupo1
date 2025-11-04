@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +20,11 @@ public class MembroDAO {
         membro.setCodigo(rs.getInt("codigo_membro"));
 
         // Trata datas que podem ser nulas
-        if (rs.getDate("dtini") != null) {
+        if (rs.getDate("dtini") != null)
             membro.setDtIni(rs.getDate("dtini").toLocalDate());
-        }
-        if (rs.getDate("dtfim") != null) {
+
+        if (rs.getDate("dtfim") != null)
             membro.setDtFim(rs.getDate("dtfim").toLocalDate());
-        }
 
         membro.setObservacao(rs.getString("observacao"));
 
@@ -81,10 +79,9 @@ public class MembroDAO {
 
     public List<Membro> get(String filtro) {
         List<Membro> membros = new ArrayList<>();
-        String sql = "SELECT * FROM membro " + filtro; // O filtro pode estar vazio
-
-        // IMPORTANTE: Você precisa fazer um JOIN se quiser o nome do usuário
-        // Ex: "SELECT m.*, u.usr_nome FROM membro m JOIN usuario u ON m.id_usuario = u.id_usuario " + filtro;
+        String sql = "SELECT m.*, u.usr_nome " +
+                     "FROM membro m JOIN usuario u " +
+                     "ON m.id_usuario = u.id_usuario " + filtro;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -100,8 +97,10 @@ public class MembroDAO {
     }
 
     public Membro get(int id) {
-        String sql = "SELECT * FROM membro WHERE id_membro = " + id;
-        // Ex: "SELECT m.*, u.usr_nome FROM membro m JOIN usuario u ON m.id_usuario = u.id_usuario WHERE m.id_membro = " + id;
+        String sql = "SELECT m.*, u.usr_nome " +
+                     "FROM membro m JOIN usuario u " +
+                     "ON m.id_usuario = u.id_usuario " +
+                     "WHERE m.id_membro = " + id;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -119,11 +118,11 @@ public class MembroDAO {
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if (rs != null && rs.next()) {
-                return true; // Encontrou
+                return true;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao verificar existência de Membro por Usuário: " + e.getMessage());
         }
-        return false; // Não encontrou
+        return false;
     }
 }

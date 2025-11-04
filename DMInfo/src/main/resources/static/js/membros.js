@@ -8,15 +8,15 @@ const API_URL = '/apis/membro';
 /**
  * Pega o token do localStorage. Se não encontrar, redireciona para o login.
  */
-//function getToken() {
-//    const token = localStorage.getItem('user_token');
-//    if (!token) {
-//        alert("Acesso não autorizado. Por favor, faça o login.");
-//        window.location.href = '/app/login';
-//        return null;
-//    }
-//    return token;
-//}
+function getToken() {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+        alert("Acesso não autorizado. Por favor, faça o login.");
+        window.location.href = '/app/login';
+        return null;
+    }
+    return token;
+}
 
 /**
  * Lida com erros de autenticação (ex: token expirado)
@@ -33,7 +33,8 @@ function handleAuthError() {
 async function carregarMembros() {
     // Pega o token de autenticação
     const token = getToken();
-    if (!token) return; // Para a execução se não houver token
+    if (!token)
+        return;
 
     try {
         // Envia o token no cabeçalho
@@ -46,9 +47,8 @@ async function carregarMembros() {
 
         if (!response.ok) {
             // Trata token expirado/inválido
-            if (response.status === 401) {
+            if (response.status === 401)
                 return handleAuthError();
-            }
             throw new Error('Falha ao carregar membros.');
         }
 
@@ -120,7 +120,8 @@ function abrirModalAdicionar() {
 async function abrirModalEditar(id) {
     // Pega o token de autenticação
     const token = getToken();
-    if (!token) return;
+    if (!token)
+        return;
 
     try {
         // Envia o token no cabeçalho
@@ -224,7 +225,6 @@ async function salvarMembro(event) {
             }
 
             const erro = await response.json();
-            // Lógica de erro corrigida (procura por 'erro.erro')
             const mensagemEspecifica = erro.erro || erro.mensagem || erro.detalhe || erro.message;
             throw new Error(mensagemEspecifica || 'Falha ao salvar membro.');
         }
@@ -246,15 +246,14 @@ function abrirModalExcluir(id) {
     deleteModal.show();
 }
 
-/**
- * Executa a exclusão do membro
- */
+// Executa a exclusão do membro
 async function excluirMembro() {
     if (!idParaExcluir) return;
 
     // Pega o token de autenticação
     const token = getToken();
-    if (!token) return;
+    if (!token)
+        return;
 
     try {
         // Envia o token no cabeçalho
@@ -272,7 +271,6 @@ async function excluirMembro() {
             }
 
             const erro = await response.json();
-            // Lógica de erro corrigida (procura por 'erro.erro')
             throw new Error(erro.erro || 'Falha ao excluir membro.');
         }
 
@@ -286,9 +284,7 @@ async function excluirMembro() {
     }
 }
 
-/**
- * Utilitário: Formata data (YYYY-MM-DD) para (DD/MM/YYYY) ou retorna ''
- */
+// Utilitário: Formata data (YYYY-MM-DD) para (DD/MM/YYYY)
 function formatarData(data) {
     if (!data) return '';
     const [ano, mes, dia] = data.split('-');

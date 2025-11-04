@@ -1,18 +1,51 @@
-const API_URL = '/administrador';
+// 👇 1. URL DA API CORRIGIDA
+const API_URL = '/apis/administrador';
 
 let administradorModal, deleteModal;
-let administradores = [];
+let administradores = []; // Armazena os dados localmente
 let idParaExcluir = null;
 
+/**
+ * Pega o token do localStorage. Se não encontrar, redireciona para o login.
+ */
+function getToken() {
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+        alert("Acesso não autorizado. Por favor, faça o login.");
+        window.location.href = '/app/login';
+        return null;
+    }
+    return token;
+}
+
+/**
+ * Lida com erros de autenticação (ex: token expirado)
+ */
+function handleAuthError() {
+    localStorage.removeItem('user_token'); // Limpa o token inválido
+    alert("Sua sessão expirou. Por favor, faça o login novamente.");
+    window.location.href = '/app/login';
+}
 
 async function carregarAdministradores() {
+    // 👇 2. ADICIONADO: Lógica de Token
+    const token = getToken();
+    if (!token) return;
+
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        });
+
         if (!response.ok) {
+            if (response.status === 401) return handleAuthError();
             throw new Error('Erro ao carregar administradores.');
         }
 
-        administradores = await response.json();
+        administradores = await response.json(); // Salva localmente
 
         const tabela = document.getElementById('tabela-administradores');
         tabela.innerHTML = '';
@@ -26,7 +59,7 @@ async function carregarAdministradores() {
             const row = `
                 <tr>
                     <td>${admin.id}</td>
-                    <td>${admin.usuario.nome}</td>
+                    <td>${admin.usuario ? admin.usuario.nome : 'N/A'}</td>
                     <td>${formatarData(admin.dtIni)}</td>
                     <td>${formatarData(admin.dtFim)}</td>
                     <td class="text-center btn-group">
@@ -51,6 +84,10 @@ async function carregarAdministradores() {
 async function salvarAdministrador(event) {
     event.preventDefault();
 
+    // Lógica de Token
+    const token = getToken();
+    if (!token) return;
+
     document.getElementById('modal-error-message').classList.add('d-none');
     document.getElementById('dtFim-error').classList.add('d-none');
 
@@ -67,14 +104,11 @@ async function salvarAdministrador(event) {
         url = `${API_URL}/${id}`;
         method = 'PUT';
 
-
         if (dtFim) {
-
             const adminOriginal = administradores.find(a => a.id == id);
             const dtIni = adminOriginal.dtIni;
 
             if (dtFim <= dtIni) {
-
                 const errorDiv = document.getElementById('dtFim-error');
                 errorDiv.textContent = 'A data fim deve ser maior que a data de início.';
                 errorDiv.classList.remove('d-none');
@@ -82,16 +116,14 @@ async function salvarAdministrador(event) {
             }
         }
 
-
+        // No seu backend (AdministradorService.update), você só atualiza o dtFim.
+        // O usuarioId não é usado no PUT.
         bodyJson = {
-            dtFim: dtFim,
-            usuario: { id: parseInt(usuarioId) }
+            dtFim: dtFim
         };
 
     } else {
-
         if (!usuarioId) {
-
             const errorDiv = document.getElementById('modal-error-message');
             errorDiv.textContent = 'O ID do Usuário é obrigatório.';
             errorDiv.classList.remove('d-none');
@@ -106,16 +138,20 @@ async function salvarAdministrador(event) {
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': token // Envia o token
             },
             body: JSON.stringify(bodyJson)
         });
 
         if (!response.ok) {
+            if (response.status === 401) return handleAuthError();
+
             const erro = await response.json();
 
+            // Tratamento de Erro
             const errorDiv = document.getElementById('modal-error-message');
-            errorDiv.textContent = erro.descricao || 'Falha ao salvar administrador.';
+            errorDiv.textContent = erro.erro || 'Falha ao salvar administrador.';
             errorDiv.classList.remove('d-none');
             return;
         }
@@ -125,7 +161,6 @@ async function salvarAdministrador(event) {
 
     } catch (error) {
         console.error('Erro ao salvar:', error);
-
         const errorDiv = document.getElementById('modal-error-message');
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('d-none');
@@ -135,14 +170,24 @@ async function salvarAdministrador(event) {
 async function excluirAdministrador() {
     if (!idParaExcluir) return;
 
+    // Lógica de Token
+    const token = getToken();
+    if (!token) return;
+
     try {
         const response = await fetch(`${API_URL}/${idParaExcluir}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': token // Envia o token
+            }
         });
 
         if (!response.ok) {
+            if (response.status === 401) return handleAuthError();
+
             const erro = await response.json();
-            throw new Error(erro.descricao || 'Falha ao excluir.');
+            // Tratamento de Erro
+            throw new Error(erro.erro || 'Falha ao excluir.');
         }
 
         deleteModal.hide();
@@ -155,7 +200,6 @@ async function excluirAdministrador() {
     }
 }
 
-
 function abrirModalAdicionar() {
     document.getElementById('dtFim-error').classList.add('d-none');
     document.getElementById('form-administrador').reset();
@@ -163,7 +207,7 @@ function abrirModalAdicionar() {
     document.getElementById('usuarioId').removeAttribute('disabled');
 
     document.getElementById('administradorModalLabel').textContent = 'Adicionar Administrador';
-    document.querySelector('#form-administrador').classList.remove('edit-mode'); // Esconde a data fim
+    document.querySelector('#form-administrador').classList.remove('edit-mode');
     document.querySelector('.modal-footer .btn-primary').textContent = 'Salvar';
 
     administradorModal.show();
@@ -177,10 +221,10 @@ function abrirModalEdicao(id) {
     document.getElementById('administradorId').value = admin.id;
     document.getElementById('usuarioId').value = admin.usuario.id;
     document.getElementById('dtFim').value = admin.dtFim || '';
-    document.getElementById('usuarioId').setAttribute('disabled', true); // Não deixa editar o usuário
+    document.getElementById('usuarioId').setAttribute('disabled', true);
 
     document.getElementById('administradorModalLabel').textContent = 'Editar Administrador';
-    document.querySelector('#form-administrador').classList.add('edit-mode'); // Mostra a data fim
+    document.querySelector('#form-administrador').classList.add('edit-mode');
     document.querySelector('.modal-footer .btn-primary').textContent = 'Atualizar';
 
     administradorModal.show();
@@ -200,14 +244,15 @@ function formatarData(data) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    administradorModal = new bootstrap.Modal(document.getElementById('administradorModal'));
+    deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+    // Carrega os dados iniciais (agora com token)
     carregarAdministradores();
 
     const form = document.getElementById('form-administrador');
-    const btnNovo = document.getElementById('btn-novo-administrador'); // ID Corrigido
-    const btnConfirmarExclusao = document.getElementById('confirmDelete'); // ID Corrigido
-
-    administradorModal = new bootstrap.Modal(document.getElementById('administradorModal'));
-    deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const btnNovo = document.getElementById('btn-novo-administrador');
+    const btnConfirmarExclusao = document.getElementById('confirmDelete');
 
     form.addEventListener('submit', salvarAdministrador);
     btnNovo.addEventListener('click', abrirModalAdicionar);

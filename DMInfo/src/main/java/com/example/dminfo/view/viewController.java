@@ -39,7 +39,9 @@ public class viewController {
     }
 
     @GetMapping("/app/administradores")
-    public String paginaGerenciarAdministradores() {return "administradores";}
+    public String paginaGerenciarAdministradores() {
+        return "administradores";
+    }
 
     @GetMapping("/app/doador")
     public String paginaGerenciarDoador() {
@@ -47,9 +49,11 @@ public class viewController {
     }
 
     @GetMapping("/app/conquista")
-    public String paginaGerenciarConquista() { return "conquista"; }
+    public String paginaGerenciarConquista() {
+        return "conquista";
+    }
 
-    @GetMapping("/login")
+    @GetMapping("/app/login")
     public String paginaLogin() {
         return "login";
     }

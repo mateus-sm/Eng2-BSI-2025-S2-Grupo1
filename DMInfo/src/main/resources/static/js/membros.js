@@ -12,7 +12,7 @@ function getToken() {
     const token = localStorage.getItem('user_token');
     if (!token) {
         alert("Acesso não autorizado. Por favor, faça o login.");
-        window.location.href = '/login.html';
+        window.location.href = '/app/login';
         return null;
     }
     return token;
@@ -24,7 +24,7 @@ function getToken() {
 function handleAuthError() {
     localStorage.removeItem('user_token'); // Limpa o token inválido
     alert("Sua sessão expirou. Por favor, faça o login novamente.");
-    window.location.href = '/login.html';
+    window.location.href = '/app/login';
 }
 
 /**

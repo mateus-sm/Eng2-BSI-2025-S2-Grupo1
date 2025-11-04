@@ -1,34 +1,28 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.model.Conquista;
 import com.example.dminfo.model.Parametros;
-import com.example.dminfo.services.ParametrosService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("/parametrizacao")
-public class ParametrosController {
+@Service
+public class ParametrosController { // O novo "Service"
+
     @Autowired
-    private ParametrosService service;
+    private Parametros parametroModel; // O "Fat Model"
 
-    @GetMapping
-    public ResponseEntity<Object> exibir() {
-        return ResponseEntity.ok(service.exibir());
+    public Parametros exibir() {
+        return parametroModel.exibir();
     }
 
-    @PostMapping
-    public ResponseEntity<Parametros> salvar(@RequestBody Parametros parametros) {
-        Parametros salvo = service.salvar(parametros);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public Parametros salvar(Parametros parametro) {
+        return parametroModel.salvar(parametro);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletar(@PathVariable Integer id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
+    public void excluir(Integer id) {
+        parametroModel.excluir(id);
     }
 
+    public boolean existeParametro() {
+        return parametroModel.existeParametro();
+    }
 }

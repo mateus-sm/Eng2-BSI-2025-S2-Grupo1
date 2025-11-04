@@ -1,6 +1,6 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.services.ParametrosService;
+import com.example.dminfo.controller.ParametrosController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class viewController {
     @Autowired
-    private ParametrosService service;
+    private ParametrosController controller;
 
     @GetMapping("/app/parametrizacao")
     public String paginaParametrizacao() {
-        if (service.existeParametro())
+        if (controller.existeParametro())
             return "redirect:/app/parametrizacao/exibir";
         else
             return "parametrizacao";

@@ -1,18 +1,17 @@
 package com.example.dminfo.util;
 
 public class SingletonDB {
-    private static Conexao conexao;
+    private static com.example.dminfo.util.Conexao conexao = null;
 
-    private SingletonDB() {} // Construtor privado
+    private SingletonDB() {
+    }
 
-    public static Conexao getConexao() {
-        if (conexao == null) {
-            conexao = new Conexao();
-            if (!conexao.conectar()) {
-                // Não conseguiu conectar, retorna null para que os DAOs falhem
-                return null;
-            }
-        }
+    public static boolean conectarDB(){
+        conexao = new com.example.dminfo.util.Conexao();
+        return conexao.conectar("jdbc:postgresql://localhost/",
+                "dminfo_db","admin","admin@123");
+    }
+    public static com.example.dminfo.util.Conexao getConexao(){
         return conexao;
     }
 }

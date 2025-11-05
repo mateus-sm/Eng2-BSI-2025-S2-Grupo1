@@ -3,58 +3,20 @@ let membroModal, deleteModal;
 let idParaExcluir = null;
 
 // URL base da sua API
-const API_URL = '/apis/membro';
+const API_URL = '/app/membro';
 
-/**
- * Pega o token do localStorage. Se não encontrar, redireciona para o login.
- */
-function getToken() {
-    const token = localStorage.getItem('user_token');
-    if (!token) {
-        alert("Acesso não autorizado. Por favor, faça o login.");
-        window.location.href = '/app/login';
-        return null;
-    }
-    return token;
-}
+console.log("Arquivo membros.js carregado com SUCESSO.");
 
-/**
- * Lida com erros de autenticação (ex: token expirado)
- */
-function handleAuthError() {
-    localStorage.removeItem('user_token'); // Limpa o token inválido
-    alert("Sua sessão expirou. Por favor, faça o login novamente.");
-    window.location.href = '/app/login';
-}
-
-/**
- * Função principal: Carrega os membros da API e popula a tabela
- */
 async function carregarMembros() {
-    // Pega o token de autenticação
-    const token = getToken();
-    if (!token)
-        return;
-
     try {
-        // Envia o token no cabeçalho
-        const response = await fetch(API_URL, {
-            method: 'GET',
-            headers: {
-                'Authorization': token
-            }
-        });
+        const response = await fetch(API_URL);
 
-        if (!response.ok) {
-            // Trata token expirado/inválido
-            if (response.status === 401)
-                return handleAuthError();
+        if (!response.ok)
             throw new Error('Falha ao carregar membros.');
-        }
 
         const membros = await response.json();
         const tabelaBody = document.getElementById('tabela-membros');
-        tabelaBody.innerHTML = ''; // Limpa a tabela
+        tabelaBody.innerHTML = '';
 
         if (membros.length === 0) {
             tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum membro encontrado.</td></tr>';
@@ -84,7 +46,6 @@ async function carregarMembros() {
             tabelaBody.appendChild(tr);
         });
 
-        // Adiciona listeners aos novos botões
         document.querySelectorAll('.btn-editar').forEach(btn => {
             btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
         });
@@ -98,59 +59,33 @@ async function carregarMembros() {
     }
 }
 
-/**
- * Abre o modal para criar um novo membro (limpa o formulário)
- */
 function abrirModalAdicionar() {
     const form = document.getElementById('form-membro');
     form.reset();
     form.classList.remove('edit-mode'); // Remove a classe de edição
     document.getElementById('membroId').value = '';
     document.getElementById('membroModalLabel').innerText = 'Adicionar Membro';
-
-    // Habilita o campo 'usuarioId' que é desabilitado na edição
     document.getElementById('usuarioId').disabled = false;
-
     membroModal.show();
 }
 
-/**
- * Abre o modal para editar um membro (busca dados e preenche o formulário)
- */
 async function abrirModalEditar(id) {
-    // Pega o token de autenticação
-    const token = getToken();
-    if (!token)
-        return;
-
     try {
-        // Envia o token no cabeçalho
-        const response = await fetch(`${API_URL}/get-by-id/${id}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': token
-            }
-        });
+        const response = await fetch(`${API_URL}/get-by-id/${id}`);
 
-        if (!response.ok) {
-            // Trata token expirado/inválido
-            if (response.status === 401) {
-                return handleAuthError();
-            }
+        if (!response.ok)
             throw new Error('Membro não encontrado.');
-        }
 
         const membro = await response.json();
 
         // Preenche o formulário
         const form = document.getElementById('form-membro');
-        form.classList.add('edit-mode'); // Adiciona a classe de edição
+        form.classList.add('edit-mode');
         document.getElementById('membroModalLabel').innerText = 'Editar Membro';
-
         document.getElementById('membroId').value = membro.id;
         document.getElementById('codigo').value = membro.codigo;
         document.getElementById('usuarioId').value = membro.usuario.id;
-        document.getElementById('usuarioId').disabled = true; // Não deve ser possível alterar o usuário
+        document.getElementById('usuarioId').disabled = true;
         document.getElementById('observacao').value = membro.observacao || '';
         document.getElementById('dtFim').value = membro.dtFim || '';
 
@@ -162,16 +97,8 @@ async function abrirModalEditar(id) {
     }
 }
 
-/**
- * Salva (Cria ou Atualiza) um membro
- */
 async function salvarMembro(event) {
-    event.preventDefault(); // Impede o submit tradicional do formulário
-
-    // Pega o token de autenticação
-    const token = getToken();
-    if (!token)
-        return;
+    event.preventDefault();
 
     const id = document.getElementById('membroId').value;
     const codigo = document.getElementById('codigo').value;
@@ -184,53 +111,39 @@ async function salvarMembro(event) {
         return;
     }
 
-    const ehUpdate = !!id; // Converte para booleano (true se 'id' não for vazio)
-
+    const ehUpdate = !!id;
     let url = API_URL;
     let method = 'POST';
-
-    // Objeto base para o JSON
     const membro = {
         codigo: parseInt(codigo),
         observacao: observacao
     };
 
     if (ehUpdate) {
-        // --- UPDATE (PUT) ---
         url = `${API_URL}/${id}`;
         method = 'PUT';
-        membro.dtFim = dtFim; // Adiciona dtFim apenas no update
+        membro.dtFim = dtFim;
     }
-    else {
-        // --- CREATE (POST) ---
-        // O backend espera um objeto 'usuario' aninhado com o 'id'
+    else
         membro.usuario = { id: parseInt(usuarioId) };
-    }
 
     try {
-        // Envia o token no cabeçalho
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(membro)
         });
 
         if (!response.ok) {
-            // Trata token expirado/inválido
-            if (response.status === 401) {
-                return handleAuthError();
-            }
-
             const erro = await response.json();
             const mensagemEspecifica = erro.erro || erro.mensagem || erro.detalhe || erro.message;
             throw new Error(mensagemEspecifica || 'Falha ao salvar membro.');
         }
 
         membroModal.hide();
-        carregarMembros(); // Recarrega a tabela
+        carregarMembros();
 
     } catch (error) {
         console.error('Erro ao salvar:', error);
@@ -238,44 +151,27 @@ async function salvarMembro(event) {
     }
 }
 
-/**
- * Abre o modal de confirmação de exclusão
- */
 function abrirModalExcluir(id) {
-    idParaExcluir = id; // Armazena o ID para o botão de confirmação
+    idParaExcluir = id;
     deleteModal.show();
 }
 
-// Executa a exclusão do membro
 async function excluirMembro() {
-    if (!idParaExcluir) return;
-
-    // Pega o token de autenticação
-    const token = getToken();
-    if (!token)
+    if (!idParaExcluir)
         return;
 
     try {
-        // Envia o token no cabeçalho
         const response = await fetch(`${API_URL}/${idParaExcluir}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': token
-            }
+            method: 'DELETE'
         });
 
         if (!response.ok) {
-            // Trata token expirado/inválido
-            if (response.status === 401) {
-                return handleAuthError();
-            }
-
             const erro = await response.json();
             throw new Error(erro.erro || 'Falha ao excluir membro.');
         }
 
         deleteModal.hide();
-        carregarMembros(); // Recarrega a tabela
+        carregarMembros();
         idParaExcluir = null;
 
     } catch (error) {
@@ -284,25 +180,26 @@ async function excluirMembro() {
     }
 }
 
-// Utilitário: Formata data (YYYY-MM-DD) para (DD/MM/YYYY)
 function formatarData(data) {
     if (!data) return '';
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
-// --- INICIALIZAÇÃO ---
-// Aguarda o DOM carregar completamente
 document.addEventListener('DOMContentLoaded', () => {
-    // Instancia os modais do Bootstrap
+    console.log("Arquivo membros.js DOM carregado.");
+
     membroModal = new bootstrap.Modal(document.getElementById('membroModal'));
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-    // Carrega os membros na tabela (isso agora vai exigir um token)
     carregarMembros();
 
     // Listeners dos botões principais
     document.getElementById('btn-novo-membro').addEventListener('click', abrirModalAdicionar);
-    document.getElementById('form-membro').addEventListener('submit', salvarMembro);
+
+    console.log("Adicionando listener ao botão 'btn-salvar-membro'");
+    document.getElementById('btn-salvar-membro').addEventListener('click', salvarMembro);
+
+    console.log("Adicionando listener ao botão 'btn-confirmar-exclusao'");
     document.getElementById('btn-confirmar-exclusao').addEventListener('click', excluirMembro);
 });

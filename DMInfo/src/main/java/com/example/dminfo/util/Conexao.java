@@ -7,65 +7,92 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Conexao {
-    private Connection connection;
-
-    private String USUARIO = "Admin";
-    private String SENHA = "admin@123";
-    private String URL = "jdbc:postgresql://localhost:5432/dminfo_db";
-
+    private Connection connect;
+    private String erro;
     public Conexao() {
-        this.connection = null;
+        erro="";
+        connect=null;
     }
 
-    public boolean conectar() {
+    public boolean conectar(String local,String banco,String usuario,String senha){
+        boolean conectado = false;
         try {
-            // Carrega o driver do PostgreSQL
-            Class.forName("org.postgresql.Driver");
-            this.connection = DriverManager.getConnection(URL, USUARIO, SENHA);
-            return true;
-        } catch (Exception e) {
-            System.out.println("Erro ao conectar ao banco: " + e.getMessage());
-            return false;
+            String url = local+banco; //"jdbc:postgresql://localhost/"+banco;
+            connect = DriverManager.getConnection( url, usuario,senha);
+            conectado=true;
         }
+        catch ( SQLException sqlex ) {
+            erro="Impossivel conectar com a base de dados: " + sqlex.toString();
+        }
+        catch ( Exception ex ) {
+            erro="Outro erro: " + ex.toString();
+        }
+        return conectado;
     }
 
-    public void desconectar() {
-        try {
-            if (this.connection != null && !this.connection.isClosed()) {
-                this.connection.close();
+    public void desconectar()
+    {
+        if(connect != null)
+        {
+            try {
+                connect.close();
+            } catch (SQLException ex) {
+                erro="Erro ao fechar a conexao: " + ex.toString();
             }
-        } catch (SQLException e) {
-            System.out.println("Erro ao desconectar: " + e.getMessage());
         }
     }
 
-    // Metodo para INSERT e SELECT
-    public ResultSet consultar(String sql) {
+    public String getMensagemErro() {
+        return erro;
+    }
+
+    public boolean getEstadoConexao() {
+        return (connect!=null);
+    }
+
+    public boolean manipular(String sql){
+        boolean executou=false;
         try {
-            Statement statement = this.connection.createStatement(
-                    ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY
-            );
-            return statement.executeQuery(sql);
-        } catch (SQLException e) {
-            System.out.println("Erro ao executar consulta SQL: " + e.getMessage());
-            return null;
+            Statement statement = connect.createStatement();
+            int result = statement.executeUpdate(sql);
+            statement.close();
+            if(result>=1)
+                executou=true;
         }
+        catch ( SQLException sqlex ){
+            erro="Erro: "+sqlex.toString();
+        }
+        return executou;
     }
 
-    // Metodo para UPDATE, DELETE, INSERT
-    public boolean executar(String sql) {
+    public ResultSet consultar(String sql)
+    {   ResultSet rs=null;
         try {
-            Statement statement = this.connection.createStatement();
-            statement.executeUpdate(sql);
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Erro ao executar SQL: " + e.getMessage());
-            return false;
+            Statement statement = connect.createStatement();
+            rs = statement.executeQuery( sql );
         }
+        catch ( SQLException sqlex ){
+            erro="Erro: "+sqlex.toString();
+            rs = null;
+        }
+        return rs;
     }
 
-    public Connection getConnection() {
-        return this.connection;
+    public int getMaxPK(String tabela,String chave)
+    {
+        String sql="select max("+chave+") from "+tabela;
+        int max=0;
+        ResultSet rs= consultar(sql);
+        try
+        {
+            if(rs.next())
+                max=rs.getInt(1);
+        }
+        catch (SQLException sqlex)
+        {
+            erro="Erro: " + sqlex.toString();
+            max = -1;
+        }
+        return max;
     }
 }

@@ -8,13 +8,18 @@
     <link rel="stylesheet" th:href="@{/styles/parametrizacao.css}">
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Parametrização</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Parametrização</h2>
 
-        <form id="formParametrizacao" class="mb-4 p-4 border rounded bg-white">
-            <input type="hidden" id="id" name="id">
-            <div class="row">
-                <div class="col-md-6">
+    <form id="formParametrizacao" class="mb-4 p-4 border rounded bg-white">
+        <input type="hidden" id="id" name="id">
+
+        <div class="row">
+            <div class="col-lg-7">
+
+                <fieldset class="border p-3 rounded mb-4">
+                    <legend class="float-none w-auto px-2 fs-5 fw-semibold">Dados da Empresa</legend>
+
                     <div class="mb-3">
                         <label for="razaoSocial" class="form-label">Razão Social:</label>
                         <input type="text" id="razaoSocial" name="razaoSocial" class="form-control" required>
@@ -24,9 +29,17 @@
                         <input type="text" id="nomeFantasia" name="nomeFantasia" class="form-control" required>
                     </div>
                     <div class="mb-3">
+                        <label for="cnpj" class="form-label">CNPJ:</label>
+                        <input type="text" id="cnpj" name="cnpj" class="form-control">
+                    </div>
+                    <div class="mb-3">
                         <label for="descricao" class="form-label">Descrição:</label>
                         <input type="text" id="descricao" name="descricao" class="form-control">
                     </div>
+                </fieldset>
+
+                <fieldset class="border p-3 rounded mb-4">
+                    <legend class="float-none w-auto px-2 fs-5 fw-semibold">Endereço</legend>
                     <div class="mb-3">
                         <label for="rua" class="form-label">Rua:</label>
                         <input type="text" id="rua" name="rua" class="form-control">
@@ -39,16 +52,28 @@
                         <label for="cidade" class="form-label">Cidade:</label>
                         <input type="text" id="cidade" name="cidade" class="form-control">
                     </div>
-                    <div class="mb-3">
-                        <label for="cep" class="form-label">CEP:</label>
-                        <input type="text" id="cep" name="cep" class="form-control">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="cep" class="form-label">CEP:</label>
+                                <input type="text" id="cep" name="cep" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="uf" class="form-label">UF:</label>
+                                <input type="text" id="uf" name="uf" class="form-control" maxlength="2">
+                            </div>
+                        </div>
                     </div>
-                </div> 
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="uf" class="form-label">UF:</label>
-                        <input type="text" id="uf" name="uf" class="form-control" maxlength="2">
-                    </div>
+                </fieldset>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <fieldset class="border p-3 rounded mb-4">
+                    <legend class="float-none w-auto px-2 fs-5 fw-semibold">Contato</legend>
                     <div class="mb-3">
                         <label for="telefone" class="form-label">Telefone:</label>
                         <input type="tel" id="telefone" name="telefone" class="form-control">
@@ -61,10 +86,10 @@
                         <label for="site" class="form-label">Site:</label>
                         <input type="url" id="site" name="site" class="form-control">
                     </div>
-                    <div class="mb-3">
-                        <label for="cnpj" class="form-label">CNPJ:</label>
-                        <input type="text" id="cnpj" name="cnpj" class="form-control">
-                    </div>
+                </fieldset>
+
+                <fieldset class="border p-3 rounded mb-4">
+                    <legend class="float-none w-auto px-2 fs-5 fw-semibold">Personalização</legend>
                     <div class="mb-3">
                         <label for="logoGrande" class="form-label">Logo Grande (URL/Caminho):</label>
                         <input type="text" id="logoGrande" name="logoGrande" class="form-control">
@@ -73,15 +98,16 @@
                         <label for="logoPequeno" class="form-label">Logo Pequeno (URL/Caminho):</label>
                         <input type="text" id="logoPequeno" name="logoPequeno" class="form-control">
                     </div>
-                </div> 
-            </div> 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
-                <button type="button" class="btn btn-secondary d-none" id="btnCancelar">Cancelar</button>
-            </div>
-        </form>
+                </fieldset>
 
+            </div>
+        </div> <div class="mt-4">
+        <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
+        <button type="button" class="btn btn-secondary d-none" id="btnCancelar">Cancelar</button>
     </div>
-    <script th:src="@{/js/parametrizacao.js}" defer></script>
+    </form>
+
+</div>
+<script th:src="@{/js/parametrizacao.js}" defer></script>
 </body>
 </html>

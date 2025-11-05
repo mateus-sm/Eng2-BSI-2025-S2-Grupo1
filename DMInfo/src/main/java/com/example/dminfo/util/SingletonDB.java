@@ -8,8 +8,8 @@ public class SingletonDB {
 
     public static boolean conectarDB(){
         conexao = new com.example.dminfo.util.Conexao();
-        return conexao.conectar("jdbc:postgresql://localhost/",
-                "dminfo_db","admin","admin@123");
+        return conexao.conectar("jdbc:postgresql://localhost:5432/",
+                "dminfo_db","postgres","admin");
     }
     public static com.example.dminfo.util.Conexao getConexao(){
         return conexao;

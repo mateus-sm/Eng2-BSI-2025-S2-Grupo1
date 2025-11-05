@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class ParametrosController { // O novo "Service"
 
     @Autowired
-    private Parametros parametroModel; // O "Fat Model"
+    private Parametros parametroModel;
 
     public Parametros exibir() {
         return parametroModel.exibir();

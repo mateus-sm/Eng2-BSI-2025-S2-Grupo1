@@ -12,8 +12,8 @@ const inputs = {
     email: document.getElementById('email'),
     site: document.getElementById('site'),
     cnpj: document.getElementById('cnpj'),
-    logoGrande: document.getElementById('logoGrande'),
-    logoPequeno: document.getElementById('logoPequeno')
+    logotipogrande: document.getElementById('logoGrande'),
+    logotipopequeno: document.getElementById('logoPequeno')
 };
 
 const regexRegras = {
@@ -112,7 +112,7 @@ document.getElementById('formParametrizacao').addEventListener('submit', async (
         });
 
         try {
-            const response = await fetch('/parametrizacao', {
+            const response = await fetch('/apis/parametrizacao', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

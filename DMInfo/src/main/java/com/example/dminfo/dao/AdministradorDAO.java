@@ -105,12 +105,12 @@ public class AdministradorDAO {
                 admin.getDtFim().toString(),
                 admin.getId()
         );
-        return SingletonDB.getConexao().executar(sql); // 'executar' para UPDATE
+        return SingletonDB.getConexao().manipular(sql); // 'manipular' para UPDATE
     }
 
     // Este 'excluir' segue a lógica do seu 'excluir' (hard delete)
     public boolean excluir(int id) {
         String sql = "DELETE FROM administrador WHERE id_admin = " + id;
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 }

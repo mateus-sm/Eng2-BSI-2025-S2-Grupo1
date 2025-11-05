@@ -143,7 +143,7 @@ public class UsuarioDAO {
                 usuario.getDtnasc().toString(),
                 usuario.getId()
         );
-        return SingletonDB.getConexao().executar(sql); // 'executar' para UPDATE
+        return SingletonDB.getConexao().manipular(sql); // 'manipular' para UPDATE
     }
 
     /**
@@ -154,6 +154,6 @@ public class UsuarioDAO {
                 LocalDate.now().toString(),
                 id
         );
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 }

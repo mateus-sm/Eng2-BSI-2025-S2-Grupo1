@@ -10,17 +10,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Controller
-@RequestMapping("app/membro")
+@RestController
+@RequestMapping("apis/membro")
 public class MembroView {
 
     @Autowired
     private MembroController controller;
-
-    @GetMapping
-    public String carregarPagina(){
-        return "membros";
-    }
 
     @GetMapping
     public ResponseEntity<Object> listar() {

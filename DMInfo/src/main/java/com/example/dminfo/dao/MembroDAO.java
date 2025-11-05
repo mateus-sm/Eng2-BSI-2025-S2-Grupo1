@@ -69,12 +69,12 @@ public class MembroDAO {
                 membro.getDtFim() == null ? "NULL" : "'" + membro.getDtFim().toString() + "'",
                 membro.getId()
         );
-        return SingletonDB.getConexao().executar(sql); // 'executar' para UPDATE
+        return SingletonDB.getConexao().manipular(sql); // 'manipular' para UPDATE
     }
 
     public boolean excluir(int id) {
         String sql = "DELETE FROM membro WHERE id_membro = " + id;
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 
     public List<Membro> get(String filtro) {

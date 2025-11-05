@@ -93,11 +93,11 @@ public class DoadorDAO {
                 doador.getUf(), doador.getCep(), doador.getEmail(), doador.getTelefone(), doador.getContato(),
                 doador.getId()
         );
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 
     public boolean excluir(int id) {
         String sql = "DELETE FROM doador WHERE id_doador = " + id;
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 }

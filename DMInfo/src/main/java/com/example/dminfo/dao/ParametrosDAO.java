@@ -97,11 +97,11 @@ public class ParametrosDAO {
                 p.getTelefone(), p.getSite(), p.getEmail(), p.getCnpj(), p.getLogoGrande(), p.getLogoPequeno(),
                 p.getId()
         );
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 
     public boolean excluir(int id) {
         String sql = "DELETE FROM parametros WHERE id_parametro = " + id;
-        return SingletonDB.getConexao().executar(sql);
+        return SingletonDB.getConexao().manipular(sql);
     }
 }

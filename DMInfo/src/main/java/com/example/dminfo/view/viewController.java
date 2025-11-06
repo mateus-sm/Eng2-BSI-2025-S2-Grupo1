@@ -57,7 +57,7 @@ public class viewController {
         return "login";
     }
 
-    @GetMapping("app/enviarFotosAtividade")
+    @GetMapping("app/enviarfotosatividade")
     public String paginaEnviarFotosAtividade() {
         return "enviarFotosAtividade";
     }

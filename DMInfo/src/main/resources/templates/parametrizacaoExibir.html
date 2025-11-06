@@ -22,23 +22,35 @@
         <tbody>
         <tr>
             <td><strong>ID:</strong></td>
-            <td><span id="id"></span></td>
+            <td><span id="id_display"></span></td>
         </tr>
         <tr>
             <td><strong>Nome Fantasia:</strong></td>
-            <td><span id="nomeFantasia"></span></td>
+            <td>
+                <span id="nomeFantasia_display"></span>
+                <input type="text" id="nomeFantasia_input" class="edit-input" style="display:none;" data-field="nomeFantasia">
+            </td>
         </tr>
         <tr>
             <td><strong>Razão Social:</strong></td>
-            <td><span id="razaoSocial"></span></td>
+            <td>
+                <span id="razaoSocial_display"></span>
+                <input type="text" id="razaoSocial_input" class="edit-input" style="display:none;" data-field="razaoSocial">
+            </td>
         </tr>
         <tr>
             <td><strong>CNPJ:</strong></td>
-            <td><span id="cnpj"></span></td>
+            <td>
+                <span id="cnpj_display"></span>
+                <input type="text" id="cnpj_input" class="edit-input" style="display:none;" data-field="cnpj">
+            </td>
         </tr>
         <tr>
             <td><strong>Descrição:</strong></td>
-            <td><span id="descricao"></span></td>
+            <td>
+                <span id="descricao_display"></span>
+                <textarea id="descricao_input" class="edit-input" style="display:none;" data-field="descricao"></textarea>
+            </td>
         </tr>
 
         <tr>
@@ -46,23 +58,38 @@
         </tr>
         <tr>
             <td><strong>Rua:</strong></td>
-            <td><span id="rua"></span></td>
+            <td>
+                <span id="rua_display"></span>
+                <input type="text" id="rua_input" class="edit-input" style="display:none;" data-field="rua">
+            </td>
         </tr>
         <tr>
             <td><strong>Bairro:</strong></td>
-            <td><span id="bairro"></span></td>
+            <td>
+                <span id="bairro_display"></span>
+                <input type="text" id="bairro_input" class="edit-input" style="display:none;" data-field="bairro">
+            </td>
         </tr>
         <tr>
             <td><strong>Cidade:</strong></td>
-            <td><span id="cidade"></span></td>
+            <td>
+                <span id="cidade_display"></span>
+                <input type="text" id="cidade_input" class="edit-input" style="display:none;" data-field="cidade">
+            </td>
         </tr>
         <tr>
             <td><strong>UF:</strong></td>
-            <td><span id="uf"></span></td>
+            <td>
+                <span id="uf_display"></span>
+                <input type="text" id="uf_input" class="edit-input" style="display:none;" data-field="uf" maxlength="2">
+            </td>
         </tr>
         <tr>
             <td><strong>CEP:</strong></td>
-            <td><span id="cep"></span></td>
+            <td>
+                <span id="cep_display"></span>
+                <input type="text" id="cep_input" class="edit-input" style="display:none;" data-field="cep">
+            </td>
         </tr>
 
         <tr>
@@ -70,31 +97,55 @@
         </tr>
         <tr>
             <td><strong>Telefone:</strong></td>
-            <td><span id="telefone"></span></td>
+            <td>
+                <span id="telefone_display"></span>
+                <input type="text" id="telefone_input" class="edit-input" style="display:none;" data-field="telefone">
+            </td>
         </tr>
         <tr>
             <td><strong>Email:</strong></td>
-            <td><span id="email"></span></td>
+            <td>
+                <span id="email_display"></span>
+                <input type="email" id="email_input" class="edit-input" style="display:none;" data-field="email">
+            </td>
         </tr>
         <tr>
             <td><strong>Site:</strong></td>
-            <td><span id="site"></span></td>
+            <td>
+                <span id="site_display"></span>
+                <input type="url" id="site_input" class="edit-input" style="display:none;" data-field="site">
+            </td>
         </tr>
 
         <tr>
             <th colspan="2">Logos</th>
         </tr>
         <tr>
-            <td><strong>Logo Grande (Path):</strong></td>
-            <td><span id="logoGrande"></span></td>
+            <td><strong>Logo Pequeno (Path):</strong></td>
+            <td>
+                <span id="logoPequeno_display"></span>
+                <input type="text" id="logoPequeno_input" class="edit-input" style="display:none;" data-field="logoPequeno">
+            </td>
         </tr>
         <tr>
-            <td><strong>Logo Pequeno (Path):</strong></td>
-            <td><span id="logoPequeno"></span></td>
+            <td><strong>Logo Grande (Path):</strong></td>
+            <td>
+                <span id="logoGrande_display"></span>
+                <input type="text" id="logoGrande_input" class="edit-input" style="display:none;" data-field="logoGrande">
+            </td>
         </tr>
         </tbody>
     </table>
     <div class="btn-container">
+        <button id="btnEditar" class="btn-editar" style="display: none;">
+            Editar
+        </button>
+        <button id="btnSalvar" class="btn-salvar" style="display: none;">
+            Salvar
+        </button>
+        <button id="btnCancelar" class="btn-cancelar" style="display: none;">
+            Cancelar
+        </button>
         <button id="btnExcluir" class="btn-excluir" style="display: none;">
             Excluir Registro
         </button>
@@ -102,4 +153,5 @@
 </div>
 <script th:src="@{/js/parametrizacaoExibir.js}" defer></script>
 </body>
+</html>
 </html>

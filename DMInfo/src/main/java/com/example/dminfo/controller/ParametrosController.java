@@ -16,19 +16,27 @@ public class ParametrosController { // O novo "Service"
         return parametroDAO.get(); //
     }
 
-    // 3. Mova a lógica de "salvar" do Model (Parametros.java) para cá
     public Parametros salvar(Parametros parametro) {
-        // Validação
-        if (parametro.getCnpj() == null || parametro.getCnpj().isEmpty()) {
-            throw new RuntimeException("CNPJ é obrigatório.");
+        if (parametro.getRazaoSocial() == null || parametro.getRazaoSocial().trim().isEmpty()) {
+            throw new RuntimeException("Razão Social é obrigatória.");
+        }
+        if (parametro.getRua() == null || parametro.getRua().trim().isEmpty()) {
+            throw new RuntimeException("Rua é obrigatória.");
+        }
+        if (parametro.getCidade() == null || parametro.getCidade().trim().isEmpty()) {
+            throw new RuntimeException("Cidade é obrigatória.");
+        }
+        if (parametro.getTelefone() == null || parametro.getTelefone().trim().isEmpty()) {
+            throw new RuntimeException("Telefone é obrigatório.");
+        }
+        if (parametro.getLogoPequeno() == null || parametro.getLogoPequeno().trim().isEmpty()) {
+            throw new RuntimeException("Logo Pequeno é obrigatório.");
         }
 
         Parametros existente = parametroDAO.get(); //
         if (existente == null) {
-            // Se não existe, cria (INSERT)
             return parametroDAO.gravar(parametro); //
         } else {
-            // Se já existe, atualiza (UPDATE)
             parametro.setId(existente.getId());
             if (parametroDAO.alterar(parametro)) { //
                 return parametro;

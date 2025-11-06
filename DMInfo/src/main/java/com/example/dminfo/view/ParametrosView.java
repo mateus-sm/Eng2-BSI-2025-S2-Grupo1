@@ -44,6 +44,24 @@ public class ParametrosView {
         }
     }
 
+    @PutMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<Object> atualizar(@PathVariable Integer id, @RequestBody Parametros dadosAtualizados) {
+        try {
+            // Define o ID do parâmetro a ser alterado
+            dadosAtualizados.setId(id);
+
+            // Reutiliza o método 'salvar' no Controller, que já tem a lógica de UPDATE
+            Parametros pAtualizado = parametros.salvar(dadosAtualizados);
+
+            // Retorna o objeto atualizado e o status 200 OK
+            return ResponseEntity.ok(pAtualizado);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao atualizar no backend: " + e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     @ResponseBody
     public ResponseEntity<Object> excluir(@PathVariable Integer id) {

@@ -1,3 +1,31 @@
+document.getElementById('foto').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const previewId = 'image-preview';
+    let preview = document.getElementById(previewId);
+
+    // Se ainda não existe o <img>, cria dinamicamente
+    if (!preview) {
+        preview = document.createElement('img');
+        preview.id = previewId;
+        preview.style.maxWidth = '200px';
+        preview.style.display = 'none';
+        preview.className = 'mt-3 border rounded';
+        event.target.parentNode.appendChild(preview);
+    }
+
+    if (!file) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -44,4 +72,21 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         console.error('Erro:', error);
         alert('Erro: ' + error.message);
     }
+});
+
+document.getElementById('foto').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('image-preview');
+
+    if (!file) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
 });

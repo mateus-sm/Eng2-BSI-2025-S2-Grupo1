@@ -17,7 +17,6 @@ public class AtribuirConquistaMembroView {
     private AtribuirConquistaMembroDAO dao;
 
     @GetMapping
-    @ResponseBody
     public ResponseEntity<Object> listar() {
         try {
             return ResponseEntity.ok(dao.listar());
@@ -40,7 +39,6 @@ public class AtribuirConquistaMembroView {
     }
 
     @PutMapping
-    @ResponseBody
     public ResponseEntity<Object> atualizar(@RequestBody AtribuirConquistaMembro atribuirConquistaMembro) {
         try {
             dao.alterar(atribuirConquistaMembro);
@@ -51,7 +49,6 @@ public class AtribuirConquistaMembroView {
     }
 
     @GetMapping("/{id}")
-    @ResponseBody
     public ResponseEntity<Object> buscarPorId(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(dao.getById(id));
@@ -61,7 +58,6 @@ public class AtribuirConquistaMembroView {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseBody
     public ResponseEntity<Object> excluir(@PathVariable Integer id) {
         try {
             dao.excluir(id);

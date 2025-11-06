@@ -81,17 +81,32 @@ public class AtribuirConquistaMembroDAO {
     }
 
     public boolean alterar(AtribuirConquistaMembro acm) {
-        if (acm != null) {
-            String sql = String.format(
-                    "UPDATE atribuir_conquista_membro SET (id_admin, id_membro, id_conquista, data, observacao)" +
-                            " VALUES ('%d', '%d', '%d', '%s', '%s') RETURNING id_atribuir_conquista",
-                    acm.getId_admin(), acm.getId_membro(), acm.getId_conquista(), acm.getData(), acm.getObservacao()
-            );
+        System.out.println(acm);
+        if (acm == null) return false;
 
-            return SingletonDB.getConexao().manipular(sql);
-        }
-        return false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String data = (acm.getData() != null) ? sdf.format(acm.getData()) : null;
+        String observacao = (acm.getObservacao() != null) ? acm.getObservacao().replace("'", "''") : "";
+
+        String sql = String.format(
+                "UPDATE atribuir_conquista_membro SET " +
+                        "id_admin = %d, " +
+                        "id_membro = %d, " +
+                        "id_conquista = %d, " +
+                        "data = %s, " +
+                        "observacao = '%s' " +
+                        "WHERE id_atribuir_conquista = %d",
+                acm.getId_admin(),
+                acm.getId_membro(),
+                acm.getId_conquista(),
+                (data != null ? "'" + data + "'" : "NULL"),
+                observacao,
+                acm.getId()
+        );
+
+        return SingletonDB.getConexao().manipular(sql);
     }
+
 
     public boolean excluir(int id) {
         String sql = "DELETE FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;

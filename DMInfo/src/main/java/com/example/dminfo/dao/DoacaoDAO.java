@@ -11,11 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Repository
 public class DoacaoDAO {
 
-    //Helper para construir a Doacao com Doador e Admin (e Usuário do Admin)
     private Doacao buildDoacao(ResultSet rs) throws SQLException {
         Doacao doacao = new Doacao();
         doacao.setId_doacao(rs.getInt("id_doacao"));
@@ -46,7 +46,7 @@ public class DoacaoDAO {
     public List<Doacao> get(String filtro) {
         List<Doacao> doacoes = new ArrayList<>();
         String sql = "SELECT d.*, " +
-                "   don.nome AS doador_nome, " +
+                "   don.nome AS doador_nome, don.id_doador, " +
                 "   a.id_admin, u.id_usuario, u.nome AS usuario_nome " +
                 "FROM doacao d " +
                 "JOIN doador don ON d.id_doador = don.id_doador " +
@@ -65,14 +65,27 @@ public class DoacaoDAO {
         return doacoes;
     }
 
+    public Doacao get(int id) {
+        String filtro = String.format(" WHERE d.id_doacao = %d", id);
+        List<Doacao> lista = get(filtro);
+        if (lista.isEmpty())
+            return null;
+        return lista.get(0);
+    }
+
     public Doacao gravar(Doacao doacao) {
-        String sql = String.format("INSERT INTO doacao (id_doador, id_admin, data, valor, observacao) " +
+        String obsOriginal = doacao.getObservacao();
+        String obsEscapada = obsOriginal.replace("'", "''");
+
+        // Usamos Locale.US para garantir o ponto decimal no valor
+        String sql = String.format(Locale.US,
+                "INSERT INTO doacao (id_doador, id_admin, data, valor, observacao) " +
                         "VALUES (%d, %d, '%s', %f, '%s') RETURNING id_doacao",
                 doacao.getId_doador().getId(),
                 doacao.getId_admin().getId(),
                 doacao.getData().toString(),
                 doacao.getValor(),
-                doacao.getObservacao()
+                obsEscapada
         );
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
@@ -82,8 +95,36 @@ public class DoacaoDAO {
                 return doacao;
             }
         }catch(SQLException e){
-            System.out.println("Erro ao gravar Doação: " + e.getMessage());
+            System.out.println("Erro ao gravar Doação (SQL): " + e.getMessage());
+            throw new RuntimeException("Falha no SQL ao gravar: " + e.getMessage());
         }
+
         return null;
+    }
+
+    public boolean atualizar(Doacao doacao) {
+        String obsOriginal = doacao.getObservacao();
+        String obsEscapada = obsOriginal.replace("'", "''");
+
+        String sql = String.format(Locale.US,
+                "UPDATE doacao SET " +
+                        "id_doador = %d, " +
+                        "id_admin = %d, " +
+                        "valor = %f, " +
+                        "observacao = '%s' " +
+                        "WHERE id_doacao = %d",
+                doacao.getId_doador().getId(),
+                doacao.getId_admin().getId(),
+                doacao.getValor(),
+                obsEscapada,
+                doacao.getId_doacao()
+        );
+
+        return SingletonDB.getConexao().manipular(sql);
+    }
+
+    public boolean excluir(int id) {
+        String sql = String.format("DELETE FROM doacao WHERE id_doacao = %d", id);
+        return SingletonDB.getConexao().manipular(sql);
     }
 }

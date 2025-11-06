@@ -1,5 +1,31 @@
-// Aguarda o DOM ser totalmente carregado
 document.addEventListener('DOMContentLoaded', () => {
+
+    const docElement = document.getElementById('documento');
+    const cepElement = document.getElementById('cep');
+    const telElement = document.getElementById('telefone');
+
+    const docMask = IMask(docElement, {
+        mask: [
+            {
+                mask: '000.000.000-00',
+                maxLength: 11
+            },
+            {
+                mask: '00.000.000/0000-00'
+            }
+        ]
+    });
+
+    const cepMask = IMask(cepElement, {
+        mask: '00000-000'
+    });
+
+    const telMask = IMask(telElement, {
+        mask: [
+            { mask: '(00) 0000-0000' },
+            { mask: '(00) 00000-0000' }
+        ]
+    });
 
     const form = document.getElementById('formDoador');
     const tabelaBody = document.getElementById('tabelaDoadores');
@@ -9,45 +35,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiUrl = '/apis/doador';
 
-    function getToken() {
-        const token = localStorage.getItem('user_token');
-        if(!token){
-            alert("Acesso não autorizado. Por favor, faça o login.");
-            window.location.href = '/app/login';
-            return null;
+    function validarFormulario() {
+
+        const nome = document.getElementById('nome').value.trim();
+        const documento = document.getElementById('documento').value.trim().replace(/\D/g, ''); // Remove não-dígitos
+        const email = document.getElementById('email').value.trim();
+        const telefone = document.getElementById('telefone').value.trim().replace(/\D/g, ''); // Remove não-dígitos
+        const cep = document.getElementById('cep').value.trim().replace(/\D/g, ''); // Remove não-dígitos
+        const rua = document.getElementById('rua').value.trim();
+        const bairro = document.getElementById('bairro').value.trim();
+        const cidade = document.getElementById('cidade').value.trim();
+        const uf = document.getElementById('uf').value.trim();
+
+        // 1. Validação do Nome
+        if (nome.length < 3) {
+            alert('O nome deve ter pelo menos 3 caracteres.');
+            document.getElementById('nome').focus();
+            return false;
         }
-        return token;
+
+        // 2. Validação do Documento (CPF/CNPJ)
+        if (!/^\d{11}$/.test(documento) && !/^\d{14}$/.test(documento)) {
+            alert('Documento inválido. Deve ser um CPF (11 dígitos) ou CNPJ (14 dígitos), sem pontuação.');
+            document.getElementById('documento').focus();
+            return false;
+        }
+
+        // 3. Validação de Email
+        if (!/\S+@\S+\.\S+/.test(email)) { // Regex simples de email
+            alert('Formato de e-mail inválido.');
+            document.getElementById('email').focus();
+            return false;
+        }
+
+        // 4. Validação de Telefone (Ex: 10 ou 11 dígitos)
+        if (!/^\d{10,11}$/.test(telefone)) {
+            alert('Telefone inválido. Deve ter 10 ou 11 dígitos (com DDD).');
+            document.getElementById('telefone').focus();
+            return false;
+        }
+
+        // 5. Validação de CEP (Opcional, mas se preenchido, deve ter 8 dígitos)
+        if (cep.length > 0 && !/^\d{8}$/.test(cep)) {
+            alert('CEP inválido. Se preenchido, deve ter 8 dígitos, sem pontuação.');
+            document.getElementById('cep').focus();
+            return false;
+        }
+
+        // 6. Campos de Endereço (Ex: Opcionais, mas se um for preenchido, os outros também?)
+        // Se o CEP for preenchido, talvez forçar os outros?
+        if (cep.length > 0 && (rua.length === 0 || bairro.length === 0 || cidade.length === 0 || uf.length === 0)) {
+            alert('Se o CEP for informado, por favor, preencha o restante do endereço (Rua, Bairro, Cidade, UF).');
+            document.getElementById('rua').focus();
+            return false;
+        }
+
+        // Se chegou até aqui, está tudo certo
+        return true;
     }
 
-    function handleAuthError() {
-        localStorage.removeItem('user_token'); // Limpa o token inválido
-        alert("Sua sessão expirou. Por favor, faça o login novamente.");
-        window.location.href = '/app/login';
-    }
 
     async function carregarDoadores() {
-        const token = getToken();
-        if(!token)
-            return;
 
         try{
             const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
-                    'Authorization': token
                 }
             });
 
-            if(!response.ok){
-                if (response.status === 401) return handleAuthError();
+            if(!response.ok)
                 throw new Error('Erro ao buscar doadores');
-            }
+
             const doadores = await response.json();
 
-            //Limpa o corpo da tabela
             tabelaBody.innerHTML = '';
-
-            //Preenche a tabela
             doadores.forEach(doador => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -71,47 +133,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetarFormulario() {
         form.reset();
-        hiddenId.value = ''; // Limpa o ID oculto
+        hiddenId.value = '';
         formTitulo.textContent = 'Cadastro de Doador';
-        btnCancelar.classList.add('d-none'); // Esconde o botão cancelar
+        btnCancelar.classList.add('d-none');
         form.querySelector('input').focus();
+
+        docMask.value = '';
+        cepMask.value = '';
+        telMask.value = '';
     }
 
     async function preencherFormularioParaEdicao(id) {
-        const token = getToken();
-        if(!token)
-            return;
 
         try {
             const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': token
                 }
             });
 
-            if(!response.ok){
-                if (response.status === 401) return handleAuthError();
+            if(!response.ok)
                 throw new Error('Doador não encontrado');
-            }
+
             const doador = await response.json();
 
-            //Preenche todos os campos do formulário
             document.getElementById('id').value = doador.id;
             document.getElementById('nome').value = doador.nome;
-            document.getElementById('documento').value = doador.documento;
+            docMask.value = doador.documento;
+            telMask.value = doador.telefone;
+            cepMask.value = doador.cep;
+
             document.getElementById('rua').value = doador.rua;
             document.getElementById('bairro').value = doador.bairro;
             document.getElementById('cidade').value = doador.cidade;
             document.getElementById('uf').value = doador.uf;
-            document.getElementById('cep').value = doador.cep;
             document.getElementById('email').value = doador.email;
-            document.getElementById('telefone').value = doador.telefone;
             document.getElementById('contato').value = doador.contato;
 
             formTitulo.textContent = 'Editando Doador';
-            btnCancelar.classList.remove('d-none'); //Mostra o botão cancelar
-            window.scrollTo(0, 0); //Rola para o topo
+            btnCancelar.classList.remove('d-none');
+            window.scrollTo(0, 0);
 
         }catch(error){
             console.error('Falha ao buscar doador:', error);
@@ -120,15 +181,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); //Impede o envio tradicional
+        e.preventDefault();
 
-        const token = getToken();
-        if(!token)
-            return;
+        docElement.value = docMask.unmaskedValue;
+        cepElement.value = cepMask.unmaskedValue;
+        telElement.value = telMask.unmaskedValue;
 
-        //Coleta os dados do formulário
+        if (!validarFormulario()) {
+             docMask.updateValue();
+             cepMask.updateValue();
+             telMask.updateValue();
+             return; //Para a execução se o formulário for inválido
+        }
+
+
         const formData = new FormData(form);
         const doador = Object.fromEntries(formData.entries());
+
+        doador.documento = docMask.unmaskedValue;
+        doador.cep = cepMask.unmaskedValue;
+        doador.telefone = telMask.unmaskedValue;
+
 
         const id = hiddenId.value;
         const isEdicao = id > 0;
@@ -141,15 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': token
                 },
                 body: JSON.stringify(doador),
             });
 
             if(!response.ok){
-                if(response.status === 401)
-                    return handleAuthError();
-
                 const errorData = await response.json();
                 throw new Error(errorData.erro || 'Erro ao salvar doador');
             }
@@ -178,29 +247,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function excluirDoador(id) {
-        const token = getToken();
-        if(!token)
-            return;
 
         try{
             const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': token
                 }
             });
 
             if(!response.ok){
-                if (response.status === 401) return handleAuthError();
-
-                //Tenta ler o erro, mas se não tiver (ex: noContent() com erro), usa o fallback
                 let errorMsg = 'Erro ao excluir doador';
                 try {
                     const errorData = await response.json();
                     errorMsg = errorData.erro || errorMsg;
-                } catch(e) {
-                    //Sem corpo no erro, usa o fallback
-                }
+                } catch(e) { /* Sem corpo no erro */ }
                 throw new Error(errorMsg);
             }
 

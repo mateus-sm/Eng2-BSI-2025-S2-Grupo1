@@ -16,7 +16,19 @@ public class DoacaoController {
         return doacaoModel.listar();
     }
 
+    public Doacao buscar(int id) {
+        return doacaoModel.buscar(id);
+    }
+
     public Doacao salvar(Doacao doacao) {
         return doacaoModel.salvar(doacao);
+    }
+
+    public Doacao atualizar(Doacao doacao) {
+        return doacaoModel.atualizar(doacao);
+    }
+
+    public boolean excluir(int id) {
+        return doacaoModel.excluir(id);
     }
 }

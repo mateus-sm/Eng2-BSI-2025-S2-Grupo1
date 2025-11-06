@@ -2,6 +2,7 @@ package com.example.dminfo.controller;
 
 import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.AtribuirConquistaMembroDAO;
+import com.example.dminfo.dao.ConquistaDAO;
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.model.AtribuirConquistaMembro;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,31 +22,36 @@ public class AtribuirConquistaController {
     @Autowired
     private AdministradorDAO administradorDAO;
 
+    @Autowired
+    private ConquistaDAO conquistaDAO;
+
     public List<AtribuirConquistaMembro> listar() {
         return dao.listar();
     }
 
     public AtribuirConquistaMembro salvar(AtribuirConquistaMembro acm) {
-        if (acm == null || acm.getId() != 0 || acm.getId_admin() != 0
-                || acm.getId_membro() != 0 || acm.getId_conquista() != 0
-                || acm.getData() != null) {
-            throw new RuntimeException("Objeto atribuição inconsistente.");
-        }
+        if (acm == null || acm.getId() != 0)
+            throw new RuntimeException("Atribuição inválida para criação.");
 
-        AtribuirConquistaMembro existente = dao.consultar(acm.getObservacao());
-        if (existente != null) {
+        if (administradorDAO.get(acm.getId_admin()) == null ||
+                membroDAO.get(acm.getId_membro()) == null ||
+                conquistaDAO.getById(acm.getId_conquista()) == null)
+            throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
+
+        if (dao.consultar(acm.getObservacao()) != null)
             throw new RuntimeException("Atribuição já existe.");
-        }
 
         return dao.gravar(acm);
     }
 
     public boolean atualizar(AtribuirConquistaMembro acm) {
-        if (acm == null || acm.getId() != 0 || acm.getId_admin() != 0
-                || acm.getId_membro() != 0 || acm.getId_conquista() != 0
-                || acm.getData() != null) {
-            throw new RuntimeException("Objeto atribuição inconsistente.");
-        }
+        if (acm == null || acm.getId() == 0)
+            throw new RuntimeException("Atribuição inválida para atualização.");
+
+        if (administradorDAO.get(acm.getId_admin()) == null ||
+                membroDAO.get(acm.getId_membro()) == null ||
+                conquistaDAO.getById(acm.getId_conquista()) == null)
+            throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
 
         return dao.alterar(acm);
     }

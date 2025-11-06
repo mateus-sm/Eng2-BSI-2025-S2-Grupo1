@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/conquista";
+const API_URL = "http://localhost:8080/apis/conquista";
 const form = document.getElementById("formConquista");
 const descricaoInput = document.getElementById("descricao");
 const idInput = document.getElementById("idConquista");

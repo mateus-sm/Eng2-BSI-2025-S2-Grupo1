@@ -1,14 +1,22 @@
 package com.example.dminfo.view;
 
+import com.example.dminfo.controller.ParametrosController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class viewController {
+    @Autowired
+    private ParametrosController parametrosController;
+
     @GetMapping("app/parametrizacao")
     public String carregarPagina() {
+        if (parametrosController.existeParametro()) {
+            return "redirect:/app/parametrizacao/exibir";
+        }
         return "parametrizacao";
+
     }
 
     @GetMapping("/app/parametrizacao/exibir")

@@ -27,4 +27,32 @@ public class ParametrosView {
             return ResponseEntity.badRequest().body("Erro ao salvar no backend: " + e.getMessage());
         }
     }
+
+    @GetMapping
+    @ResponseBody
+    public ResponseEntity<Object> exibir() {
+        try {
+            // Chama o service, que chama o DAO
+            Parametros p = parametros.exibir();
+            if (p != null) {
+                return ResponseEntity.ok(p);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum parametro encontrado.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao buscar no backend: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<Object> excluir(@PathVariable Integer id) {
+        try {
+            parametros.excluir(id); // Chama o service
+            return ResponseEntity.noContent().build(); // Retorna 204 No Content
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao excluir no backend: " + e.getMessage());
+        }
+    }
 }

@@ -5,23 +5,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dadosContainer = document.getElementById('dados-container');
     const btnExcluir = document.getElementById('btnExcluir');
 
-    let idParaExcluir = null; // Variável para guardar o ID
+    let idParaExcluir = null;
 
     try {
-
-        const response = await fetch('/parametrizacao');
+        const response = await fetch('/apis/parametrizacao'); //
 
         if (!response.ok) {
+            if(response.status === 404) {
+                throw new Error(`Nenhum parâmetro cadastrado.`);
+            }
             throw new Error(`Erro ao buscar dados: ${response.statusText}`);
         }
 
-        const listaParametros = await response.json();
+        const dados = await response.json();
 
-        if (listaParametros && listaParametros.length > 0) {
-            const dados = listaParametros[0];
-
+        if (dados) {
             idParaExcluir = dados.id;
 
+            // --- CORREÇÃO AQUI: TODOS OS CAMPOS ADICIONADOS ---
             document.getElementById('id').textContent = dados.id;
             document.getElementById('nomeFantasia').textContent = dados.nomeFantasia;
             document.getElementById('razaoSocial').textContent = dados.razaoSocial;
@@ -37,11 +38,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('site').textContent = dados.site;
             document.getElementById('logoGrande').textContent = dados.logoGrande;
             document.getElementById('logoPequeno').textContent = dados.logoPequeno;
-
+            // --- FIM DA CORREÇÃO ---
 
             loadingDiv.style.display = 'none';
             dadosContainer.style.display = 'block';
-
             btnExcluir.style.display = 'block';
 
             btnExcluir.addEventListener('click', async () => {
@@ -50,35 +50,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                if (confirm('Tem certeza que deseja excluir permanentemente este registro?')) {
+                if (confirm('Tem certeza que deseja excluir?')) {
                     try {
-                        const response = await fetch(`/parametrizacao/${idParaExcluir}`, {
+                        const response = await fetch(`/apis/parametrizacao/${idParaExcluir}`, { //
                             method: 'DELETE'
                         });
 
                         if (response.ok || response.status === 204) {
                             alert('Registro excluído com sucesso!');
-                            window.location.href = '/app/parametrizacao';
+                            window.location.href = '/app/parametrizacao'; //
                         } else {
-                            alert(`Falha ao excluir. O servidor respondeu com status ${response.status}.`);
+                            alert(`Falha ao excluir. Status ${response.status}.`);
                         }
                     } catch (error) {
-                        console.error('Erro ao excluir:', error);
-                        alert('Erro de conexão ao tentar excluir o registro.');
+                        alert('Erro de conexão ao tentar excluir.');
                     }
                 }
             });
 
         } else {
-
-            erroDiv.textContent = 'Nenhum parâmetro cadastrado no banco de dados.';
+            erroDiv.textContent = 'Resposta vazia do servidor.';
             erroDiv.style.display = 'block';
             loadingDiv.style.display = 'none';
         }
 
     } catch (error) {
         console.error('Falha na requisição:', error);
-        erroDiv.textContent = `Erro ao carregar dados: ${error.message}`;
+        erroDiv.textContent = error.message;
         erroDiv.style.display = 'block';
         loadingDiv.style.display = 'none';
     }

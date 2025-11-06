@@ -3,36 +3,27 @@ function aplicarMascaraDinheiro(valor) {
         return '';
     }
 
-    // Se o valor for um NÚMERO (vindo do backend), convertemos para string de centavos
     if (typeof valor === 'number') {
-        // Multiplica por 100, arredonda e converte para string. Ex: 1.00 -> 100
         valor = Math.round(valor * 100).toString();
     } else {
-        // Se for string (vindo do input), limpa para dígitos. Ex: "1.000,50" -> "100050"
         valor = valor.toString().replace(/\D/g, '');
     }
 
-    // Se o valor estiver vazio após a limpeza, retorna 0,00
     if (valor === '') {
         return '0,00';
     }
 
-    // Adiciona zeros à esquerda para ter pelo menos 3 dígitos (para garantir os centavos, ex: '5' vira '005')
     while (valor.length < 3) {
         valor = '0' + valor;
     }
 
-    // Separa a parte inteira (tudo menos os últimos 2 dígitos) e os centavos
     let intPart = valor.slice(0, -2);
     let decimalPart = valor.slice(-2);
 
-    // Remove zeros à esquerda da parte inteira, exceto se for o último dígito
     intPart = intPart.replace(/^0+/, '') || '0';
 
-    // Adiciona separador de milhar (ponto)
     intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-    // Formato final: 1.000,00 (sem R$)
     return `${intPart},${decimalPart}`;
 }
 
@@ -40,11 +31,9 @@ function limparDinheiroParaEnvio(valorFormatado) {
     if (!valorFormatado) {
         return 0.0;
     }
-    // Remove separadores de milhar (pontos) e troca a vírgula por ponto decimal
-    // O .trim() remove espaços em branco
+
     const valorLimpo = valorFormatado.toString().replace(/\./g, '').replace(',', '.').trim();
 
-    // Retorna o float. Garante que se a string for inválida, ele retorna 0.0
     const floatValue = parseFloat(valorLimpo);
     return isNaN(floatValue) ? 0.0 : floatValue;
 }
@@ -53,7 +42,6 @@ function formatarDinheiro(valor) {
     if (valor === null || valor === undefined || isNaN(valor)) {
         return 'R$ 0,00';
     }
-    // Garante que o valor seja tratado como um número antes da formatação
     const numericValue = typeof valor === 'string' ? parseFloat(valor) : valor;
 
     return numericValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -105,7 +93,6 @@ async function carregarAtividades(ordenacao = 'alfabetica') {
             return;
         }
 
-        // --- Lógica de Ordenação ---
         atividades.sort((a, b) => {
             const statusA = a.status === true;
             const statusB = b.status === true;
@@ -126,7 +113,6 @@ async function carregarAtividades(ordenacao = 'alfabetica') {
             if (nomeA > nomeB) return 1;
             return 0;
         });
-        // --- Fim da Lógica de Ordenação ---
 
 
         atividades.forEach(atividade => {
@@ -152,10 +138,11 @@ async function carregarAtividades(ordenacao = 'alfabetica') {
             const dataFimFormatada = formatarDataParaInput(atividade.dtFim);
             const finalizadaChecked = atividade.status === true ? 'checked' : '';
 
-            // Prepara o valor para o input (sem formatação monetária, apenas número com vírgula)
             const custoRealValorLimpo = atividade.custoreal;
             const custoRealFormatadoDisplay = formatarDinheiro(custoRealValorLimpo);
             const custoRealParaInput = aplicarMascaraDinheiro(custoRealValorLimpo);
+
+            const observacoesText = atividade.observacoes || '';
 
 
             linha.innerHTML = `
@@ -193,7 +180,9 @@ async function carregarAtividades(ordenacao = 'alfabetica') {
                         </span>
                     </div>
                 </td>
-                <td>${atividade.observacoes || ''}</td>
+                <td id="observacoes-cell-${atividade.id}" data-observacoes="${observacoesText}">
+                    ${observacoesText}
+                </td>
                 <td>
                     <div class="acao-container"> 
                         <label class="checkbox-container">
@@ -214,35 +203,28 @@ async function carregarAtividades(ordenacao = 'alfabetica') {
     }
 }
 
-// --- Lógica de Alternância de Edição de Custo Real ---
 function toggleCustoReal(id) {
     const displaySpan = document.getElementById(`custo-real-display-${id}`);
     const inputElement = document.getElementById(`custo-real-input-${id}`);
     const editButton = document.querySelector(`.btn-editar-custo[data-id="${id}"]`);
 
     if (displaySpan.style.display !== 'none') {
-        // Entra no modo de edição
         displaySpan.style.display = 'none';
         editButton.style.display = 'none';
         inputElement.style.display = 'inline-block';
         inputElement.focus();
     } else {
-        // Sai do modo de edição (Acontece após o blur, antes do salvamento)
 
-        // 1. Aplica a formatação FINAL no display (usando o valor atual do input)
         const valorDigitado = limparDinheiroParaEnvio(inputElement.value);
         displaySpan.textContent = formatarDinheiro(valorDigitado);
 
-        // 2. Garante que o input escondido mantenha a máscara BRL
         inputElement.value = aplicarMascaraDinheiro(valorDigitado);
 
-        // Volta para o modo de exibição
         displaySpan.style.display = 'inline-block';
         editButton.style.display = 'inline-block';
         inputElement.style.display = 'none';
     }
 }
-// --- FIM DA LÓGICA DE ALTERNÂNCIA ---
 
 async function salvarDataUnica(id, botao) {
     const inputDtIni = document.getElementById(`data-ini-${id}`);
@@ -250,15 +232,16 @@ async function salvarDataUnica(id, botao) {
     const inputCustoReal = document.getElementById(`custo-real-input-${id}`);
     const inputFinalizar = document.getElementById(`finalizar-${id}`);
 
+    // CORREÇÃO: Lendo o valor de observação da célula de exibição
+    const obsCell = document.getElementById(`observacoes-cell-${id}`);
+    const observacoesValor = obsCell.textContent.trim();
+
+
     const novaDtIni = inputDtIni.value;
     const novaDtFim = inputDtFim.value;
     const novoStatus = inputFinalizar.checked;
 
-    // Limpando o valor do Custo Real do INPUT (garantindo que o valor salvo seja o que está no input mascarado)
     const novoCustoReal = limparDinheiroParaEnvio(inputCustoReal.value);
-
-    // Assumindo que Observações não é editável no momento
-    const observacoesValor = '';
 
     botao.disabled = true;
     botao.classList.add('salvando');
@@ -285,16 +268,12 @@ async function salvarDataUnica(id, botao) {
             throw new Error(`Falha no backend: ${errorMessage}`);
         }
 
-        // --- CORREÇÃO DE VALOR E OTIMIZAÇÃO DE PISCAMENTO ---
 
-        // 1. Atualiza o valor exibido no span do Custo Real com a formatação correta (R$ X,XX)
         const displaySpan = document.getElementById(`custo-real-display-${id}`);
         displaySpan.textContent = formatarDinheiro(novoCustoReal);
 
-        // 2. Garante que o input oculto tenha o valor mascarado (X.XXX,XX) para a próxima edição
         inputCustoReal.value = aplicarMascaraDinheiro(novoCustoReal);
 
-        // Se o salvamento for sucesso, atualiza a classe da linha
         const linha = botao.closest('tr');
         if (novoStatus) {
             linha.classList.remove('status-aberta');
@@ -318,41 +297,33 @@ async function salvarDataUnica(id, botao) {
             botao.classList.remove('sucesso');
             botao.textContent = '💾';
 
-            // REMOVIDA: A recarga completa da tabela foi removida para evitar o "piscamento".
-            // O valor é atualizado localmente acima.
-
         }, 2000);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega a tabela com o padrão 'alfabetica'
     carregarAtividades('alfabetica');
 
     const tabelaCorpo = document.getElementById('tabela-corpo');
     tabelaCorpo.addEventListener('click', (event) => {
-        // 1. Botão Salvar
         if (event.target.classList.contains('btn-salvar-linha')) {
             const botao = event.target;
             const id = botao.dataset.id;
             salvarDataUnica(id, botao);
         }
-        // 2. Botão de Edição do Custo Real
         else if (event.target.classList.contains('btn-editar-custo')) {
             const id = event.target.dataset.id;
             toggleCustoReal(id);
         }
     });
 
-    // 3. Aplicar máscara e sair do modo de edição no BLUR do Custo Real
     tabelaCorpo.addEventListener('blur', (event) => {
         if (event.target.classList.contains('input-custo-real')) {
             const inputElement = event.target;
             const id = inputElement.dataset.id;
 
-            // Aplica a máscara e sai do modo de edição (o toggleCustoReal faz isso)
             inputElement.value = aplicarMascaraDinheiro(inputElement.value);
             toggleCustoReal(id);
         }
-    }, true); // Use 'true' para captura para pegar o evento de blur corretamente
+    }, true);
 });

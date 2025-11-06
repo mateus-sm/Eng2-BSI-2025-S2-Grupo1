@@ -1,32 +1,41 @@
-//package com.example.dminfo.controller;
-//
-//import com.example.dminfo.model.CriarRealizacaoAtividades;
-//import com.example.dminfo.services.CriarRealizacaoAtividadesService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/finalizar-atividades")
-//public class FinalizarAtividadesController {
-//    @Autowired
-//    private CriarRealizacaoAtividadesService service;
-//
-//    @GetMapping
-//    public ResponseEntity<List<CriarRealizacaoAtividades>> listar() {
-//        return ResponseEntity.ok(service.listar());
-//    }
-//
-//    @PutMapping("/{id}/data-fim")
-//    public ResponseEntity<Object> atualizarData(@PathVariable int id, @RequestBody(required = false) String dataFinalStr) {
-//        try {
-//            service.atualizarDataFim(id, dataFinalStr);
-//            return ResponseEntity.ok().build();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(500).body(e.getMessage());
-//        }
-//    }
-//}
+package com.example.dminfo.controller;
+
+import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
+import com.example.dminfo.model.CriarRealizacaoAtividades;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class FinalizarAtividadesController {
+
+    @Autowired
+    private CriarRealizacaoAtividadesDAO atividadeDAO;
+
+    public List<CriarRealizacaoAtividades> listarTodas() {
+        return atividadeDAO.listarTodas();
+    }
+
+    public boolean finalizarAtividade(CriarRealizacaoAtividades atividade) {
+
+        CriarRealizacaoAtividades existente = atividadeDAO.getById(atividade.getId());
+
+        if (existente == null) {
+            return false;
+        }
+
+        existente.setDtIni(atividade.getDtIni());
+
+        existente.setDtFim(atividade.getDtFim());
+        existente.setCustoreal(atividade.getCustoreal());
+        existente.setObservacoes(atividade.getObservacoes());
+
+
+        if (atividade.getStatus() != null) {
+            existente.setStatus(atividade.getStatus());
+        }
+
+        return atividadeDAO.finalizarAtividade(existente);
+    }
+}

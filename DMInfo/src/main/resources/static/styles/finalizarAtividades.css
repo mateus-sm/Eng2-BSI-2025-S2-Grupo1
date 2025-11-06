@@ -1,3 +1,4 @@
+/* finalizedades.css */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f7f6;
@@ -43,7 +44,8 @@ h1 {
 }
 
 /* Input de Data */
-.input-data-fim {
+.input-data-fim,
+.input-data-ini{
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -75,6 +77,61 @@ h1 {
     font-weight: bold;
 }
 
+/* --- ESTILOS DO CONTAINER DE AÇÃO (Alinhamento) --- */
+.acao-container {
+    display: flex; /* Habilita flexbox para alinhar o checkbox e o botão */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 10px; /* Espaço entre o checkbox/label e o botão Salvar */
+}
+
+/* --- ESTILOS DO BOTÃO FINALIZAR (Toggle, mantendo o CHECKBOX visível) --- */
+
+/* Estilo do CHECKBOX NATIVO */
+.input-finalizar {
+    /* Mantemos o checkbox visível e ajustamos o espaçamento */
+    margin-right: 5px;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+}
+
+/* Estilo do LABEL (que atua como borda/fundo) */
+.checkbox-container {
+    display: flex; /* Flexbox para alinhar o checkbox e o texto dentro do label */
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    user-select: none;
+    min-width: 80px;
+
+    /* Estado Padrão: Não Finalizado (Vermelho) */
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background-color: #fce4e6;
+    font-weight: bold;
+}
+
+/* Estilo quando o checkbox ESTÁ MARCADO (Finalizado - Verde) */
+/* Este seletor atua no label (.checkbox-container) quando o input dentro dele está checado */
+.input-finalizar:checked ~ .checkbox-container {
+    /* NOTA: Usei o seletor tilde (~) que funciona para irmãos subsequentes,
+       mas neste caso, se o input estiver antes do texto no label, a cor será aplicada */
+    border-color: #28a745;
+    color: #ffffff; /* Texto branco para contraste */
+    background-color: #28a745;
+    font-weight: bold;
+}
+
+/* Ajuste o hover */
+.checkbox-container:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* --- FIM DOS ESTILOS DO BOTÃO FINALIZAR --- */
+
 .btn-salvar-linha {
     background-color: #284768; /* Azul */
     color: white;
@@ -96,4 +153,70 @@ h1 {
 }
 .btn-salvar-linha.sucesso {
     background-color: #28a745; /* Verde */
+}
+
+/* Estilos de Status da Linha */
+.atividades-tabela tbody tr.status-finalizada {
+    border-left: 5px solid #28a745; /* Verde */
+}
+
+.atividades-tabela tbody tr.status-aberta {
+    border-left: 5px solid #dc3545; /* Vermelho */
+}
+
+/* Estilos do Filtro */
+.filtro-container {
+    margin-bottom: 25px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filtro-container label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+}
+
+.filtro-container select {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    min-width: 250px;
+}
+
+.filtro-container select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.custo-real-cell-container {
+    display: flex;       /* Habilita flexbox */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 5px;            /* Adiciona um pequeno espaço entre os elementos */
+    /* Garante que o container ocupe a largura total da célula, se necessário */
+    width: 100%;
+}
+
+/* Ajusta o botão de edição (lápis) para alinhamento e cursor */
+.btn-editar-custo {
+    cursor: pointer;
+    color: #495057; /* Cor do ícone */
+    font-size: 1.1em;
+    padding: 2px;
+}
+.btn-editar-custo:hover {
+    color: #007bff; /* Cor ao passar o mouse */
+}
+/* Se precisar que o input de texto fique alinhado também */
+.input-custo-real {
+    flex-grow: 1; /* Permite que o input cresça */
 }

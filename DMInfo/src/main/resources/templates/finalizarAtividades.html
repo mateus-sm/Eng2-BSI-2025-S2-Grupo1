@@ -10,6 +10,15 @@
 
 <div class="container">
     <h1>Atividades Cadastradas</h1>
+
+    <div class="filtro-container">
+        <label for="ordenacao-select">Ordenar por:</label>
+        <select id="ordenacao-select" onchange="carregarAtividades(this.value)">
+            <option value="alfabetica">Nome da Atividade (A-Z) - Padrão</option>
+            <option value="status_aberta">Status (Não Finalizadas Primeiro)</option>
+            <option value="status_finalizada">Status (Finalizadas Primeiro)</option>
+        </select>
+    </div>
     <table class="atividades-tabela">
         <thead>
         <tr>

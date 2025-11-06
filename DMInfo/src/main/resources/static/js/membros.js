@@ -3,9 +3,7 @@ let membroModal, deleteModal;
 let idParaExcluir = null;
 
 // URL base da sua API
-const API_URL = '/app/membro';
-
-console.log("Arquivo membros.js carregado com SUCESSO.");
+const API_URL = '/apis/membro';
 
 async function carregarMembros() {
     try {
@@ -19,7 +17,7 @@ async function carregarMembros() {
         tabelaBody.innerHTML = '';
 
         if (membros.length === 0) {
-            tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum membro encontrado.</td></tr>';
+            tabelaBody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum membro encontrado.</td></tr>';
             return;
         }
 
@@ -27,7 +25,6 @@ async function carregarMembros() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${membro.id}</td>
-                <td>${membro.codigo}</td>
                 <td>${membro.usuario ? membro.usuario.nome : 'N/A'}</td>
                 <td>${membro.observacao || ''}</td>
                 <td>${formatarData(membro.dtIni)}</td>
@@ -62,7 +59,7 @@ async function carregarMembros() {
 function abrirModalAdicionar() {
     const form = document.getElementById('form-membro');
     form.reset();
-    form.classList.remove('edit-mode'); // Remove a classe de edição
+    form.classList.remove('edit-mode');
     document.getElementById('membroId').value = '';
     document.getElementById('membroModalLabel').innerText = 'Adicionar Membro';
     document.getElementById('usuarioId').disabled = false;
@@ -83,7 +80,6 @@ async function abrirModalEditar(id) {
         form.classList.add('edit-mode');
         document.getElementById('membroModalLabel').innerText = 'Editar Membro';
         document.getElementById('membroId').value = membro.id;
-        document.getElementById('codigo').value = membro.codigo;
         document.getElementById('usuarioId').value = membro.usuario.id;
         document.getElementById('usuarioId').disabled = true;
         document.getElementById('observacao').value = membro.observacao || '';
@@ -101,21 +97,15 @@ async function salvarMembro(event) {
     event.preventDefault();
 
     const id = document.getElementById('membroId').value;
-    const codigo = document.getElementById('codigo').value;
     const usuarioId = document.getElementById('usuarioId').value;
     const observacao = document.getElementById('observacao').value;
-    const dtFim = document.getElementById('dtFim').value || null; // Envia null se vazio
-
-    if (parseInt(codigo) <= 0) {
-        alert("Erro: O Código do Membro deve ser um número positivo.");
-        return;
-    }
+    const dtFim = document.getElementById('dtFim').value || null;
 
     const ehUpdate = !!id;
     let url = API_URL;
     let method = 'POST';
+
     const membro = {
-        codigo: parseInt(codigo),
         observacao: observacao
     };
 
@@ -181,25 +171,20 @@ async function excluirMembro() {
 }
 
 function formatarData(data) {
-    if (!data) return '';
+    if (!data)
+        return '';
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Arquivo membros.js DOM carregado.");
 
     membroModal = new bootstrap.Modal(document.getElementById('membroModal'));
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
     carregarMembros();
 
-    // Listeners dos botões principais
     document.getElementById('btn-novo-membro').addEventListener('click', abrirModalAdicionar);
-
-    console.log("Adicionando listener ao botão 'btn-salvar-membro'");
     document.getElementById('btn-salvar-membro').addEventListener('click', salvarMembro);
-
-    console.log("Adicionando listener ao botão 'btn-confirmar-exclusao'");
     document.getElementById('btn-confirmar-exclusao').addEventListener('click', excluirMembro);
 });

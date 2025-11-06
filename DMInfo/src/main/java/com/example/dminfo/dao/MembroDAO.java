@@ -13,13 +13,11 @@ import java.util.List;
 @Repository
 public class MembroDAO {
 
-    // Metodo para construir o objeto Membro a partir do ResultSet
     private Membro buildMembro(ResultSet rs) throws SQLException {
         Membro membro = new Membro();
         membro.setId(rs.getInt("id_membro"));
-        membro.setCodigo(rs.getInt("codigo_membro"));
+        // A linha 'setCodigo' foi REMOVIDA
 
-        // Trata datas que podem ser nulas
         if (rs.getDate("dtini") != null)
             membro.setDtIni(rs.getDate("dtini").toLocalDate());
 
@@ -28,28 +26,25 @@ public class MembroDAO {
 
         membro.setObservacao(rs.getString("observacao"));
 
-        // Cria e anexa o objeto Usuario
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
-
-        // Se sua consulta (JOIN) também buscar o nome do usuário, adicione aqui
-        // Ex: usuario.setNome(rs.getString("usr_nome"));
+        usuario.setNome(rs.getString("nome"));
 
         membro.setUsuario(usuario);
         return membro;
     }
 
     public Membro gravar(Membro membro) {
-        String sql = String.format("INSERT INTO membro (codigo_membro, dtini, dtfim, observacao, id_usuario) " +
-                        "VALUES (%d, '%s', %s, '%s', %d) RETURNING id_membro",
-                membro.getCodigo(),
+        // 'codigo_membro' REMOVIDO do INSERT
+        String sql = String.format("INSERT INTO membro (dtini, dtfim, observacao, id_usuario) " +
+                        "VALUES ('%s', %s, '%s', %d) RETURNING id_membro",
                 membro.getDtIni().toString(),
                 membro.getDtFim() == null ? "NULL" : "'" + membro.getDtFim().toString() + "'",
                 membro.getObservacao(),
                 membro.getUsuario().getId()
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql); // 'consultar' para pegar o RETURNING
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 membro.setId(rs.getInt("id_membro"));
@@ -62,14 +57,14 @@ public class MembroDAO {
     }
 
     public boolean alterar(Membro membro) {
-        String sql = String.format("UPDATE membro SET codigo_membro = %d, observacao = '%s', dtfim = %s " +
+        // 'codigo_membro' REMOVIDO do UPDATE
+        String sql = String.format("UPDATE membro SET observacao = '%s', dtfim = %s " +
                         "WHERE id_membro = %d",
-                membro.getCodigo(),
                 membro.getObservacao(),
                 membro.getDtFim() == null ? "NULL" : "'" + membro.getDtFim().toString() + "'",
                 membro.getId()
         );
-        return SingletonDB.getConexao().manipular(sql); // 'manipular' para UPDATE
+        return SingletonDB.getConexao().manipular(sql);
     }
 
     public boolean excluir(int id) {
@@ -79,9 +74,12 @@ public class MembroDAO {
 
     public List<Membro> get(String filtro) {
         List<Membro> membros = new ArrayList<>();
-        String sql = "SELECT m.*, u.usr_nome " +
-                     "FROM membro m JOIN usuario u " +
-                     "ON m.id_usuario = u.id_usuario " + filtro;
+        // 'm.codigo_membro' REMOVIDO do SELECT
+        String sql = "SELECT " +
+                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
+                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
+                "    u.nome AS nome " +
+                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " + filtro;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -91,16 +89,20 @@ public class MembroDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Erro ao listar Membros: " + e.getMessage());
+            System.err.println("### ERRO AO LISTAR MEMBROS (DAO) ###");
+            e.printStackTrace();
         }
         return membros;
     }
 
     public Membro get(int id) {
-        String sql = "SELECT m.*, u.usr_nome " +
-                     "FROM membro m JOIN usuario u " +
-                     "ON m.id_usuario = u.id_usuario " +
-                     "WHERE m.id_membro = " + id;
+        // 'm.codigo_membro' REMOVIDO do SELECT
+        String sql = "SELECT " +
+                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
+                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
+                "    u.nome AS nome " +
+                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " +
+                "WHERE m.id_membro = " + id;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -108,7 +110,8 @@ public class MembroDAO {
                 return buildMembro(rs);
             }
         } catch (SQLException e) {
-            System.out.println("Erro ao buscar Membro por ID: " + e.getMessage());
+            System.err.println("### ERRO AO BUSCAR MEMBRO POR ID (DAO) ###");
+            e.printStackTrace();
         }
         return null;
     }

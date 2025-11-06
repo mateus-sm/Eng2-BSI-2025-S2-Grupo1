@@ -26,7 +26,6 @@
         <thead class="table-dark">
         <tr>
             <th>ID</th>
-            <th>Código</th>
             <th>Usuário</th>
             <th>Observação</th>
             <th>Data Início</th>
@@ -49,11 +48,6 @@
             <div class="modal-body">
                 <form id="form-membro">
                     <input type="hidden" id="membroId">
-
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código do Membro *</label>
-                        <input type="number" class="form-control" id="codigo" required>
-                    </div>
 
                     <div class="mb-3">
                         <label for="usuarioId" class="form-label">ID do Usuário *</label>
@@ -93,15 +87,14 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
                 <button type="button" class="btn btn-danger" id="btn-confirmar-exclusao">Excluir</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ...></script>
 <script th:src="@{/js/membros.js}"></script>
 </body>
 </html>

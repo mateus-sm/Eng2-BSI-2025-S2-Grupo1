@@ -16,7 +16,6 @@ public class viewController {
             return "redirect:/app/parametrizacao/exibir";
         }
         return "parametrizacao";
-
     }
 
     @GetMapping("/app/parametrizacao/exibir")
@@ -53,5 +52,10 @@ public class viewController {
     @GetMapping("/login")
     public String paginaLogin() {
         return "login";
+    }
+
+    @GetMapping("app/enviarFotosAtividade")
+    public String paginaEnviarFotosAtividade() {
+        return "enviarFotosAtividade";
     }
 }

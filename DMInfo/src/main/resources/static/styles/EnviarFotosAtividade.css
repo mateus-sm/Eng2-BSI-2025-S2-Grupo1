@@ -1,0 +1,20 @@
+body {
+    background-color: #f8f9fa; /* Fundo cinza claro */
+}
+
+.container {
+    max-width: 800px; /* Um pouco mais estreito, pois o formulário é simples */
+}
+
+.form-container {
+    background-color: #ffffff;
+    padding: 2rem; /* Mais espaçamento interno */
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Garante que o input de arquivo do Bootstrap pareça clicável */
+.form-control[type="file"] {
+    cursor: pointer;
+}

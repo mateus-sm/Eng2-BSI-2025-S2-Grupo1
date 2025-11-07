@@ -205,7 +205,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     if (id) {
-        atribuicao.id_atribuir_conquista = Number(id)
+        atribuicao.id = Number(id)
     }
 
     try {

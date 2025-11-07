@@ -268,5 +268,90 @@ function editarAtribuicao(id, idMembro, idConquista, idAdmin, data, observacao) 
     window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
+//Tratar Filtro
+const btnFiltrar = document.getElementById("btnFiltrar")
+const btnLimparFiltro = document.getElementById("btnLimparFiltro")
+const filtroDescricao = document.getElementById("filtroDescricao")
+
+let atribuicoesExibidas = []
+
+function filtrarAtribuicoes() {
+    const termo = filtroDescricao.value.toLowerCase().trim()
+
+    setTimeout(() => {
+        atribuicoesExibidas = todasAsAtribuicoes.filter((attr) => {
+            const membro = (membros[attr.id_membro] || "").toLowerCase()
+            const conquista = (conquistas[attr.id_conquista] || "").toLowerCase()
+            const admin = (administradores[attr.id_admin] || "").toLowerCase()
+            const observacao = (attr.observacao || "").toLowerCase()
+            return (
+                !termo ||
+                membro.includes(termo) ||
+                conquista.includes(termo) ||
+                admin.includes(termo) ||
+                observacao.includes(termo)
+            )
+        })
+
+        renderizarTabelaFiltrada()
+
+        if (atribuicoesExibidas.length === 0) {
+            mostrarAlerta("Nenhuma atribuição encontrada com os critérios informados.", "warning")
+        }
+    }, 300)
+}
+
+function limparFiltros() {
+    filtroDescricao.value = ""
+    atribuicoesExibidas = [...todasAsAtribuicoes]
+    renderizarTabelaFiltrada()
+}
+
+function renderizarTabelaFiltrada() {
+    tabela.innerHTML = ""
+    totalAtribuicoes.textContent = atribuicoesExibidas.length
+
+    if (atribuicoesExibidas.length === 0) {
+        mensagemVazia.classList.remove("d-none")
+        return
+    }
+
+    mensagemVazia.classList.add("d-none")
+
+    atribuicoesExibidas.forEach((attr) => {
+        const tr = document.createElement("tr")
+        const nomeMembro = membros[attr.id_membro] || `ID: ${attr.id_membro}`
+        const nomeConquista = conquistas[attr.id_conquista] || `ID: ${attr.id_conquista}`
+        const nomeAdmin = administradores[attr.id_admin] || `ID: ${attr.id_admin}`
+        const dataFormatada = attr.data ? new Date(attr.data).toLocaleDateString("pt-BR") : "—"
+
+        tr.innerHTML = `
+          <td class="text-center"><strong>${attr.id}</strong></td>
+          <td>${nomeMembro}</td>
+          <td>${nomeConquista}</td>
+          <td>${nomeAdmin}</td>
+          <td>${dataFormatada}</td>
+          <td>${attr.observacao || "—"}</td>
+          <td class="text-center">
+            <button class="btn btn-sm" onclick="editarAtribuicao(${attr.id}, ${attr.id_membro}, ${attr.id_conquista}, ${attr.id_admin}, '${(attr.data || "").replace(/'/g, "\\'")}', '${(attr.observacao || "").replace(/'/g, "\\'")}')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffc94c" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+              </svg>
+            </button>
+            <button class="btn btn-sm" onclick="excluirAtribuicao(${attr.id})">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-trash3" viewBox="0 0 16 16">
+                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l-.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+              </svg>
+            </button>
+          </td>
+        `
+        tabela.appendChild(tr)
+    })
+}
+
+btnFiltrar.addEventListener("click", filtrarAtribuicoes)
+btnLimparFiltro.addEventListener("click", limparFiltros)
+
 // Carregar dados iniciais ao abrir a página
 carregarDadosIniciais()

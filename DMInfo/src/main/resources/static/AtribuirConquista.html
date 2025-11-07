@@ -78,6 +78,22 @@
         <!-- Mensagens de feedback -->
         <div id="alertaContainer"></div>
 
+        <!-- Seção de Filtro -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-9">
+                        <label for="filtroDescricao" class="form-label fw-semibold">Buscar por Atribuição:</label>
+                        <input type="text" id="filtroDescricao" class="form-control">
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="button" class="btn btn-success flex-grow-1" id="btnFiltrar">Filtrar</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnLimparFiltro" title="Limpar filtros">✕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Tabela -->
         <div class="card shadow-sm">
             <div class="card-header bg-dark text-white">

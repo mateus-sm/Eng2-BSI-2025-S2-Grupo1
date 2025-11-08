@@ -29,10 +29,25 @@ body {
     display: none;
 }
 
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.required-field-asterisk {
+    color: #dc3545;
+    font-weight: bold;
+}
+
 #tabelaDoacoes .btn {
     padding: 0.25rem 0.5rem;
 }
 
 #tabelaDoacoes .btn-editar {
     margin-right: 5px;
+}
+
+.btn-remover-item i {
+    pointer-events: none;
 }

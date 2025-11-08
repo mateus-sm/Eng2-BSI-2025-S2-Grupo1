@@ -1,47 +1,126 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const docElement = document.getElementById('documento');
-    const cepElement = document.getElementById('cep');
-    const telElement = document.getElementById('telefone');
-
-    const docMask = IMask(docElement, {
-        mask: [
-            {
-                mask: '000.000.000-00',
-                maxLength: 11
-            },
-            {
-                mask: '00.000.000/0000-00'
-            }
-        ]
-    });
-
-    const cepMask = IMask(cepElement, {
-        mask: '00000-000'
-    });
-
-    const telMask = IMask(telElement, {
-        mask: [
-            { mask: '(00) 0000-0000' },
-            { mask: '(00) 00000-0000' }
-        ]
-    });
-
     const form = document.getElementById('formDoador');
     const tabelaBody = document.getElementById('tabelaDoadores');
     const btnCancelar = document.getElementById('btnCancelar');
     const formTitulo = document.querySelector('.form-container h2');
     const hiddenId = document.getElementById('id');
 
+    // Elementos para Máscara
+    const inputNome = document.getElementById('nome');
+    const inputDocumento = document.getElementById('documento');
+    const inputTelefone = document.getElementById('telefone');
+    const inputCep = document.getElementById('cep');
+
     const apiUrl = '/apis/doador';
+
+    // --- REINICIALIZAÇÃO DAS MÁSCARAS (IMASK) ---
+
+    // 1. Máscara para Documento (alterna entre CPF e CNPJ)
+    // Assumindo que IMask está carregado via HTML
+    if (typeof IMask !== 'undefined') {
+        window.docMask = IMask(inputDocumento, {
+            mask: [
+                {
+                    mask: '000.000.000-00',
+                    maxLength: 11 // Define o limite para mudar para CNPJ
+                },
+                {
+                    mask: '00.000.000/0000-00'
+                }
+            ]
+        });
+
+        // 2. Máscara para CEP
+        window.cepMask = IMask(inputCep, {
+            mask: '00000-000'
+        });
+
+        // 3. Máscara para Telefone (alterna entre fixo e celular)
+        window.telMask = IMask(inputTelefone, {
+            mask: [
+                { mask: '(00) 0000-0000' },
+                { mask: '(00) 00000-0000' }
+            ]
+        });
+    }
+
+    // --- FUNÇÕES DE VALIDAÇÃO REAL DE CPF/CNPJ (MANTIDAS) ---
+
+    function validarCPF(cpf) {
+        if (!cpf || cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+        let soma;
+        let resto;
+        soma = 0;
+
+        for (let i = 1; i <= 9; i++) {
+            soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        }
+        resto = (soma * 10) % 11;
+        if ((resto === 10) || (resto === 11)) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
+        soma = 0;
+        for (let i = 1; i <= 10; i++) {
+            soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        }
+        resto = (soma * 10) % 11;
+        if ((resto === 10) || (resto === 11)) resto = 0;
+        if (resto !== parseInt(cpf.substring(10, 11))) return false;
+
+        return true;
+    }
+
+    function validarCNPJ(cnpj) {
+        if (!cnpj || cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0, tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += numeros.charAt(tamanho - i) * pos--;
+            if (pos < 2) pos = 9;
+        }
+        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+        tamanho = tamanho + 1;
+        numeros = cnpj.substring(0, tamanho);
+        soma = 0;
+        pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += numeros.charAt(tamanho - i) * pos--;
+            if (pos < 2) pos = 9;
+        }
+        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        if (resultado !== parseInt(digitos.charAt(1))) return false;
+
+        return true;
+    }
+
+    function validarDocumento(documento) {
+        if (documento.length === 11) {
+            return validarCPF(documento);
+        } else if (documento.length === 14) {
+            return validarCNPJ(documento);
+        }
+        return false;
+    }
+    // --- FIM FUNÇÕES DE VALIDAÇÃO REAL ---
 
     function validarFormulario() {
 
         const nome = document.getElementById('nome').value.trim();
-        const documento = document.getElementById('documento').value.trim().replace(/\D/g, ''); // Remove não-dígitos
+        // A validação usa o valor "limpo" diretamente da máscara (unmaskedValue)
+        const documento = window.docMask ? window.docMask.unmaskedValue : inputDocumento.value.trim().replace(/\D/g, '');
         const email = document.getElementById('email').value.trim();
-        const telefone = document.getElementById('telefone').value.trim().replace(/\D/g, ''); // Remove não-dígitos
-        const cep = document.getElementById('cep').value.trim().replace(/\D/g, ''); // Remove não-dígitos
+        const telefone = window.telMask ? window.telMask.unmaskedValue : document.getElementById('telefone').value.trim().replace(/\D/g, '');
+        const cep = window.cepMask ? window.cepMask.unmaskedValue : document.getElementById('cep').value.trim().replace(/\D/g, '');
         const rua = document.getElementById('rua').value.trim();
         const bairro = document.getElementById('bairro').value.trim();
         const cidade = document.getElementById('cidade').value.trim();
@@ -54,43 +133,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        // 2. Validação do Documento (CPF/CNPJ)
-        if (!/^\d{11}$/.test(documento) && !/^\d{14}$/.test(documento)) {
-            alert('Documento inválido. Deve ser um CPF (11 dígitos) ou CNPJ (14 dígitos), sem pontuação.');
-            document.getElementById('documento').focus();
+        // 2. Validação do Documento (CPF/CNPJ Real)
+        if (!validarDocumento(documento)) {
+            alert('Documento inválido. Deve ser um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.');
+            inputDocumento.focus();
             return false;
         }
 
         // 3. Validação de Email
-        if (!/\S+@\S+\.\S+/.test(email)) { // Regex simples de email
+        if (!/\S+@\S+\.\S+/.test(email)) {
             alert('Formato de e-mail inválido.');
             document.getElementById('email').focus();
             return false;
         }
 
-        // 4. Validação de Telefone (Ex: 10 ou 11 dígitos)
+        // 4. Validação de Telefone (Exige 10 ou 11 dígitos, sem pontuação)
         if (!/^\d{10,11}$/.test(telefone)) {
             alert('Telefone inválido. Deve ter 10 ou 11 dígitos (com DDD).');
             document.getElementById('telefone').focus();
             return false;
         }
 
-        // 5. Validação de CEP (Opcional, mas se preenchido, deve ter 8 dígitos)
+        // 5. Validação de CEP
         if (cep.length > 0 && !/^\d{8}$/.test(cep)) {
             alert('CEP inválido. Se preenchido, deve ter 8 dígitos, sem pontuação.');
             document.getElementById('cep').focus();
             return false;
         }
 
-        // 6. Campos de Endereço (Ex: Opcionais, mas se um for preenchido, os outros também?)
-        // Se o CEP for preenchido, talvez forçar os outros?
+        // 6. Campos de Endereço
         if (cep.length > 0 && (rua.length === 0 || bairro.length === 0 || cidade.length === 0 || uf.length === 0)) {
             alert('Se o CEP for informado, por favor, preencha o restante do endereço (Rua, Bairro, Cidade, UF).');
             document.getElementById('rua').focus();
             return false;
         }
 
-        // Se chegou até aqui, está tudo certo
         return true;
     }
 
@@ -100,8 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try{
             const response = await fetch(apiUrl, {
                 method: 'GET',
-                headers: {
-                }
+                headers: {}
             });
 
             if(!response.ok)
@@ -138,9 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCancelar.classList.add('d-none');
         form.querySelector('input').focus();
 
-        docMask.value = '';
-        cepMask.value = '';
-        telMask.value = '';
+        // Limpa os valores das máscaras ao resetar (se imask estiver disponível)
+        if (window.docMask) window.docMask.value = '';
+        if (window.cepMask) window.cepMask.value = '';
+        if (window.telMask) window.telMask.value = '';
     }
 
     async function preencherFormularioParaEdicao(id) {
@@ -148,8 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'GET',
-                headers: {
-                }
+                headers: {}
             });
 
             if(!response.ok)
@@ -159,9 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('id').value = doador.id;
             document.getElementById('nome').value = doador.nome;
-            docMask.value = doador.documento;
-            telMask.value = doador.telefone;
-            cepMask.value = doador.cep;
+            // Usa as instâncias de máscara para preencher o valor formatado
+            if (window.docMask) window.docMask.value = doador.documento;
+            if (window.telMask) window.telMask.value = doador.telefone;
+            if (window.cepMask) window.cepMask.value = doador.cep;
 
             document.getElementById('rua').value = doador.rua;
             document.getElementById('bairro').value = doador.bairro;
@@ -183,24 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        docElement.value = docMask.unmaskedValue;
-        cepElement.value = cepMask.unmaskedValue;
-        telElement.value = telMask.unmaskedValue;
-
-        if (!validarFormulario()) {
-             docMask.updateValue();
-             cepMask.updateValue();
-             telMask.updateValue();
-             return; //Para a execução se o formulário for inválido
-        }
-
+        if (!validarFormulario())
+            return;
 
         const formData = new FormData(form);
         const doador = Object.fromEntries(formData.entries());
 
-        doador.documento = docMask.unmaskedValue;
-        doador.cep = cepMask.unmaskedValue;
-        doador.telefone = telMask.unmaskedValue;
+        // Garante que os valores enviados são os limpos da máscara (unmaskedValue)
+        doador.documento = window.docMask ? window.docMask.unmaskedValue : doador.documento.replace(/\D/g, '');
+        doador.telefone = window.telMask ? window.telMask.unmaskedValue : doador.telefone.replace(/\D/g, '');
+        doador.cep = window.cepMask ? window.cepMask.unmaskedValue : doador.cep.replace(/\D/g, '');
 
 
         const id = hiddenId.value;
@@ -251,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try{
             const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE',
-                headers: {
-                }
+                headers: {}
             });
 
             if(!response.ok){
@@ -275,5 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnCancelar.addEventListener('click', resetarFormulario);
 
+    // Carrega o select doador e inicializa as máscaras (se imask estiver disponível)
     carregarDoadores();
 });

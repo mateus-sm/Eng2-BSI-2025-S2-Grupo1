@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${item.descricao}</td>
                 <td>${item.quantidade}</td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-info btn-editar-item me-1" data-index="${index}">Editar</button>
+                    <button type="button" class="btn btn-sm btn-warning btn-editar-item me-1" data-index="${index}">Editar</button>
                     <button type="button" class="btn btn-sm btn-danger btn-remover-item" data-index="${index}" title="Remover item">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -281,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btnCancelarEdicao) btnCancelarEdicao.classList.remove('d-none');
 
             if (selectDoador) selectDoador.value = doacao.id_doador.id;
-            // REMOVIDO: inputAdminId.value = doacao.id_admin.id;
 
             limparValidacao();
 
@@ -432,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             alert(`Doação ${isEdicao ? 'atualizada' : 'salva'} com sucesso!`);
             // Redireciona de volta para a lista após salvar/atualizar
-            window.location.href = 'doacao.html';
+            window.location.href = 'doacao';
 
         } catch (error) {
             console.error('Falha ao salvar/atualizar:', error);
@@ -449,12 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // O evento de clique na tabela principal foi movido para doacao-list.js
-
     if (btnCancelarEdicao) btnCancelarEdicao.addEventListener('click', (e) => {
         e.preventDefault();
         // Redireciona de volta para a lista ao cancelar
-        window.location.href = 'doacao.html';
+        window.location.href = 'doacao';
     });
 
     // --- Lógica de Inicialização ---

@@ -1,12 +1,8 @@
 package com.example.dminfo.model;
 
-import com.example.dminfo.dao.DoadorDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-@Repository
+@Component
 public class Doador {
 
     private int id;
@@ -20,9 +16,6 @@ public class Doador {
     private String email;
     private String telefone;
     private String contato;
-
-    @Autowired
-    private DoadorDAO dao;
 
     public Doador() {}
 
@@ -40,7 +33,6 @@ public class Doador {
         this.contato = contato;
     }
 
-    // Construtor sem ID (para 'gravar')
     public Doador(String nome, String documento, String rua, String bairro, String cidade, String uf, String cep, String email, String telefone, String contato) {
         this.nome = nome;
         this.documento = documento;
@@ -87,52 +79,4 @@ public class Doador {
 
     public String getContato() {return contato;}
     public void setContato(String contato) {this.contato = contato;}
-
-
-    public List<Doador> listar() {
-        return dao.get("");
-    }
-
-    public Doador getById(Integer id) {
-        return dao.get(id);
-    }
-
-    public Doador salvar(Doador doador) {
-        //Validação (ex: documento único)
-        if (dao.getByDocumento(doador.getDocumento()) != null)
-            throw new RuntimeException("Já existe um doador com este documento.");
-        return dao.gravar(doador);
-    }
-
-    public Doador atualizar(Integer id, Doador doadorDetalhes) {
-        Doador doador = dao.get(id);
-        if (doador == null)
-            throw new RuntimeException("Doador não encontrado com id: " + id); //
-
-        //Verifica se o documento foi alterado para um que já existe
-        if (!doador.getDocumento().equals(doadorDetalhes.getDocumento()) && dao.getByDocumento(doadorDetalhes.getDocumento()) != null)
-            throw new RuntimeException("O novo documento já pertence a outro doador.");
-
-        //Atualiza os campos
-        doador.setNome(doadorDetalhes.getNome());
-        doador.setDocumento(doadorDetalhes.getDocumento());
-        doador.setRua(doadorDetalhes.getRua());
-        doador.setBairro(doadorDetalhes.getBairro());
-        doador.setCidade(doadorDetalhes.getCidade());
-        doador.setUf(doadorDetalhes.getUf());
-        doador.setCep(doadorDetalhes.getCep());
-        doador.setEmail(doadorDetalhes.getEmail());
-        doador.setTelefone(doadorDetalhes.getTelefone());
-        doador.setContato(doadorDetalhes.getContato());
-
-        if (dao.alterar(doador))
-            return doador;
-        throw new RuntimeException("Erro ao atualizar doador no banco de dados.");
-    }
-
-    public boolean excluir(Integer id){
-        if (dao.get(id) == null)
-            throw new RuntimeException("Doador não encontrado com id: " + id);
-        return dao.excluir(id); //
-    }
 }

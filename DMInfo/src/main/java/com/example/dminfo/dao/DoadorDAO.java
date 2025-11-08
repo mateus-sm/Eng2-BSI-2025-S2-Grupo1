@@ -41,7 +41,8 @@ public class DoadorDAO {
     }
 
     public Doador getByDocumento(String documento) {
-        String sql = "SELECT * FROM doador WHERE documento = '" + documento + "'";
+        String documentoSeguro = documento.replace("'", "''");
+        String sql = "SELECT * FROM doador WHERE documento = '" + documentoSeguro + "'";
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if(rs != null && rs.next())
@@ -69,8 +70,16 @@ public class DoadorDAO {
     public Doador gravar(Doador doador){
         String sql = String.format("INSERT INTO doador (nome, documento, rua, bairro, cidade, uf, cep, email, telefone, contato) " +
                         "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id_doador",
-                doador.getNome(), doador.getDocumento(), doador.getRua(), doador.getBairro(), doador.getCidade(),
-                doador.getUf(), doador.getCep(), doador.getEmail(), doador.getTelefone(), doador.getContato()
+                doador.getNome().replace("'", "''"),
+                doador.getDocumento().replace("'", "''"),
+                doador.getRua().replace("'", "''"),
+                doador.getBairro().replace("'", "''"),
+                doador.getCidade().replace("'", "''"),
+                doador.getUf().replace("'", "''"),
+                doador.getCep().replace("'", "''"),
+                doador.getEmail().replace("'", "''"),
+                doador.getTelefone().replace("'", "''"),
+                doador.getContato().replace("'", "''")
         );
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
@@ -89,8 +98,16 @@ public class DoadorDAO {
         String sql = String.format("UPDATE doador SET nome = '%s', documento = '%s', rua = '%s', bairro = '%s', " +
                         "cidade = '%s', uf = '%s', cep = '%s', email = '%s', telefone = '%s', contato = '%s' " +
                         "WHERE id_doador = %d",
-                doador.getNome(), doador.getDocumento(), doador.getRua(), doador.getBairro(), doador.getCidade(),
-                doador.getUf(), doador.getCep(), doador.getEmail(), doador.getTelefone(), doador.getContato(),
+                doador.getNome().replace("'", "''"),
+                doador.getDocumento().replace("'", "''"),
+                doador.getRua().replace("'", "''"),
+                doador.getBairro().replace("'", "''"),
+                doador.getCidade().replace("'", "''"),
+                doador.getUf().replace("'", "''"),
+                doador.getCep().replace("'", "''"),
+                doador.getEmail().replace("'", "''"),
+                doador.getTelefone().replace("'", "''"),
+                doador.getContato().replace("'", "''"),
                 doador.getId()
         );
         return SingletonDB.getConexao().manipular(sql);

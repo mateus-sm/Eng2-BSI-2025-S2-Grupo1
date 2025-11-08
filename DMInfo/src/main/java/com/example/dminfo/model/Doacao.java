@@ -1,30 +1,17 @@
 package com.example.dminfo.model;
 
-import com.example.dminfo.dao.AdministradorDAO;
-import com.example.dminfo.dao.DoacaoDAO;
-import com.example.dminfo.dao.DoadorDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
+import org.springframework.stereotype.Component;
 import java.time.LocalDate;
-import java.util.List;
 
-@Repository
+@Component
 public class Doacao {
 
     private int id_doacao;
-    private Doador id_doador; // Referência ao "Fat Model"
-    private Administrador id_admin; // Referência ao "Fat Model"
+    private Doador id_doador;
+    private Administrador id_admin;
     private LocalDate data;
     private double valor;
     private String observacao;
-
-    @Autowired
-    private DoacaoDAO dao;
-    @Autowired
-    private DoadorDAO doadorDAO;
-    @Autowired
-    private AdministradorDAO adminDAO;
 
     public Doacao() {}
 
@@ -53,55 +40,4 @@ public class Doacao {
 
     public String getObservacao() {return observacao;}
     public void setObservacao(String observacao) {this.observacao = observacao;}
-
-
-    public List<Doacao> listar() {
-        return dao.get(""); // Filtro vazio
-    }
-
-    public Doacao buscar(int id) {
-        return dao.get(id);
-    }
-
-    private void validarDoacao(Doacao doacao) {
-        Doador doador = doadorDAO.get(doacao.getId_doador().getId());
-        if (doador == null)
-            throw new RuntimeException("Doador não encontrado com ID: " + doacao.getId_doador().getId());
-
-        Administrador admin = adminDAO.get(doacao.getId_admin().getId());
-        if (admin == null)
-            throw new RuntimeException("Administrador não encontrado com ID: " + doacao.getId_admin().getId());
-
-        if (doacao.getValor() <= 0)
-            throw new RuntimeException("O valor da doação deve ser positivo.");
-
-        doacao.setId_doador(doador);
-        doacao.setId_admin(admin);
-    }
-
-    public Doacao salvar(Doacao doacao) {
-        validarDoacao(doacao);
-        doacao.setData(LocalDate.now());
-
-        return dao.gravar(doacao);
-    }
-
-    public Doacao atualizar(Doacao doacao) {
-        if (dao.get(doacao.getId_doacao()) == null)
-            throw new RuntimeException("Doação não encontrada com ID: " + doacao.getId_doacao());
-
-        validarDoacao(doacao);
-
-        if (dao.atualizar(doacao)) {
-            return dao.get(doacao.getId_doacao());
-        }
-        return null;
-    }
-
-    public boolean excluir(int id) {
-        if (dao.get(id) == null)
-            throw new RuntimeException("Doação não encontrada com ID: " + id);
-
-        return dao.excluir(id);
-    }
 }

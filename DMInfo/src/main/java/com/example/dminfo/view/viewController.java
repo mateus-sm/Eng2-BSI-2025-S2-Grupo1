@@ -69,13 +69,10 @@ public class viewController {
     public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {
         Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
 
-        // 1. VERIFICAÇÃO DE SEGURANÇA CRÍTICA: Se o ID não for encontrado, redireciona para o login.
-        if (idAdminLogado == null) {
-            // Se o usuário não estiver logado, ele não pode acessar o formulário
+        //VERIFICAÇÃO DE SEGURANÇA CRÍTICA: Se o ID não for encontrado, redireciona para o login.
+        if (idAdminLogado == null)
             return "redirect:/login";
-        }
 
-        // 2. Se o ID for encontrado, injeta-o no modelo
         model.addAttribute("idAdminLogado", idAdminLogado);
 
         return "doacao-form";

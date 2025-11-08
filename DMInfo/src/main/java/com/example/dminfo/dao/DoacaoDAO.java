@@ -23,31 +23,44 @@ public class DoacaoDAO {
         doacao.setValor(rs.getDouble("valor"));
         doacao.setObservacao(rs.getString("observacao"));
 
-        //Monta Doador
         Doador doador = new Doador();
         doador.setId(rs.getInt("id_doador"));
         doador.setNome(rs.getString("doador_nome"));
         doacao.setId_doador(doador);
 
-        //Monta Admin
         Administrador admin = new Administrador();
         admin.setId(rs.getInt("id_admin"));
 
-        //Monta Usuário do Admin
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
         usuario.setNome(rs.getString("usuario_nome"));
         admin.setUsuario(usuario);
-        doacao.setId_admin(admin);
 
+        doacao.setId_admin(admin);
         return doacao;
+    }
+
+    public Doacao get(int id) {
+        String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
+                "FROM doacao d " +
+                "JOIN doador don ON d.id_doador = don.id_doador " +
+                "JOIN administrador a ON d.id_admin = a.id_admin " +
+                "JOIN usuario u ON a.id_usuario = u.id_usuario " +
+                "WHERE d.id_doacao = " + id;
+
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        try {
+            if (rs != null && rs.next())
+                return buildDoacao(rs);
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Doação por ID: " + e.getMessage());
+        }
+        return null;
     }
 
     public List<Doacao> get(String filtro) {
         List<Doacao> doacoes = new ArrayList<>();
-        String sql = "SELECT d.*, " +
-                "   don.nome AS doador_nome, don.id_doador, " +
-                "   a.id_admin, u.id_usuario, u.nome AS usuario_nome " +
+        String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
                 "FROM doacao d " +
                 "JOIN doador don ON d.id_doador = don.id_doador " +
                 "JOIN administrador a ON d.id_admin = a.id_admin " +
@@ -65,19 +78,10 @@ public class DoacaoDAO {
         return doacoes;
     }
 
-    public Doacao get(int id) {
-        String filtro = String.format(" WHERE d.id_doacao = %d", id);
-        List<Doacao> lista = get(filtro);
-        if (lista.isEmpty())
-            return null;
-        return lista.get(0);
-    }
-
     public Doacao gravar(Doacao doacao) {
-        String obsOriginal = doacao.getObservacao();
+        String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
         String obsEscapada = obsOriginal.replace("'", "''");
 
-        // Usamos Locale.US para garantir o ponto decimal no valor
         String sql = String.format(Locale.US,
                 "INSERT INTO doacao (id_doador, id_admin, data, valor, observacao) " +
                         "VALUES (%d, %d, '%s', %f, '%s') RETURNING id_doacao",
@@ -103,7 +107,7 @@ public class DoacaoDAO {
     }
 
     public boolean atualizar(Doacao doacao) {
-        String obsOriginal = doacao.getObservacao();
+        String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
         String obsEscapada = obsOriginal.replace("'", "''");
 
         String sql = String.format(Locale.US,

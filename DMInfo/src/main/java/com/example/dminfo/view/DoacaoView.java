@@ -6,11 +6,10 @@ import com.example.dminfo.util.MembroErro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller; // Mantenha @Controller se for a única opção, mas @RestController é o padrão aqui.
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Controller
+@RestController
 @RequestMapping("apis/doacao")
 public class DoacaoView {
 
@@ -18,13 +17,11 @@ public class DoacaoView {
     private DoacaoController controller;
 
     @GetMapping
-    @ResponseBody
     public ResponseEntity<Object> listar() {
         return ResponseEntity.ok(controller.listar());
     }
 
     @GetMapping("/{id}")
-    @ResponseBody
     public ResponseEntity<Object> buscar(@PathVariable int id) {
         Doacao doacao = controller.buscar(id);
         if (doacao == null)
@@ -33,7 +30,6 @@ public class DoacaoView {
     }
 
     @PostMapping
-    @ResponseBody
     public ResponseEntity<Object> salvar(@RequestBody Doacao doacao) {
         try {
             Doacao salva = controller.salvar(doacao);
@@ -46,7 +42,6 @@ public class DoacaoView {
     }
 
     @PutMapping("/{id}")
-    @ResponseBody
     public ResponseEntity<Object> atualizar(@PathVariable int id, @RequestBody Doacao doacao) {
         try {
             doacao.setId_doacao(id);
@@ -62,7 +57,6 @@ public class DoacaoView {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseBody
     public ResponseEntity<Object> excluir(@PathVariable int id) {
         try {
             if (controller.excluir(id))

@@ -19,7 +19,7 @@ import java.util.UUID;
 @Service
 public class EnviarFotosAtividadeController {
 
-    private static final String UPLOAD_DIRECTORY = "E:/Eng2-BSI-2025-S2-Grupo1-main/uploads/";
+    private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/";
 
     @Autowired
     private EnviarFotosAtividadeDAO dao;
@@ -29,7 +29,6 @@ public class EnviarFotosAtividadeController {
     }
 
     public EnviarFotosAtividade salvar(MultipartFile arquivo, int idMembro, int idAtividade) throws IOException {
-        // 1️⃣ Salvar arquivo físico
         Files.createDirectories(Paths.get(UPLOAD_DIRECTORY));
 
         String extension = arquivo.getOriginalFilename().substring(arquivo.getOriginalFilename().lastIndexOf("."));
@@ -37,7 +36,6 @@ public class EnviarFotosAtividadeController {
         Path caminho = Paths.get(UPLOAD_DIRECTORY + nomeArquivo);
         arquivo.transferTo(caminho.toFile());
 
-        // 2️⃣ Criar objeto para salvar no banco
         EnviarFotosAtividade foto = new EnviarFotosAtividade();
         foto.setFoto(nomeArquivo);
         foto.setData(LocalDate.now());
@@ -50,7 +48,6 @@ public class EnviarFotosAtividadeController {
         atividade.setId(idAtividade);
         foto.setAtividade(atividade);
 
-        // 3️⃣ Salvar no banco via DAO
         return dao.gravar(foto);
     }
 }

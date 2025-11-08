@@ -4,6 +4,8 @@ import com.example.dminfo.dao.EventoDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class Evento {
 
@@ -11,7 +13,6 @@ public class Evento {
     private Administrador admin;
     private String titulo;
     private String descricao;
-
 
     @Autowired(required = false)
     private EventoDAO dao;
@@ -31,34 +32,64 @@ public class Evento {
         this.descricao = descricao;
     }
 
+    public List<Evento> listar() {
+        return dao.getAll();
+    }
+
+    public Evento getById(Integer id) {
+        return dao.getById(id);
+    }
+
+    public Evento salvar(Evento evento) {
+        if (evento.getTitulo() == null || evento.getTitulo().trim().isEmpty())
+            throw new RuntimeException("O título do evento é obrigatório.");
+
+        return dao.gravar(evento);
+    }
+
+    public Evento atualizar(Integer id, Evento evento) {
+        Evento existente = dao.getById(id);
+        if (existente == null)
+            throw new RuntimeException("Evento com ID " + id + " não encontrado para atualização.");
+
+        existente.setTitulo(evento.getTitulo());
+        existente.setDescricao(evento.getDescricao());
+
+        if (dao.alterar(existente))
+            return existente;
+        throw new RuntimeException("Falha ao atualizar o evento no banco de dados.");
+    }
+
+    public boolean excluir(Integer id) {
+        Evento existente = dao.getById(id);
+        if (existente == null)
+            return false;
+
+        return dao.excluir(id);
+    }
+
+
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public Administrador getAdmin() {
         return admin;
     }
-
     public void setAdmin(Administrador admin) {
         this.admin = admin;
     }
-
     public String getTitulo() {
         return titulo;
     }
-
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
-
     public String getDescricao() {
         return descricao;
     }
-
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }

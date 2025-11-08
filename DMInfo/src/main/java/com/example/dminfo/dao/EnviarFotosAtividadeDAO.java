@@ -50,15 +50,33 @@ public class EnviarFotosAtividadeDAO {
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
-            if (rs != null) {
-                while (rs.next()) {
+            if (rs != null)
+                while (rs.next())
                     fotos.add(buildFoto(rs));
-                }
-            }
         } catch (SQLException e) {
             System.out.println("Erro ao listar Fotos de Atividade: " + e.getMessage());
         }
         return fotos;
+    }
+
+    public EnviarFotosAtividade get(int idFoto) {
+        String sql = String.format(
+                "SELECT ef.*, m.id_membro, u.id_usuario, u.nome AS usuario_nome, a.id_atividade, a.descricao AS atividade_descricao " +
+                        "FROM enviar_fotos_atividade ef " +
+                        "JOIN membro m ON ef.id_membro = m.id_membro " +
+                        "JOIN usuario u ON m.id_usuario = u.id_usuario " +
+                        "JOIN atividade a ON ef.id_atividade = a.id_atividade " +
+                        "WHERE ef.id_foto = %d", idFoto
+        );
+
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        try {
+            if (rs != null && rs.next())
+                return buildFoto(rs);
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Foto: " + e.getMessage());
+        }
+        return null;
     }
 
     public EnviarFotosAtividade gravar(EnviarFotosAtividade foto) {
@@ -80,5 +98,30 @@ public class EnviarFotosAtividadeDAO {
         int idGerado = SingletonDB.getConexao().getMaxPK("enviar_fotos_atividade", "id_foto");
         foto.setId(idGerado);
         return foto;
+    }
+
+    public boolean alterar(EnviarFotosAtividade foto) {
+        String sql = String.format(
+                "UPDATE enviar_fotos_atividade SET id_membro=%d, id_atividade=%d, foto='%s', data='%s' WHERE id_foto=%d",
+                foto.getMembro().getId(),
+                foto.getAtividade().getId(),
+                foto.getFoto(),
+                foto.getData().toString(),
+                foto.getId()
+        );
+        boolean executou = SingletonDB.getConexao().manipular(sql);
+
+        if (!executou)
+            System.out.println("Erro ao alterar foto: " + SingletonDB.getConexao().getMensagemErro());
+        return executou;
+    }
+
+    public boolean excluir(int idFoto) {
+        String sql = String.format("DELETE FROM enviar_fotos_atividade WHERE id_foto=%d", idFoto);
+        boolean executou = SingletonDB.getConexao().manipular(sql);
+
+        if (!executou)
+            System.out.println("Erro ao excluir foto: " + SingletonDB.getConexao().getMensagemErro());
+        return executou;
     }
 }

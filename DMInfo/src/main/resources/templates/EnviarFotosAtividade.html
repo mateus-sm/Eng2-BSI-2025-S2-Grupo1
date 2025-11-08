@@ -15,9 +15,19 @@
         <h2 class="mb-4">Enviar Fotos da Atividade</h2>
 
         <form id="upload-form">
+
             <div class="mb-3">
-                <label for="id_atividade" class="form-label">ID da Atividade *</label>
-                <input type="number" class="form-control" id="id_atividade" name="id_atividade" required>
+                <label for="id_evento" class="form-label">Evento *</label>
+                <select class="form-select" id="id_evento" required>
+                    <option value="" disabled selected>Carregando eventos...</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_atividade" class="form-label">Atividade *</label>
+                <select class="form-select" id="id_atividade" disabled required>
+                    <option value="" disabled selected>Selecione um evento primeiro...</option>
+                </select>
             </div>
 
             <div class="mb-3">

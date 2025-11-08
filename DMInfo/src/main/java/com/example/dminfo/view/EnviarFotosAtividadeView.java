@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -20,6 +20,7 @@ public class EnviarFotosAtividadeView {
     @Autowired
     private EnviarFotosAtividadeController controller;
 
+    // GET /apis/atividade/{idAtividade}/fotos
     @GetMapping
     public ResponseEntity<Object> listarFotos(@PathVariable int idAtividade) {
         try {
@@ -30,21 +31,56 @@ public class EnviarFotosAtividadeView {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Object> enviarFoto(
-            @PathVariable int idAtividade,
-            @RequestParam("foto") MultipartFile file,
-            @RequestParam("id_membro") int idMembro
-    ) {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MembroErro("Nenhum arquivo de foto enviado."));
-        }
-
+    // GET /apis/eventos
+    @GetMapping("/eventos")
+    public ResponseEntity<Object> listarTodosEventos() {
         try {
-            EnviarFotosAtividade fotoSalva = controller.salvar(file, idMembro, idAtividade);
-            return ResponseEntity.status(HttpStatus.CREATED).body(fotoSalva);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(new MembroErro("Falha no upload: " + e.getMessage()));
+            List<Map<String, Object>> eventos = controller.listarTodosEventos();
+            return ResponseEntity.ok(eventos);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new MembroErro("Erro ao buscar eventos: " + e.getMessage()));
         }
+    }
+
+    // GET /apis/atividade/{idAtividade}/fotos/{idFoto}
+    @GetMapping("/{idFoto}")
+    public ResponseEntity<Object> buscarFotoPorId(@PathVariable int idFoto) {
+        Map<String, Object> resultado = controller.getById(idFoto);
+
+        if (resultado.containsKey("erro"))
+            return ResponseEntity.badRequest().body(new MembroErro(resultado.get("erro").toString()));
+        return ResponseEntity.ok(resultado);
+    }
+
+    // POST /apis/atividade/{idAtividade}/fotos
+    @PostMapping
+    public ResponseEntity<Object> enviarFoto(@PathVariable int idAtividade, @RequestParam("foto") MultipartFile file, @RequestParam("id_membro") int idMembro) {
+        Map<String, Object> resultado = controller.salvar(file, idMembro, idAtividade);
+
+        if (resultado.containsKey("erro"))
+            return ResponseEntity.badRequest().body(new MembroErro(resultado.get("erro").toString()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+    }
+
+    // DELETE /apis/atividade/{idAtividade}/fotos/{idFoto}
+    @DeleteMapping("/{idFoto}")
+    public ResponseEntity<Object> excluirFoto(@PathVariable int idFoto) {
+        Map<String, Object> resultado = controller.excluirFoto(idFoto);
+
+        if (resultado.containsKey("erro") || resultado.containsKey("alerta"))
+            return ResponseEntity.badRequest().body(new MembroErro(resultado.containsKey("erro") ? resultado.get("erro").toString() : resultado.get("alerta").toString()));
+
+        return ResponseEntity.ok(new MembroErro(resultado.get("mensagem").toString()));
+    }
+
+    // PUT /apis/atividade/{idAtividade}/fotos/{idFoto}
+    @PutMapping("/{idFoto}")
+    public ResponseEntity<Object> alterarFoto(@PathVariable int idFoto, @RequestBody EnviarFotosAtividade foto) {
+        Map<String, Object> resultado = controller.alterar(idFoto, foto.getMembro().getId(), foto.getAtividade().getId());
+
+        if (resultado.containsKey("erro"))
+            return ResponseEntity.badRequest().body(new MembroErro(resultado.get("erro").toString()));
+
+        return ResponseEntity.ok(new MembroErro(resultado.get("mensagem").toString()));
     }
 }

@@ -1,9 +1,66 @@
+async function carregarEventos() {
+    const selectEvento = document.getElementById('id_evento');
+    try {
+        const response = await fetch('/apis/eventos');
+        if (!response.ok)
+            throw new Error('Falha ao carregar eventos');
+
+        const eventos = await response.json();
+
+        selectEvento.innerHTML = '<option value="" disabled selected>Selecione o Evento</option>';
+        selectEvento.disabled = false;
+
+        eventos.forEach(evento => {
+            const option = document.createElement('option');
+            option.value = evento.id;
+            option.textContent = `${evento.titulo} (${evento.descricao})`;
+            selectEvento.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+        selectEvento.innerHTML = '<option value="" disabled selected>Erro ao carregar eventos</option>';
+        selectEvento.disabled = true;
+    }
+}
+
+async function carregarAtividades(idEvento) {
+    const selectAtividade = document.getElementById('id_atividade');
+    selectAtividade.innerHTML = '<option value="" disabled selected>Carregando atividades...</option>';
+    selectAtividade.disabled = true;
+
+    try {
+        const response = await fetch(`/apis/eventos/${idEvento}/atividades`);
+        if (!response.ok)
+            throw new Error('Falha ao carregar atividades');
+
+        const atividades = await response.json();
+
+        selectAtividade.innerHTML = '<option value="" disabled selected>Selecione a Atividade</option>';
+        selectAtividade.disabled = false;
+
+        if (atividades.length === 0) {
+            selectAtividade.innerHTML = '<option value="" disabled selected>Nenhuma atividade encontrada</option>';
+            selectAtividade.disabled = true;
+            return;
+        }
+
+        atividades.forEach(atividade => {
+            const option = document.createElement('option');
+            option.value = atividade.id;
+            option.textContent = atividade.descricao;
+            selectAtividade.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar atividades:', error);
+        selectAtividade.innerHTML = '<option value="" disabled selected>Erro ao carregar atividades</option>';
+    }
+}
+
 document.getElementById('foto').addEventListener('change', function(event) {
     const file = event.target.files[0];
     const previewId = 'image-preview';
     let preview = document.getElementById(previewId);
 
-    // Se ainda não existe o <img>, cria dinamicamente
     if (!preview) {
         preview = document.createElement('img');
         preview.id = previewId;
@@ -26,6 +83,12 @@ document.getElementById('foto').addEventListener('change', function(event) {
     reader.readAsDataURL(file);
 });
 
+document.getElementById('id_evento').addEventListener('change', function(event) {
+    const idEventoSelecionado = event.target.value;
+    if (idEventoSelecionado)
+        carregarAtividades(idEventoSelecionado);
+});
+
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -38,13 +101,13 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         return;
     }
     if (!idAtividade || !idMembro) {
-        alert("ID da Atividade e ID do Membro são obrigatórios.");
+        alert("Por favor, selecione o Evento e a Atividade, e verifique o ID do Membro.");
         return;
     }
 
     const formData = new FormData();
     formData.append('id_membro', idMembro);
-    formData.append('foto', fotoInput.files[0]); // Pega o arquivo
+    formData.append('foto', fotoInput.files[0]);
 
     const API_URL = `/apis/atividade/${idAtividade}/fotos`;
 
@@ -57,10 +120,12 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         if (!response.ok) {
             let errorMsg = 'Falha no upload';
             try {
+                // Seu backend retorna Map.of("erro", "Mensagem"), que a View converte para JSON
                 const erro = await response.json();
+                // A chave pode ser 'erro' (do seu backend) ou 'message' (padrão de erro)
                 errorMsg = erro.erro || erro.message || 'Falha no upload';
             } catch(e) {
-                errorMsg = `Falha no upload: ${response.statusText}`;
+                errorMsg = `Falha no upload: ${response.status} ${response.statusText}`;
             }
             throw new Error(errorMsg);
         }
@@ -68,25 +133,14 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         const resultado = await response.json();
         alert('Foto enviada com sucesso! ID da Foto: ' + resultado.id);
 
+        // Limpar formulário após sucesso
+        document.getElementById('upload-form').reset();
+        document.getElementById('image-preview').style.display = 'none';
+
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro: ' + error.message);
     }
 });
 
-document.getElementById('foto').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById('image-preview');
-
-    if (!file) {
-        preview.style.display = 'none';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-});
+carregarEventos();

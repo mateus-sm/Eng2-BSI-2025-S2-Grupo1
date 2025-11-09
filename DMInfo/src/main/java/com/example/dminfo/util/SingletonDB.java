@@ -11,7 +11,5 @@ public class SingletonDB {
         return conexao.conectar("jdbc:postgresql://localhost:5432/",
                 "dminfo_db","postgres","admin@123");
     }
-    public static com.example.dminfo.util.Conexao getConexao(){
-        return conexao;
-    }
+    public static com.example.dminfo.util.Conexao getConexao(){return conexao;}
 }

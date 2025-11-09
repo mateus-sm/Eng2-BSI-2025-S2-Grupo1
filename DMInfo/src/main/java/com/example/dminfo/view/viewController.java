@@ -1,6 +1,5 @@
 package com.example.dminfo.view;
 
-// Imports que você já tinha
 import org.springframework.ui.Model;
 import com.example.dminfo.controller.ParametrosController;
 import jakarta.servlet.http.HttpSession;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-// --- IMPORTS CRÍTICOS PARA LOGIN/REGISTRO ---
 import com.example.dminfo.controller.UsuarioController;
 import com.example.dminfo.model.Usuario;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,10 +27,6 @@ public class viewController {
     private UsuarioController usuarioService;
 
     private static final String ADMIN_ID_SESSION_KEY = "ADMIN_ID_SESSION";
-
-    //
-    // --- MÉTODOS DE LOGIN ---
-    //
 
     @GetMapping("/login")
     public String paginaLogin(Model model) {
@@ -57,19 +51,11 @@ public class viewController {
         }
     }
 
-    //
-    // --- MÉTODOS DE REGISTRO (CORRIGIDOS) ---
-    //
-
     @GetMapping("/register")
     public String paginaRegistro() {
         return "register";
     }
 
-    /**
-     * Processa o formulário de registro COMPLETO.
-     * (Versão final com tratamento de data e validação por campo)
-     */
     @PostMapping("/register")
     public String processarRegistro(
             @RequestParam("nome") String nome,
@@ -78,7 +64,6 @@ public class viewController {
             @RequestParam("senha") String senha,
             @RequestParam("email") String email,
             @RequestParam("telefone") String telefone,
-            // --- MUDANÇA PRINCIPAL: Recebemos a data como String ---
             @RequestParam("dtnasc") String dtnascStr,
             @RequestParam("cep") String cep,
             @RequestParam("rua") String rua,
@@ -94,16 +79,12 @@ public class viewController {
         Map<String, String> errors = new HashMap<>(); // Criamos o mapa de erros
 
         try {
-            // Tenta converter a string da data
-            if (dtnascStr != null && !dtnascStr.trim().isEmpty()) {
+            if (dtnascStr != null && !dtnascStr.trim().isEmpty())
                 dtnasc = LocalDate.parse(dtnascStr, formatter);
-            }
         } catch (Exception e) {
-            // Se a data for inválida (ex: "99/99/9999"), adicionamos um erro
             errors.put("dtnasc_error", "Data em formato inválido. Use dd/mm/aaaa.");
         }
 
-        // 1. Criamos o objeto Usuario com todos os dados
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(nome);
         novoUsuario.setCpf(cpf);
@@ -118,16 +99,12 @@ public class viewController {
         novoUsuario.setCidade(cidade);
         novoUsuario.setUf(uf);
 
-        // 2. CHAMAMOS O MÉTODO DE VALIDAÇÃO
-        // E adicionamos os erros dele ao nosso mapa
         errors.putAll(usuarioService.validar(novoUsuario));
 
-        // 3. Verificamos se o Mapa de erros NÃO está vazio
         if (!errors.isEmpty()) {
             // Se houver erros, adicionamos todos eles ao Model
             errors.forEach(model::addAttribute); // ex: model.addAttribute("cpf_error", "Este CPF...")
 
-            // Adicionamos os valores do formulário DE VOLTA ao Model para repopular
             model.addAttribute("nome", nome);
             model.addAttribute("cpf", cpf);
             model.addAttribute("usuario", usuario);
@@ -140,20 +117,14 @@ public class viewController {
             model.addAttribute("cidade", cidade);
             model.addAttribute("uf", uf);
 
-            return "register"; // Volta para a página de registro
+            return "register";
         }
 
-        // 4. SUCESSO! (Se o mapa 'errors' estava vazio)
         usuarioService.salvar(novoUsuario);
 
         redirectAttributes.addFlashAttribute("sucesso", "Conta criada com sucesso! Faça o login.");
         return "redirect:/login";
     }
-
-
-    //
-    // --- SEUS MÉTODOS EXISTENTES (não mexer) ---
-    //
 
     @GetMapping("app/parametrizacao")
     public String carregarPagina() {
@@ -187,12 +158,22 @@ public class viewController {
     public String paginaGerenciarAdministradores() {return "administradores";}
 
     @GetMapping("/app/doador")
-    public String paginaGerenciarDoador() {
+    public String paginaGerenciarDoador(Model model, HttpSession session) {
+        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+        if (idAdminLogado == null)
+            return "redirect:/login";
+        model.addAttribute("idAdminLogado", idAdminLogado);
         return "doador";
     }
 
     @GetMapping("/app/doacao")
-    public String paginaGerenciarDoacao() { return "doacao"; }
+    public String paginaGerenciarDoacao(Model model, HttpSession session) {
+        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+        if (idAdminLogado == null)
+            return "redirect:/login";
+        model.addAttribute("idAdminLogado", idAdminLogado);
+        return "doacao";
+    }
 
     @GetMapping("/app/conquista")
     public String paginaGerenciarConquista() { return "conquista"; }

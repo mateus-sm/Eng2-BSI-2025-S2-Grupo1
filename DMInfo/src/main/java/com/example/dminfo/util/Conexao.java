@@ -95,4 +95,7 @@ public class Conexao {
         }
         return max;
     }
+    public Connection getConnection() {
+        return this.connect;
+    }
 }

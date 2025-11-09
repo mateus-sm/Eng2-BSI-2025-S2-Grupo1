@@ -60,4 +60,7 @@ public class UsuarioController {
     public boolean excluir(int id) {
         return usuarioModel.excluir(id);
     }
+
+    public Map<String, String> validar(Usuario usuario) {return usuarioModel.validar(usuario);
+    }
 }

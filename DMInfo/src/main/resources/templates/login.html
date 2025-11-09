@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - DM Info</title>
+
     <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles/login.css}">
@@ -19,21 +20,21 @@
     <h1>DM Info</h1>
     <h3>Bem-vindo, Irmão!</h3>
 
-    <form id="login-form" class="login-form">
+    <form id="login-form" class="login-form" th:action="@{/login}" method="POST">
 
-        <div id="error-message" class="alert alert-danger d-none" role="alert">
-            Usuário ou senha inválidos.
+        <div th:if="${erro}" id="error-message" class="alert alert-danger" role="alert">
+            <span th:text="${erro}"></span>
         </div>
 
         <input type="text" id="usuario" name="usuario" placeholder="Usuário" required />
         <input type="password" id="senha" name="senha" placeholder="Senha" required />
 
         <button type="submit">Entrar</button>
+        <a href="/register" class="register-link">Criar conta</a>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/js/login.js}"></script>
 
 </body>
 </html>

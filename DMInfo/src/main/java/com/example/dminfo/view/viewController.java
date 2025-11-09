@@ -45,12 +45,29 @@ public class viewController {
     public String paginaGerenciarAdministradores() {return "administradores";}
 
     @GetMapping("/app/doador")
-    public String paginaGerenciarDoador() {
+    public String paginaGerenciarDoador(Model model, HttpSession session) {
+
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//
+//        model.addAttribute("idAdminLogado", idAdminLogado);
+
         return "doador";
     }
 
     @GetMapping("/app/doacao")
-    public String paginaGerenciarDoacao() { return "doacao"; }
+    public String paginaGerenciarDoacao(Model model, HttpSession session) {
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//
+//        model.addAttribute("idAdminLogado", idAdminLogado);
+
+        return "doacao";
+    }
 
     @GetMapping("/app/conquista")
     public String paginaGerenciarConquista() { return "conquista"; }
@@ -67,13 +84,12 @@ public class viewController {
 
     @GetMapping("/app/doacao-form")
     public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {
-        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-
-        //VERIFICAÇÃO DE SEGURANÇA CRÍTICA: Se o ID não for encontrado, redireciona para o login.
-        if (idAdminLogado == null)
-            return "redirect:/login";
-
-        model.addAttribute("idAdminLogado", idAdminLogado);
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//
+//        model.addAttribute("idAdminLogado", idAdminLogado);
 
         return "doacao-form";
     }

@@ -1,167 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
-    <title>Registrar - DM Info</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Registrar - DM Info</title>
 
-    <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/styles/login.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
+        <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/styles/login.css}">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
 
-<div class="container container-register">
-    <div class="logo">
-        <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+    <div class="container container-register">
+        <div class="logo">
+            <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+        </div>
+
+        <h1>Registrar</h1>
+        <h3>Crie sua conta</h3>
+
+        <form class="login-form" th:action="@{/register}" method="POST" novalidate>
+
+            <div th:if="${sucesso}" class="alert alert-success w-100" role="alert">
+                <span th:text="${sucesso}"></span>
+            </div>
+
+            <div class="row g-2 w-100">
+
+                <div class="col-md-6">
+                    <input type="text" name="nome" placeholder="Nome Completo" required class="form-control" th:value="${nome}" />
+                    <span th:if="${nome_error}" th:text="${nome_error}" class="error"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <input type="text" name="cpf" id="cpf" placeholder="CPF" required class="form-control" th:value="${cpf}" />
+                    <span th:if="${cpf_error}" th:text="${cpf_error}" class="error"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <input type="text" name="usuario" placeholder="Login (usuário)" required class="form-control" th:value="${usuario}" />
+                    <span th:if="${usuario_error}" th:text="${usuario_error}" class="error"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <input type="password" name="senha" placeholder="Senha" required class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <input type="email" name="email" placeholder="E-mail" required class="form-control" th:value="${email}" />
+                    <span th:if="${email_error}" th:text="${email_error}" class="error"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <input type="tel" name="telefone" id="telefone" placeholder="Telefone" required class="form-control" th:value="${telefone}" />
+                </div>
+
+                <div class="col-md-6">
+                    <input type="text" id="dtnasc" name="dtnasc" placeholder="Data de Nascimento (dd/mm/aaaa)" class="form-control" th:value="${dtnasc}" required>
+                    <span th:if="${dtnasc_error}" th:text="${dtnasc_error}" class="error"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <input type="text" name="cep" id="cep" placeholder="CEP" required class="form-control" th:value="${cep}" />
+                </div>
+                <div class="col-12">
+                    <input type="text" name="rua" id="rua" placeholder="Rua / Endereço" required class="form-control" th:value="${rua}" />
+                </div>
+                <div class="col-md-6">
+                    <input type="text" name="bairro" id="bairro" placeholder="Bairro" required class="form-control" th:value="${bairro}" />
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="cidade" id="cidade" placeholder="Cidade" required class="form-control" th:value="${cidade}" />
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="uf" id="uf" placeholder="UF" maxlength="2" required class="form-control" th:value="${uf}" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">Registrar</button>
+            <a href="/login" class="register-link">Já tenho conta</a>
+        </form>
     </div>
 
-    <h1>Registrar</h1>
-    <h3>Crie sua conta</h3>
-
-    <form class="login-form" th:action="@{/register}" method="POST">
-
-        <div th:if="${sucesso}" class="alert alert-success w-100" role="alert">
-            <span th:text="${sucesso}"></span>
-        </div>
-
-        <div class="row g-2 w-100">
-
-            <div class="col-md-6">
-                <input type="text" name="nome" id="nome" placeholder="Nome Completo" required
-                       class="form-control" th:value="${nome}"
-                       th:classappend="${nome_error} ? 'input-error' : ''" />
-                <span th:if="${nome_error}" th:text="${nome_error}"
-                      id="nome_error_msg" class="error"></span>
-            </div>
-
-            <div class="col-md-6">
-                <input type="text" name="cpf" id="cpf" placeholder="CPF (000.000.000-00)" required
-                       class="form-control" th:value="${cpf}"
-                       th:classappend="${cpf_error} ? 'input-error' : ''" />
-                <span th:if="${cpf_error}" th:text="${cpf_error}"
-                      id="cpf_error_msg" class="error"></span>
-            </div>
-
-            <div class="col-md-6">
-                <input type="text" name="usuario" id="usuario" placeholder="Login (usuário)" required
-                       class="form-control" th:value="${usuario}"
-                       th:classappend="${usuario_error} ? 'input-error' : ''" />
-                <span th:if="${usuario_error}" th:text="${usuario_error}"
-                      id="usuario_error_msg" class="error"></span>
-            </div>
-
-            <div class="col-md-6">
-                <input type="password" name="senha" id="senha" placeholder="Senha" required class="form-control" />
-            </div>
-
-            <div class="col-md-6">
-                <input type="email" name="email" id="email" placeholder="E-mail" required
-                       class="form-control" th:value="${email}"
-                       th:classappend="${email_error} ? 'input-error' : ''" />
-                <span th:if="${email_error}" th:text="${email_error}"
-                      id="email_error_msg" class="error"></span>
-            </div>
-
-            <div class="col-md-6">
-                <input type="tel" name="telefone" id="telefone" placeholder="Telefone" required
-                       class="form-control" th:value="${telefone}" />
-            </div>
-
-            <div class="col-md-6">
-                <input type="text" id="dtnasc" name="dtnasc" placeholder="Data de Nascimento (dd/mm/aaaa)"
-                       class="form-control" th:value="${dtnasc}" required
-                       th:classappend="${dtnasc_error} ? 'input-error' : ''" />
-                <span th:if="${dtnasc_error}" th:text="${dtnasc_error}"
-                      id="dtnasc_error_msg" class="error"></span>
-            </div>
-
-            <div class="col-md-6">
-                <input type="text" name="cep" id="cep" placeholder="CEP" required
-                       class="form-control" th:value="${cep}" />
-            </div>
-
-            <div class="col-12">
-                <input type="text" name="rua" id="rua" placeholder="Rua / Endereço" required
-                       class="form-control" th:value="${rua}" />
-            </div>
-            <div class="col-md-6">
-                <input type="text" name="bairro" id="bairro" placeholder="Bairro" required
-                       class="form-control" th:value="${bairro}" />
-            </div>
-            <div class="col-md-4">
-                <input type="text" name="cidade" id="cidade" placeholder="Cidade" required
-                       class="form-control" th:value="${cidade}" />
-            </div>
-            <div class="col-md-2">
-                <input type="text" name="uf" id="uf" placeholder="UF" maxlength="2" required
-                       class="form-control" th:value="${uf}" />
-            </div>
-        </div>
-
-        <button type="submit" class="btn-register">Registrar</button>
-        <a href="/login" class="register-link">Já tenho conta</a>
-    </form>
-</div>
-
-<script>
-    // CPF
-    document.getElementById("cpf").addEventListener("input", function () {
-        let v = this.value.replace(/\D/g, "").slice(0, 11);
-        v = v.replace(/(\d{3})(\d)/, "$1.$2")
-            .replace(/(\d{3})(\d)/, "$1.$2")
-            .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-        this.value = v;
-    });
-
-    // Telefone
-    document.getElementById("telefone").addEventListener("input", function () {
-        let v = this.value.replace(/\D/g, "").slice(0, 11);
-        v = v.replace(/(\d{2})(\d)/, "($1) $2")
-            .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
-        this.value = v;
-    });
-
-    // Data Nascimento
-    document.getElementById("dtnasc").addEventListener("input", function () {
-        let v = this.value.replace(/\D/g, "").slice(0, 8);
-        if (v.length >= 5) v = v.replace(/(\d{2})(\d{2})(\d+)/, "$1/$2/$3");
-        else if (v.length >= 3) v = v.replace(/(\d{2})(\d+)/, "$1/$2");
-        this.value = v;
-    });
-
-    // CEP (ViaCEP)
-    document.getElementById("cep").addEventListener("blur", function () {
-        const cep = this.value.replace(/\D/g, "");
-        if (cep.length !== 8) return;
-        fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(r => r.json()).then(d => {
-            if (!d.erro) {
-                document.getElementById('rua').value = d.logradouro || "";
-                document.getElementById('bairro').value = d.bairro || "";
-                document.getElementById('cidade').value = d.localidade || "";
-                document.getElementById('uf').value = d.uf || "";
-            }
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const inputsComErro = document.querySelectorAll('.input-error');
-        inputsComErro.forEach(input => {
-            input.addEventListener('input', () => {
-                input.classList.remove('input-error');
-                const errorMsgId = input.id + '_error_msg';
-                const errorMsg = document.getElementById(errorMsgId);
-                if (errorMsg) {
-                    errorMsg.style.display = 'none';
+    <script>
+        document.getElementById("cep").addEventListener("blur", function () {
+            const cep = this.value.replace(/\D/g, "");
+            if (cep.length !== 8) return;
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(r => r.json()).then(d => {
+                if (!d.erro) {
+                    document.getElementById('rua').value = d.logouro || "";
+                    document.getElementById('bairro').value = d.bairro || "";
+                    document.getElementById('cidade').value = d.localidade || "";
+                    document.getElementById('uf').value = d.uf || "";
                 }
             });
         });
-    });
-</script>
+    </script>
 
-</body>
+    <script>
+        // Seleciona os elementos do formulário
+        const cpfInput = document.getElementById('cpf');
+        const telInput = document.getElementById('telefone');
+        const dateInput = document.getElementById('dtnasc');
+        const form = document.querySelector('.login-form');
+
+        // --- Funções de Máscara (Formatação Visual) ---
+
+        // Máscara de CPF: 123.456.789-10
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+            value = value.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o 1º ponto
+            value = value.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o 2º ponto
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
+            if (value.length > 14) value = value.substring(0, 14); // Limita o tamanho
+            e.target.value = value;
+        });
+
+        // Máscara de Telefone: (11) 98888-7777
+        telInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2'); // Coloca parênteses no DDD
+            value = value.replace(/(\d{5})(\d{1,4})$/, '$1-$2'); // Adiciona traço (para celular com 9 dígitos)
+            if (value.length > 15) value = value.substring(0, 15); // Limita o tamanho
+            e.target.value = value;
+        });
+
+        // Máscara de Data: 10/05/2025
+        dateInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '$1/$2'); // Adiciona a 1ª barra
+            value = value.replace(/(\d{2})(\d{1,4})$/, '$1/$2'); // Adiciona a 2ª barra
+            if (value.length > 10) value = value.substring(0, 10); // Limita o tamanho
+            e.target.value = value;
+        });
+
+
+        // --- Função de Limpeza (Antes de Enviar) ---
+
+        form.addEventListener('submit', () => {
+            // ATENÇÃO: Isso modifica o valor dos campos SÓ no momento do envio.
+
+            // Limpa o CPF (ex: "123.456.789-10" -> "12345678910")
+            //cpfInput.value = cpfInput.value.replace(/\D/g, '');
+
+            // Limpa o Telefone (ex: "(11) 98888-7777" -> "11988887777")
+            telInput.value = telInput.value.replace(/\D/g, '');
+
+            // A data é mantida como "dd/mm/aaaa", pois o Java/Spring
+            // provavelmente espera esse formato de String.
+        });
+
+    </script>
+
+    <script>
+        // Script de tratamento de erro (Mantido)
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputsComErro = document.querySelectorAll('.input-error');
+            inputsComErro.forEach(input => {
+                input.addEventListener('input', () => {
+                    input.classList.remove('input-error');
+                    const errorMsgId = input.id + '_error_msg';
+                    const errorMsg = document.getElementById(errorMsgId);
+                    if (errorMsg) {
+                        errorMsg.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+
+    </body>
 </html>

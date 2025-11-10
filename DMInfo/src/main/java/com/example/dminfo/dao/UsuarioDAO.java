@@ -4,11 +4,10 @@ import com.example.dminfo.model.Usuario;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement; // Importe
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement; // Importe
-import java.sql.Date; // Importe
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,12 +119,6 @@ public class UsuarioDAO {
     }
 
 
-    // ---
-    // --- MÉTODO GRAVAR (CORRIGIDO) ---
-    // ---
-    /**
-     * Grava um novo usuário no banco usando PreparedStatement.
-     */
     public Usuario gravar(Usuario usuario) {
         String sql = "INSERT INTO usuario (nome, senha, usuario, telefone, email, rua, cidade, " +
                 "bairro, cep, uf, cpf, dtnasc, dtini) " +
@@ -145,9 +138,6 @@ public class UsuarioDAO {
             stmt.setString(10, usuario.getUf());
             stmt.setString(11, usuario.getCpf());
 
-            // --- CORREÇÃO AQUI ---
-            // Se a data for nula, envia NULL para o banco.
-            // Se não for nula, converte e envia a data.
             if (usuario.getDtnasc() != null) {
                 stmt.setDate(12, Date.valueOf(usuario.getDtnasc()));
             } else {

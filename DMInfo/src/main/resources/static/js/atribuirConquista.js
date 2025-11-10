@@ -17,6 +17,15 @@ const alertaContainer = document.getElementById("alertaContainer")
 const totalAtribuicoes = document.getElementById("totalAtribuicoes")
 const mensagemVazia = document.getElementById("mensagemVazia")
 
+//Data maxima
+const hoje = new Date()
+const ano = hoje.getFullYear()
+const mes = String(hoje.getMonth() + 1).padStart(2, '0')
+const dia = String(hoje.getDate()).padStart(2, '0')
+const dataMaximaHoje = `${ano}-${mes}-${dia}`
+
+dataAtribuicaoInput.setAttribute("max", dataMaximaHoje)
+
 // Estado global
 let todasAsAtribuicoes = []
 const membros = {}

@@ -15,8 +15,6 @@ import java.util.List;
 @Repository
 public class UsuarioDAO {
 
-    // Helper para construir o objeto Usuario a partir do banco
-    // (Este método está perfeito, sem mudanças)
     private Usuario buildUsuario(ResultSet rs) throws SQLException {
         LocalDate dtNasc = (rs.getDate("dtnasc") != null) ? rs.getDate("dtnasc").toLocalDate() : null;
         LocalDate dtIni = (rs.getDate("dtini") != null) ? rs.getDate("dtini").toLocalDate() : null;
@@ -41,7 +39,6 @@ public class UsuarioDAO {
         );
     }
 
-    // --- MÉTODOS DE BUSCA (sem mudanças) ---
     public Usuario get(int id) {
         String sql = "SELECT * FROM usuario WHERE id_usuario = ?";
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
@@ -57,13 +54,12 @@ public class UsuarioDAO {
     }
 
     public Usuario getUsuario(String login) {
-        // Busca apenas usuários ativos (dtfim IS NULL)
         String sql = "SELECT * FROM usuario WHERE usuario = ? AND dtfim IS NULL";
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
             stmt.setString(1, login);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return buildUsuario(rs); // Usa o helper
+                return buildUsuario(rs);
             }
         } catch (SQLException e) {
             System.err.println("Erro ao buscar Usuario por login: " + e.getMessage());
@@ -72,13 +68,12 @@ public class UsuarioDAO {
     }
 
     public Usuario getUsuarioByEmail(String email) {
-        // Busca apenas usuários ativos (dtfim IS NULL)
         String sql = "SELECT * FROM usuario WHERE email = ? AND dtfim IS NULL";
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return buildUsuario(rs); // Usa o helper
+                return buildUsuario(rs);
             }
         } catch (SQLException e) {
             System.err.println("Erro ao buscar Usuario por email: " + e.getMessage());
@@ -87,13 +82,12 @@ public class UsuarioDAO {
     }
 
     public Usuario getUsuarioByCpf(String cpf) {
-        // Busca apenas usuários ativos (dtfim IS NULL)
         String sql = "SELECT * FROM usuario WHERE cpf = ? AND dtfim IS NULL";
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
             stmt.setString(1, cpf);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return buildUsuario(rs); // Usa o helper
+                return buildUsuario(rs);
             }
         } catch (SQLException e) {
             System.err.println("Erro ao buscar Usuario por CPF: " + e.getMessage());
@@ -103,11 +97,10 @@ public class UsuarioDAO {
 
     public List<Usuario> get(String filtro) {
         List<Usuario> usuarios = new ArrayList<>();
-        // Usamos ILIKE para busca case-insensitive no PostgreSQL
         String sql = "SELECT * FROM usuario WHERE nome ILIKE ? AND dtfim IS NULL ORDER BY nome";
 
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
-            stmt.setString(1, "%" + filtro + "%"); // Adiciona '%' para o LIKE
+            stmt.setString(1, "%" + filtro + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 usuarios.add(buildUsuario(rs));
@@ -149,7 +142,6 @@ public class UsuarioDAO {
             } else {
                 stmt.setNull(13, java.sql.Types.DATE);
             }
-            // --- FIM DA CORREÇÃO ---
 
             ResultSet rs = stmt.executeQuery();
 
@@ -182,13 +174,11 @@ public class UsuarioDAO {
             stmt.setString(10, usuario.getUf());
             stmt.setString(11, usuario.getCpf());
 
-            // --- CORREÇÃO AQUI ---
             if (usuario.getDtnasc() != null) {
                 stmt.setDate(12, Date.valueOf(usuario.getDtnasc()));
             } else {
                 stmt.setNull(12, java.sql.Types.DATE);
             }
-            // --- FIM DA CORREÇÃO ---
 
             stmt.setInt(13, usuario.getId());
 
@@ -201,21 +191,18 @@ public class UsuarioDAO {
         }
     }
 
-    // --- MÉTODO EXCLUIR (sem mudanças) ---
     public boolean excluir(int id) {
         // 1. Query com placeholders '?'
         String sql = "UPDATE usuario SET dtfim = ? WHERE id_usuario = ?";
 
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
 
-            // 2. Definir os valores para os placeholders
-            stmt.setDate(1, Date.valueOf(LocalDate.now())); // Define a data atual
-            stmt.setInt(2, id);                             // Define o ID
+            stmt.setDate(1, Date.valueOf(LocalDate.now()));
+            stmt.setInt(2, id);
 
-            // 3. Executar o update
             int linhasAfetadas = stmt.executeUpdate();
 
-            // 4. Retornar true se alguma linha foi afetada
+
             return linhasAfetadas > 0;
 
         } catch (SQLException e) {

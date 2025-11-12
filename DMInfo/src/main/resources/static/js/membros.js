@@ -1,13 +1,17 @@
-// para os modais do Bootstrap
 let membroModal, deleteModal;
 let idParaExcluir = null;
 
-// URL base da sua API
 const API_URL = '/apis/membro';
 
 async function carregarMembros() {
     try {
-        const response = await fetch(API_URL);
+        const termoBusca = document.getElementById('termoBusca').value;
+        let url = API_URL;
+
+        if (termoBusca && termoBusca.trim() !== '')
+            url = `${API_URL}?filtro=${encodeURIComponent(termoBusca)}`;
+
+        const response = await fetch(url);
 
         if (!response.ok)
             throw new Error('Falha ao carregar membros.');
@@ -52,7 +56,7 @@ async function carregarMembros() {
 
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao carregar membros.');
+        alert('Erro ao carregar membros. Verifique o console para mais detalhes.');
     }
 }
 
@@ -75,7 +79,6 @@ async function abrirModalEditar(id) {
 
         const membro = await response.json();
 
-        // Preenche o formulário
         const form = document.getElementById('form-membro');
         form.classList.add('edit-mode');
         document.getElementById('membroModalLabel').innerText = 'Editar Membro';
@@ -187,4 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-novo-membro').addEventListener('click', abrirModalAdicionar);
     document.getElementById('btn-salvar-membro').addEventListener('click', salvarMembro);
     document.getElementById('btn-confirmar-exclusao').addEventListener('click', excluirMembro);
+
+    document.getElementById('termoBusca').addEventListener('keyup', carregarMembros);
 });

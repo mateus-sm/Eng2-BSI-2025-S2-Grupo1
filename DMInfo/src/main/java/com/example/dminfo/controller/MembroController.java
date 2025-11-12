@@ -12,8 +12,8 @@ public class MembroController {
     @Autowired
     private Membro membroModel;
 
-    public List<Membro> listar() {
-        return membroModel.listar();
+    public List<Membro> listar(String filtro) {
+        return membroModel.listarComFiltro(filtro);
     }
 
     public Membro getById(Integer id) {

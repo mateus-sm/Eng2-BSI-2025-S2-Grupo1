@@ -35,7 +35,11 @@ public class Membro {
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
     public List<Membro> listar() {
-        return dao.get(""); // Filtro vazio
+        return dao.get(""); // Filtro vazio (mantido para compatibilidade)
+    }
+
+    public List<Membro> listarComFiltro(String filtro) {
+        return dao.get(filtro);
     }
 
     public Membro getById(Integer id) {

@@ -17,8 +17,8 @@ public class MembroView {
     private MembroController controller;
 
     @GetMapping
-    public ResponseEntity<Object> listar() {
-        return ResponseEntity.ok(controller.listar());
+    public ResponseEntity<Object> listar(@RequestParam(required = false) String filtro) {
+        return ResponseEntity.ok(controller.listar(filtro));
     }
 
     @PostMapping

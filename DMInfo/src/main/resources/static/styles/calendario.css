@@ -1,33 +1,266 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
+/* --- LAYOUT PRINCIPAL (DUAS COLUNAS) --- */
+.container-principal {
+    display: flex;
+    max-width: 1600px; /* Limite a largura total do conteúdo */
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* --- BARRA LATERAL (LISTA DE ATIVIDADES) --- */
+.lista-lateral {
+    width: 350px; /* Largura fixa para a barra lateral */
+    min-width: 300px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    box-sizing: border-box;
+    overflow-y: auto; /* Adiciona scroll se a lista for longa */
+    max-height: 90vh; /* Limita a altura para que o scroll funcione */
+}
+
+.lista-lateral h2 {
+    color: #34495e;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+#lista-atividades-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaçamento entre os itens */
+}
+
+/* --- ESTILO DO ITEM DA ATIVIDADE NA LISTA --- */
+.atividade-item {
+    padding: 10px 15px;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    cursor: default;
+    border-left-width: 5px; /* Define a largura da borda de cor */
+    border-left-style: solid;
+    display: flex;
+    flex-direction: column;
+}
+
+.atividade-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.item-title {
+    font-weight: bold;
     color: #333;
+    font-size: 1.1em;
+}
+
+.item-local, .item-data {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+/* --- CONTAINER DO CALENDÁRIO --- */
+.calendario-conteudo {
+    flex-grow: 1; /* Ocupa o restante do espaço */
     padding: 20px;
 }
-
-.container {
-    max-width: 1100px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+#calendario {
+    height: 100%;
 }
 
-.fc-header-toolbar {
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #ddd;
+/* --- ESTILO DOS BOTÕES DE AÇÃO --- */
+.item-acoes {
+    display: flex;
+    justify-content: flex-end; /* Alinha botões à direita */
+    gap: 8px;
+    margin-top: 10px;
 }
 
-.fc-button-primary {
-    background-color: #284768 !important;
-    border: none !important;
-}
-.fc-button-primary:hover {
-    background-color: #284768 !important;
-}
-
-.fc-event {
+.item-acoes button {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    transition: background-color 0.2s;
+}
+
+/* Botão Adicionar (+) */
+.btn-adicionar {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+.btn-adicionar:hover {
+    background-color: #218838;
+}
+
+/* Botão Remover (-) */
+.btn-remover {
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+}
+.btn-remover:hover {
+    background-color: #c82333;
+}
+
+/* Botão Editar (Pincel) */
+.btn-editar {
+    background-color: #007bff; /* Azul */
+    color: white;
+    font-size: 0.9em; /* Ícone um pouco menor */
+}
+.btn-editar:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para status vazio */
+.status-empty {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    margin-top: 20px;
+}
+.filtro-realizadas {
+    /* Garante que o filtro tenha margem inferior antes de começar a lista */
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-top: 1px solid #e9ecef; /* Linha divisória sutil */
+    border-bottom: 1px solid #e9ecef;
+}
+
+.filtro-realizadas label {
+    display: flex; /* Para alinhar o checkbox e o texto */
+    align-items: center;
+    font-size: 0.95em;
+    color: #495057;
+    cursor: pointer;
+    user-select: none; /* Previne seleção do texto */
+}
+
+.filtro-realizadas input[type="checkbox"] {
+    /* Espaço à direita do checkbox */
+    margin-right: 8px;
+    /* Ajusta o tamanho e aparência (opcional, depende do navegador) */
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+/* Botão Membros */
+.btn-membros {
+    background-color: #6c757d; /* Cinza */
+    color: white;
+}
+.btn-membros:hover {
+    background-color: #5a6268;
+}
+/* --- FUNDO ESCURO (BACKDROP) --- */
+#membros-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Transparência escura */
+    z-index: 1000; /* Garante que fique acima de tudo */
+}
+
+/* --- CONTÊINER PRINCIPAL DO MODAL --- */
+#membros-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centraliza perfeitamente */
+    width: 90%;
+    max-width: 500px; /* Largura ideal para a lista de membros */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1001; /* Fica acima do backdrop */
+    animation: fadeIn 0.3s ease-out; /* Efeito de entrada suave */
+    display: flex; /* Adicionado para compatibilidade */
+    flex-direction: column;
+}
+
+/* --- HEADER --- */
+.membros-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.membros-modal-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #34495e;
+}
+
+.fechar-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.2s;
+}
+
+.fechar-modal-btn:hover {
+    color: #666;
+}
+
+/* --- BODY (LISTA DE MEMBROS) --- */
+.membros-modal-body {
+    padding: 20px;
+    max-height: 400px; /* Altura máxima com scroll */
+    overflow-y: auto;
+}
+
+.membros-modal-body label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.membros-modal-body input[type="checkbox"] {
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* --- FOOTER --- */
+.membros-modal-footer {
+    padding: 10px 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+#btn-salvar-membros {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#btn-salvar-membros:hover {
+    background-color: #0056b3;
+}
+.btn-membros {
+    background-color: #ffc107; /* Amarelo (cor de aviso/warning) */
+    color: white; /* Cor do ícone (simbolo) */
+    /* Outros estilos como padding, border, etc., permanecem os mesmos se já existirem */
+}
+.btn-membros:hover {
+    background-color: #e0a800; /* Um tom de amarelo mais escuro para o hover */
 }

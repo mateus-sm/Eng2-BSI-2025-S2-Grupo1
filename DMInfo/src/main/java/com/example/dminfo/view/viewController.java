@@ -133,7 +133,7 @@ public class viewController {
         }
         return "parametrizacao";
     }
-    // ... (e o resto dos seus métodos) ...
+
     @GetMapping("/app/parametrizacao/exibir")
     public String paginaExibirParametrizacao() {
         return "parametrizacaoExibir";

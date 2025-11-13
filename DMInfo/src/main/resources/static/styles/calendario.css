@@ -58,11 +58,13 @@
     font-weight: bold;
     color: #333;
     font-size: 1.1em;
+    display: inline-block;
 }
 
 .item-local, .item-data {
     font-size: 0.9em;
     color: #6c757d;
+    display: inline-block;
 }
 
 /* --- CONTAINER DO CALENDÁRIO --- */
@@ -129,7 +131,7 @@
 }
 .filtro-realizadas {
     /* Garante que o filtro tenha margem inferior antes de começar a lista */
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     padding: 10px 0;
     border-top: 1px solid #e9ecef; /* Linha divisória sutil */
     border-bottom: 1px solid #e9ecef;
@@ -154,12 +156,98 @@
 }
 /* Botão Membros */
 .btn-membros {
-    background-color: #6c757d; /* Cinza */
-    color: white;
+    background-color: #ffc107; /* Amarelo (cor de aviso/warning) */
+    color: white; /* Cor do ícone (simbolo) */
 }
 .btn-membros:hover {
-    background-color: #5a6268;
+    background-color: #e0a800; /* Um tom de amarelo mais escuro para o hover */
 }
+
+/* ============================================== */
+/* ESTILOS DE PESQUISA E BOTÃO DE SINCRONIZAÇÃO CUSTOMIZADO */
+/* ============================================== */
+
+/* Botão de Sincronização (Customizado) */
+.sync-button-container {
+    padding-bottom: 10px; /* Margem após o botão */
+    padding-top: 5px; /* Margem antes do botão */
+}
+
+/* CORRIGIDO: Botão agora em Azul Escuro */
+.sync-button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #0056b3; /* Azul Escuro */
+    color: white;
+    border: 1px solid #004085;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s, border-color 0.2s;
+    text-align: center;
+    display: flex; /* Para centralizar o conteúdo (ícone e texto) */
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espaço entre o ícone e o texto */
+}
+
+.sync-button:hover {
+    background-color: #004085; /* Azul Escuro mais intenso no hover */
+    border-color: #002752;
+}
+
+/* Estilo para o ícone (Emoji) */
+.sync-icon {
+    font-size: 1.1em;
+    line-height: 1; /* Alinhamento vertical */
+}
+
+/* Estilo para o container da pesquisa de atividades */
+.pesquisa-atividades-container {
+    margin-bottom: 15px;
+}
+
+/* Estilo para o input de pesquisa de atividades */
+#pesquisa-atividades {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+#pesquisa-atividades:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Estilo para o container da pesquisa de membros no modal */
+#pesquisa-membros {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+#pesquisa-membros:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
+/* ============================================== */
+/* ESTILOS DE MODAL (ORIGINAIS) */
+/* ============================================== */
+
 /* --- FUNDO ESCURO (BACKDROP) --- */
 #membros-modal-backdrop {
     position: fixed;
@@ -256,11 +344,24 @@
 #btn-salvar-membros:hover {
     background-color: #0056b3;
 }
-.btn-membros {
-    background-color: #ffc107; /* Amarelo (cor de aviso/warning) */
-    color: white; /* Cor do ícone (simbolo) */
-    /* Outros estilos como padding, border, etc., permanecem os mesmos se já existirem */
+
+/* ============================================== */
+/* ESTILOS: ATIVIDADES JÁ REALIZADAS */
+/* ============================================== */
+
+.atividade-item.realizada {
+    opacity: 0.65; /* Sutilmente mais transparente para indicar conclusão */
+    background-color: #f1f1f1; /* Fundo levemente mais claro/cinza */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-.btn-membros:hover {
-    background-color: #e0a800; /* Um tom de amarelo mais escuro para o hover */
+
+.atividade-item.realizada:hover {
+    opacity: 0.65; /* Mantém a opacidade no hover */
+    transform: none; /* Remove o efeito de hover para atividades realizadas */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: default;
+}
+
+.atividade-item.realizada .item-acoes button {
+    opacity: 0.8;
 }

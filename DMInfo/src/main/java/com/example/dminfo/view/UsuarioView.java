@@ -1,11 +1,9 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.controller.LoginController;
-import com.example.dminfo.util.MembroErro;
+import com.example.dminfo.model.MembroErro;
 import com.example.dminfo.controller.UsuarioController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.example.dminfo.model.Usuario;
 import org.springframework.http.HttpStatus;

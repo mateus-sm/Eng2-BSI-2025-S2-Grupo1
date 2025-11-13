@@ -1,6 +1,6 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.util.MembroErro;
+import com.example.dminfo.model.MembroErro;
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.controller.MembroController;
 import org.springframework.beans.factory.annotation.Autowired;

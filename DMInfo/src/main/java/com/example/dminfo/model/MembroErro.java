@@ -1,4 +1,4 @@
-package com.example.dminfo.util;
+package com.example.dminfo.model;
 
 public class MembroErro {
     private String erro;

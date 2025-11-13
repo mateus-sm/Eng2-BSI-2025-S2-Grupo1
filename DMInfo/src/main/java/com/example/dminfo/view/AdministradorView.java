@@ -2,12 +2,11 @@ package com.example.dminfo.view;
 
 import com.example.dminfo.controller.AdministradorController;
 import com.example.dminfo.model.Administrador;
-import com.example.dminfo.util.MembroErro; // Reutilizando a classe de Erro
+import com.example.dminfo.model.MembroErro;
 import com.example.dminfo.util.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin

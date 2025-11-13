@@ -9,8 +9,10 @@ const PALETA_CORES = [
     '#2add70'
 ];
 
+// FUNÇÃO NOVA DO AMIGO: Lógica de Sincronização com Google Agenda
 async function sincronizarAgenda() {
     const btn = document.getElementById('btn-sync-calendar');
+    // Adicionado um ícone Bi-Calendar-Check-Fill genérico, substitua se usar uma biblioteca diferente
     const iconeOriginal = '<i class="bi bi-calendar-check-fill"></i>';
 
     btn.disabled = true;
@@ -23,10 +25,15 @@ async function sincronizarAgenda() {
         if (resultText.includes("Erro: A autorização do Google não foi concluída")) {
             alert("Autorização do Google Calendar é necessária. Redirecionando para o login do Google...");
             sessionStorage.setItem('googleAuthRedirect', 'true');
+            // Redireciona para o endpoint de autorização no backend
             window.location.href = '/api/calendar/oauth/start';
         }
-        else
+        else if (resultText.includes("auth_failed")) {
+            alert("Erro na autorização. Por favor, tente sincronizar novamente.");
+        }
+        else {
             alert(resultText);
+        }
 
     } catch (error) {
         console.error('Erro ao sincronizar:', error);
@@ -76,10 +83,9 @@ function transformarAtividadeParaEvento(atividade) {
 document.addEventListener('DOMContentLoaded', async () => {
     const calendarioElemento = document.getElementById('calendario');
 
-    // Variáveis locais de estado
     let todasAtividades = [];
     let atividadesNoCalendarioIds = [];
-    let todosOsMembros = []; // Lista completa de membros (id, nome, etc.)
+    let todosOsMembros = [];
     let membrosAtividadeAtual = [];
     let idAtividadeModal = null;
 
@@ -170,6 +176,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // FUNÇÃO PARA FILTRAR MEMBROS NO MODAL (usada pelo oninput)
+    window.filtrarMembros = function() {
+        const pesquisaInput = document.getElementById('pesquisa-membros');
+        if (pesquisaInput) {
+            renderizarListaGerenciamentoMembros(pesquisaInput.value);
+        }
+    };
+
     // Busca a lista completa de membros do BD
     async function buscarTodosOsMembros() {
         try {
@@ -243,14 +257,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    function renderizarListaGerenciamentoMembros() {
+    function renderizarListaGerenciamentoMembros(termoPesquisa = '') {
         const modalTitulo = document.getElementById('membros-modal-titulo');
         const modalBody = document.getElementById('membros-modal-body');
+        const pesquisaInput = document.getElementById('pesquisa-membros');
 
-        if (!modalBody) {
+        if (!modalBody || !pesquisaInput) {
             console.warn("Estrutura HTML do modal incompleta.");
             return;
         }
+
+        const paragrafoCarregando = modalBody.querySelector('p');
+        if (paragrafoCarregando) {
+            modalBody.removeChild(paragrafoCarregando);
+        }
+
+        let listaContainer = document.getElementById('lista-membros-checkboxes');
+        if (!listaContainer) {
+            listaContainer = document.createElement('div');
+            listaContainer.id = 'lista-membros-checkboxes';
+            modalBody.appendChild(listaContainer);
+        }
+
+        listaContainer.innerHTML = '';
 
         if (modalTitulo) {
             const atividadeAtual = todasAtividades.find(a => a.id === idAtividadeModal);
@@ -258,19 +287,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             modalTitulo.textContent = `Gerenciar Membros: ${tituloAtividade} (ID: ${idAtividadeModal})`;
         }
 
-        modalBody.innerHTML = '';
-
         if (todosOsMembros.length === 0) {
-            modalBody.innerHTML = '<p>Nenhum membro cadastrado para atribuição.</p>';
+            listaContainer.innerHTML = '<p>Nenhum membro cadastrado para atribuição.</p>';
             return;
         }
 
-        todosOsMembros.forEach(membro => {
+        const termo = termoPesquisa.toLowerCase().trim();
+
+        const membrosFiltrados = todosOsMembros.filter(membro => {
+            const nomeMembro = membro.usuario ? membro.usuario.nome : membro.nome;
+            return nomeMembro && nomeMembro.toLowerCase().includes(termo);
+        });
+
+        if (membrosFiltrados.length === 0 && termo !== '') {
+            listaContainer.innerHTML = '<p>Nenhum membro encontrado com este nome.</p>';
+            return;
+        }
+
+        if (membrosFiltrados.length === 0 && todosOsMembros.length > 0) {
+            listaContainer.innerHTML = '<p>Nenhum membro encontrado. Tente redefinir a pesquisa.</p>';
+            return;
+        }
+
+        membrosFiltrados.forEach(membro => {
             const idMembro = membro.id || membro.id_membro;
             const nomeMembro = membro.usuario ? membro.usuario.nome : membro.nome;
             const estaAssociado = membrosAtividadeAtual.includes(idMembro);
 
-            modalBody.innerHTML += `
+            listaContainer.innerHTML += `
                 <div>
                     <label>
                         <input type="checkbox" 
@@ -294,12 +338,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         const idsAtivos = await buscarMembrosPorAtividade(idCriacao);
         membrosAtividadeAtual = idsAtivos;
 
+        const pesquisaInput = document.getElementById('pesquisa-membros');
+        if (pesquisaInput) {
+            pesquisaInput.value = '';
+        }
+
         renderizarListaGerenciamentoMembros();
         mostrarGerenciadorMembros();
     }
 
     // -----------------------------------------------------
-    // FUNÇÃO DE CARREGAMENTO E FILTRO
+    // FUNÇÕES DE FILTRO E ORDENAÇÃO DE ATIVIDADES (Suas)
+    // -----------------------------------------------------
+
+    // FUNÇÃO 1: Ordena alfabeticamente
+    function ordenarAtividadesPorTitulo(lista) {
+        return lista.sort((a, b) => {
+            const tituloA = (a.atv ? a.atv.descricao : 'Atividade').toLowerCase();
+            const tituloB = (b.atv ? b.atv.descricao : 'Atividade').toLowerCase();
+
+            if (tituloA < tituloB) return -1;
+            if (tituloA > tituloB) return 1;
+            return 0;
+        });
+    }
+
+    // FUNÇÃO 2: Filtra por status/data e por termo de pesquisa, e então ordena
+    window.filtrarEOrdenarAtividades = function(termoPesquisa) {
+        let atividadesParaExibir = todasAtividades;
+        const mostrarRealizadas = document.getElementById('mostrar-realizadas-checkbox')?.checked || false;
+        const ontem = getOntem();
+
+        // 1. Aplicar filtro de Atividades Realizadas (status e data) - MANTIDO
+        if (!mostrarRealizadas) {
+            atividadesParaExibir = atividadesParaExibir.filter(atividade => {
+                if (atividade.status === true) {
+                    return false;
+                }
+                if (!atividade.dtFim) {
+                    return true;
+                }
+                const dataFim = new Date(atividade.dtFim.replace(/-/g, '/'));
+                return dataFim >= ontem;
+            });
+        }
+
+        // 2. Aplicar filtro de Pesquisa (Título e Local) - MANTIDO
+        const termo = termoPesquisa ? termoPesquisa.toLowerCase().trim() : '';
+        if (termo !== '') {
+            atividadesParaExibir = atividadesParaExibir.filter(atividade => {
+                const titulo = (atividade.atv ? atividade.atv.descricao : 'Atividade').toLowerCase();
+                const local = (atividade.local || '').toLowerCase();
+
+                return titulo.includes(termo) || local.includes(termo);
+            });
+        }
+
+        // 3. Aplicar ordenação alfabética - MANTIDO
+        const atividadesOrdenadas = ordenarAtividadesPorTitulo(atividadesParaExibir);
+
+        // 4. Renderizar a lista
+        renderizarListaAtividades(atividadesOrdenadas, atividadesNoCalendarioIds);
+    };
+
+    // -----------------------------------------------------
+    // FUNÇÃO DE RENDERIZAÇÃO
     // -----------------------------------------------------
 
     function renderizarListaAtividades(lista, idsAtivos) {
@@ -309,7 +412,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         listaElemento.innerHTML = '';
 
         if (lista.length === 0) {
-            listaElemento.innerHTML = '<p class="status-empty">Nenhuma atividade cadastrada.</p>';
+            const pesquisaInput = document.getElementById('pesquisa-atividades');
+            if (pesquisaInput && pesquisaInput.value.trim() !== '') {
+                listaElemento.innerHTML = '<p class="status-empty">Nenhuma atividade encontrada para esta pesquisa.</p>';
+            } else {
+                listaElemento.innerHTML = '<p class="status-empty">Nenhuma atividade cadastrada.</p>';
+            }
             return;
         }
 
@@ -325,15 +433,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 dataDisplay += ` | Fim: ${atividade.dtFim}`;
             }
 
+            const tituloAtividade = atividade.atv ? atividade.atv.descricao : 'Atividade';
+            const localAtividade = atividade.local ? ' | ' + atividade.local : '';
+
             const item = document.createElement('div');
             item.classList.add('atividade-item');
             item.dataset.id = atividade.id;
             item.style.borderLeft = `5px solid ${cor}`;
 
+            // ADICIONA CLASSE PARA ESTILO VISUAL DE CONCLUÍDA
+            if (atividade.status === true) {
+                item.classList.add('realizada');
+            }
+
             item.innerHTML = `
                 <div class="item-header">
-                    <span class="item-title">${atividade.atv ? atividade.atv.descricao : 'Atividade'}</span>
-                    <span class="item-local">${atividade.local || ''}</span>
+                    <span class="item-title">${tituloAtividade}</span>
+                    <span class="item-local">${localAtividade}</span>
                 </div>
                 <div class="item-data">
                     ${dataDisplay}
@@ -352,7 +468,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function carregarEstadoEEventos() {
         try {
-            // Garante que a lista de todos os membros está carregada para uso posterior (eventClick)
             await buscarTodosOsMembros();
 
             const respostaAtividades = await fetch('/apis/calendario');
@@ -364,22 +479,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             todasAtividades = await respostaAtividades.json();
             atividadesNoCalendarioIds = await respostaAtivos.json();
 
-            const mostrarRealizadas = document.getElementById('mostrar-realizadas-checkbox')?.checked || false;
-            let atividadesParaExibir = todasAtividades;
-
-            if (!mostrarRealizadas) {
-                const ontem = getOntem();
-
-                atividadesParaExibir = todasAtividades.filter(atividade => {
-                    if (!atividade.dtFim) return true;
-
-                    const dataFim = new Date(atividade.dtFim.replace(/-/g, '/'));
-                    return dataFim >= ontem;
-                });
+            const pesquisaInput = document.getElementById('pesquisa-atividades');
+            if (pesquisaInput) {
+                pesquisaInput.value = '';
             }
 
-            renderizarListaAtividades(atividadesParaExibir, atividadesNoCalendarioIds);
+            // Usa a função combinada de filtro e ordenação
+            filtrarEOrdenarAtividades('');
+
             calendario.refetchEvents();
+
+            // Verifica se voltamos de uma autorização do Google - CÓDIGO DO AMIGO
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'auth_success') {
+                alert("Autorização do Google concluída! Agora você pode sincronizar suas atividades.");
+                // Limpa o parâmetro da URL
+                history.replaceState(null, '', window.location.pathname);
+            }
+
 
         } catch (error) {
             console.error("Erro ao carregar estado inicial:", error);
@@ -431,7 +548,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             calendario.changeView('timeGridDay', info.dateStr);
         },
 
-        // CORRIGIDO: Manipulador de clique do evento para incluir membros sem alert temporário
         eventClick: async function(info) {
             const idAtividade = info.event.id;
 
@@ -447,13 +563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let membrosFormatados;
                 if (nomesMembros.length > 0) {
-                    // CORRIGIDO: Usa '\n' para exibir um nome por linha
                     membrosFormatados = nomesMembros.join('\n');
                 } else {
                     membrosFormatados = 'Nenhum membro associado.';
                 }
 
-                // Exibe o alerta FINAL com os membros
                 alert(
                     `Atividade: ${info.event.title}\n\n` +
                     `Início: ${inicio}h\n` +
@@ -493,11 +607,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarEstadoEEventos();
     calendario.render();
 
-    document.getElementById('btn-sync-calendar').addEventListener('click', sincronizarAgenda);
+    // Adiciona o listener da nova função de sincronização do Google
+    const syncButton = document.getElementById('btn-sync-calendar');
+    if (syncButton) {
+        syncButton.addEventListener('click', sincronizarAgenda);
+    }
 
     document.addEventListener('change', (event) => {
         if (event.target.id === 'mostrar-realizadas-checkbox') {
-            carregarEstadoEEventos();
+            filtrarEOrdenarAtividades(document.getElementById('pesquisa-atividades')?.value || '');
         }
     });
 
@@ -522,12 +640,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             fecharGerenciadorMembros();
         }
     });
-
-    // Verifica se voltamos de uma autorização do Google
-    if (sessionStorage.getItem('googleAuthRedirect') === 'true') {
-        sessionStorage.removeItem('googleAuthRedirect');
-        setTimeout(() => {
-            alert("Autorização concluída! Tente sincronizar novamente.");
-        }, 500);
-    }
 });

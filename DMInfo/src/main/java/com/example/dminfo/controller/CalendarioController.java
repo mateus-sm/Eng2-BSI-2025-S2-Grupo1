@@ -41,6 +41,7 @@ public class CalendarioController {
             cra.setDtFim(rs.getDate("dtfim").toLocalDate());
         }
 
+        // CAMPOS DE CUSTO RESTAURADOS
         cra.setCustoprevisto(rs.getDouble("custoprevisto"));
         cra.setCustoreal(rs.getDouble("custoreal"));
         cra.setStatus(rs.getBoolean("status"));
@@ -51,13 +52,16 @@ public class CalendarioController {
     public List<CriarRealizacaoAtividades> listarTodasAtividades() {
         this.conexao = SingletonDB.getConexao();
 
+        // SQL ajustado para incluir o LEFT JOIN do calendário e colunas de Join
         String sql = "SELECT cra.*, " +
                 "u.usuario AS admin_usuario, " +
-                "atv.descricao AS atividade_descricao " +
+                "atv.descricao AS atividade_descricao, " +
+                "c.id_criacao AS id_calendario_ativo " + // Alias para o ID no calendário
                 "FROM criar_realizacao_atividades cra " +
                 "JOIN administrador adm ON cra.id_admin = adm.id_admin " +
                 "JOIN usuario u ON adm.id_usuario = u.id_usuario " +
-                "JOIN atividade atv ON cra.id_atividade = atv.id_atividade";
+                "JOIN atividade atv ON cra.id_atividade = atv.id_atividade " +
+                "LEFT JOIN calendario c ON cra.id_criacao = c.id_criacao"; // LEFT JOIN para saber se está ativo no calendário
 
         ResultSet rs = this.conexao.consultar(sql);
         List<CriarRealizacaoAtividades> atividades = new ArrayList<>();

@@ -3,18 +3,6 @@ let idParaExcluir = null;
 
 const API_URL = '/apis/membro';
 
-async function sincronizarAgenda() {
-    const response = await fetch('/api/calendar/sync', { method: 'POST' });
-    const result = await response.text();
-
-    if (result.includes("Erro: A autorização do Google não foi concluída")) {
-        alert("Autorização do Google Calendar é necessária. Redirecionando para o login do Google...");
-        window.location.href = '/api/calendar/oauth/start';
-    } else {
-        alert(result);
-    }
-}
-
 async function carregarMembros() {
     try {
         const termoBusca = document.getElementById('termoBusca').value;
@@ -204,5 +192,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-confirmar-exclusao').addEventListener('click', excluirMembro);
 
     document.getElementById('termoBusca').addEventListener('keyup', carregarMembros);
-    document.getElementById('btn-sync-calendar').addEventListener('click', sincronizarAgenda);
 });

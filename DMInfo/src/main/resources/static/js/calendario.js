@@ -9,6 +9,34 @@ const PALETA_CORES = [
     '#2add70'
 ];
 
+async function sincronizarAgenda() {
+    const btn = document.getElementById('btn-sync-calendar');
+    const iconeOriginal = '<i class="bi bi-calendar-check-fill"></i>';
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Sincronizando...';
+
+    try {
+        const response = await fetch('/api/calendar/sync', { method: 'POST' });
+        const resultText = await response.text();
+
+        if (resultText.includes("Erro: A autorização do Google não foi concluída")) {
+            alert("Autorização do Google Calendar é necessária. Redirecionando para o login do Google...");
+            sessionStorage.setItem('googleAuthRedirect', 'true');
+            window.location.href = '/api/calendar/oauth/start';
+        }
+        else
+            alert(resultText);
+
+    } catch (error) {
+        console.error('Erro ao sincronizar:', error);
+        alert('Ocorreu um erro inesperado ao tentar sincronizar.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `${iconeOriginal} Sincronizar Google Agenda`;
+    }
+}
+
 function transformarAtividadeParaEvento(atividade) {
     let titulo;
     let idTipoAtividade;
@@ -465,6 +493,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await carregarEstadoEEventos();
     calendario.render();
 
+    document.getElementById('btn-sync-calendar').addEventListener('click', sincronizarAgenda);
+
     document.addEventListener('change', (event) => {
         if (event.target.id === 'mostrar-realizadas-checkbox') {
             carregarEstadoEEventos();
@@ -492,4 +522,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             fecharGerenciadorMembros();
         }
     });
+
+    // Verifica se voltamos de uma autorização do Google
+    if (sessionStorage.getItem('googleAuthRedirect') === 'true') {
+        sessionStorage.removeItem('googleAuthRedirect');
+        setTimeout(() => {
+            alert("Autorização concluída! Tente sincronizar novamente.");
+        }, 500);
+    }
 });

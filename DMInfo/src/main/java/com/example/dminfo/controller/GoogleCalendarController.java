@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -159,9 +160,10 @@ public class GoogleCalendarController {
             end.setDate(new com.google.api.client.util.DateTime(endDateStr));
         }
         else {
-            // Evento com horário específico
             LocalDateTime startDt = LocalDateTime.of(dataInicio, horarioInicio.toLocalTime());
-            LocalDateTime endDt = startDt.plusHours(1); // Assumindo duração de 1 hora se não houver tempo de fim
+
+            LocalTime horaFim = horarioInicio.toLocalTime().plusHours(1);
+            LocalDateTime endDt = LocalDateTime.of(dataFim, horaFim);
 
             // Converte para o formato RFC3339
             String startRfc3339 = startDt.atZone(zoneId).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);

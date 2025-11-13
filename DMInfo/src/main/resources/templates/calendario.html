@@ -10,9 +10,57 @@
     <link rel="stylesheet" th:href="@{/styles/calendario.css}">
 </head>
 <body>
-<div class="container">
-    <div id="calendario"></div>
+
+<div class="container-principal">
+    <div id="lista-lateral-container" class="lista-lateral">
+
+        <div class="sync-button-container">
+            <button class="sync-button" id="btn-sync-calendar">
+                <i class="sync-icon">🗓️</i> Sincronizar Google Agenda
+            </button>
+        </div>
+
+        <div class="filtro-realizadas">
+            <label for="mostrar-realizadas-checkbox">
+                <input type="checkbox" id="mostrar-realizadas-checkbox">
+                Mostrar atividades já realizadas
+            </label>
+        </div>
+
+        <div class="pesquisa-atividades-container">
+            <input type="text" id="pesquisa-atividades" placeholder="Pesquisar atividades..." oninput="filtrarEOrdenarAtividades(this.value)">
+        </div>
+
+        <h2>Atividades Cadastradas</h2>
+        <div id="lista-atividades-lateral">
+        </div>
+    </div>
+
+    <div id="calendario-container" class="calendario-conteudo">
+        <div id="calendario">
+        </div>
+    </div>
 </div>
-<script th:src="@{/js/calendario.js}" defer></script>
+<div id="membros-modal-backdrop" style="display: none;"></div>
+<div id="membros-modal-container" style="display: none;">
+    <div class="membros-modal-content">
+
+        <div class="membros-modal-header">
+            <h3 id="membros-modal-titulo">Gerenciar Membros da Atividade</h3>
+            <button class="fechar-modal-btn" onclick="fecharGerenciadorMembros()">&times;</button>
+        </div>
+
+        <div id="membros-modal-body" class="membros-modal-body">
+            <input type="text" id="pesquisa-membros" placeholder="Pesquisar membros..." oninput="filtrarMembros()">
+            <p>Carregando membros...</p>
+        </div>
+
+        <div class="membros-modal-footer">
+            <button id="btn-salvar-membros" onclick="fecharGerenciadorMembros()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/calendario.js}"></script>
 </body>
 </html>

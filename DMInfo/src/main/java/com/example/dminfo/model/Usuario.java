@@ -1,7 +1,7 @@
 package com.example.dminfo.model;
 
 import java.time.LocalDate;
-public class Usuario {
+public class  Usuario {
 
     private int id;
     private String nome;

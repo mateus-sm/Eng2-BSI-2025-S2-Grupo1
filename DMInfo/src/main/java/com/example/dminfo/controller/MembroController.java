@@ -1,5 +1,6 @@
 package com.example.dminfo.controller;
 
+import com.example.dminfo.dao.MembroAtividadeDAO;
 import com.example.dminfo.model.Membro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,11 @@ public class MembroController {
 
     @Autowired
     private Membro membroModel;
+    @Autowired
+    private MembroAtividadeDAO membroAtividadeDAO;
 
-    public List<Membro> listar() {
-        return membroModel.listar();
+    public List<Membro> listar(String filtro) {
+        return membroModel.listarComFiltro(filtro);
     }
 
     public Membro getById(Integer id) {
@@ -30,5 +33,18 @@ public class MembroController {
 
     public boolean excluir(Integer id) {
         return membroModel.excluir(id);
+    }
+
+    //comunicacao membro_atividade
+    public List<Integer> listarMembrosPorAtividade(int idCriacao) {
+        return membroAtividadeDAO.listarMembrosPorAtividade(idCriacao);
+    }
+
+    public boolean adicionarMembroAtividade(int idCriacao, int idMembro) {
+        return membroAtividadeDAO.adicionarMembroAtividade(idCriacao, idMembro);
+    }
+
+    public boolean removerMembroAtividade(int idCriacao, int idMembro) {
+        return membroAtividadeDAO.removerMembroAtividade(idCriacao, idMembro);
     }
 }

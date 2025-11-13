@@ -1,10 +1,9 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.util.MembroErro;
+import com.example.dminfo.model.MembroErro;
 import com.example.dminfo.controller.UsuarioController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.example.dminfo.model.Usuario;
 import org.springframework.http.HttpStatus;
@@ -17,13 +16,11 @@ import java.util.Map;
 public class UsuarioView {
 
     @Autowired
-    private UsuarioController controller; // O @Service
+    private UsuarioController controller;
 
-    /**
-     * Endpoint para login.
-     * Recebe um JSON com "usuario" e "senha".
-     */
-    @PostMapping("/login") // Mudei para /login para ser mais específico
+
+
+    @PostMapping("/login")
     public ResponseEntity<Object> logar(@RequestBody Map<String, String> dados) {
         String login = dados.get("usuario"); // 'usuario' é o campo de login
         String senha = dados.get("senha");
@@ -33,12 +30,12 @@ public class UsuarioView {
         }
 
         try {
+
             Map<String, Object> json = controller.logar(login, senha);
 
             if ((boolean) json.get("isLogado")) {
                 return ResponseEntity.ok(json);
             } else {
-                // Se o login falhar
                 return ResponseEntity.badRequest().body(new MembroErro("Login ou senha inválidos."));
             }
         } catch (Exception e) {
@@ -46,7 +43,6 @@ public class UsuarioView {
         }
     }
 
-    // --- NOVOS ENDPOINTS CRUD ABAIXO ---
 
     @GetMapping
     public ResponseEntity<Object> listar() {

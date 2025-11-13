@@ -2,7 +2,7 @@ package com.example.dminfo.view;
 
 import com.example.dminfo.controller.EnviarFotosAtividadeController;
 import com.example.dminfo.model.EnviarFotosAtividade;
-import com.example.dminfo.util.MembroErro;
+import com.example.dminfo.model.MembroErro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

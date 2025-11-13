@@ -16,7 +16,6 @@ public class MembroDAO {
     private Membro buildMembro(ResultSet rs) throws SQLException {
         Membro membro = new Membro();
         membro.setId(rs.getInt("id_membro"));
-        // A linha 'setCodigo' foi REMOVIDA
 
         if (rs.getDate("dtini") != null)
             membro.setDtIni(rs.getDate("dtini").toLocalDate());
@@ -35,7 +34,6 @@ public class MembroDAO {
     }
 
     public Membro gravar(Membro membro) {
-        // 'codigo_membro' REMOVIDO do INSERT
         String sql = String.format("INSERT INTO membro (dtini, dtfim, observacao, id_usuario) " +
                         "VALUES ('%s', %s, '%s', %d) RETURNING id_membro",
                 membro.getDtIni().toString(),
@@ -57,7 +55,6 @@ public class MembroDAO {
     }
 
     public boolean alterar(Membro membro) {
-        // 'codigo_membro' REMOVIDO do UPDATE
         String sql = String.format("UPDATE membro SET observacao = '%s', dtfim = %s " +
                         "WHERE id_membro = %d",
                 membro.getObservacao(),
@@ -72,14 +69,18 @@ public class MembroDAO {
         return SingletonDB.getConexao().manipular(sql);
     }
 
-    public List<Membro> get(String filtro) {
+    public List<Membro> get(String termoBusca) {
         List<Membro> membros = new ArrayList<>();
-        // 'm.codigo_membro' REMOVIDO do SELECT
+        String filtroSQL = "";
+
+        if (termoBusca != null && !termoBusca.trim().isEmpty())
+            filtroSQL = " WHERE UPPER(u.nome) LIKE UPPER('%" + termoBusca.trim() + "%')";
+
         String sql = "SELECT " +
                 "    m.id_membro AS id_membro, m.dtini AS dtini, " +
                 "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
                 "    u.nome AS nome " +
-                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " + filtro;
+                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " + filtroSQL;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -96,7 +97,6 @@ public class MembroDAO {
     }
 
     public Membro get(int id) {
-        // 'm.codigo_membro' REMOVIDO do SELECT
         String sql = "SELECT " +
                 "    m.id_membro AS id_membro, m.dtini AS dtini, " +
                 "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +

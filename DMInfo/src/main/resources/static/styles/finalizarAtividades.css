@@ -114,6 +114,17 @@ h1 {
     font-weight: bold;
 }
 
+.checkbox-container.is-checked {
+    border-color: #28a745;
+    color: #ffffff; /* Texto branco para contraste */
+    background-color: #28a745;
+    font-weight: bold;
+}
+
+.checkbox-container:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
 /* Estilo quando o checkbox ESTÁ MARCADO (Finalizado - Verde) */
 /* Este seletor atua no label (.checkbox-container) quando o input dentro dele está checado */
 .input-finalizar:checked ~ .checkbox-container {
@@ -219,4 +230,59 @@ h1 {
 /* Se precisar que o input de texto fique alinhado também */
 .input-custo-real {
     flex-grow: 1; /* Permite que o input cresça */
+}
+
+.atividades-tabela tbody tr.status-finalizada {
+    border-left: 5px solid #28a745; /* Verde escuro para a borda lateral */
+    background-color: #e6f4e6; /* Verde clarinho para o fundo da linha */
+}
+
+.atividades-tabela tbody tr.status-aberta {
+    border-left: 5px solid #dc3545; /* Vermelho escuro para a borda lateral */
+    background-color: #fce4e6; /* Vermelho clarinho para o fundo da linha */
+}
+
+/* É crucial garantir que o hover não esconda totalmente a cor de fundo! */
+.atividades-tabela tbody tr:hover {
+    /* Usando cores claras para o hover (levemente mais escuras que o fundo base) */
+    background-color: #d8e5d8; /* Hover para Finalizada */
+}
+
+.atividades-tabela tbody tr.status-aberta:hover {
+    background-color: #f8d0d4; /* Hover para Aberta */
+}
+
+/* Barra de pesquisa */
+.pesquisa-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 0;
+}
+
+#barra-pesquisa {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    flex-grow: 1; /* Permite que o campo ocupe o espaço restante */
+}
+
+.btn-pesquisa {
+    background-color: #34495e; /* Azul escuro, combinando com o cabeçalho da tabela */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 8px 12px;
+    line-height: 1;
+    transition: background-color 0.3s;
+}
+
+.btn-pesquisa:hover {
+    background-color: #2c3e50;
 }

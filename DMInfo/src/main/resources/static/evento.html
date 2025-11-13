@@ -10,6 +10,8 @@
 <h1>Eventos</h1>
 
 <form id="eventoForm">
+    <input type="hidden" id="eventoId" value="" />
+
     <label for="titulo">Título</label>
     <input type="text" id="titulo" name="titulo" required />
 
@@ -19,8 +21,21 @@
     <label for="idAdmin">ID do Administrador</label>
     <input type="number" id="idAdmin" name="idAdmin" required />
 
-    <button type="submit">Criar Evento</button>
+    <button type="submit" id="submitBtn">Criar Evento</button>
 </form>
+
+<div class="filtros">
+    <label for="searchDesc">Pesquisar por Descrição:</label>
+    <input type="text" id="searchDesc" placeholder="Digite parte da descrição" />
+
+    <label for="sortField">Ordenar por:</label>
+    <select id="sortField">
+        <option value="tituloAsc">Título (A-Z)</option>
+        <option value="idAsc">ID (Menor p/ Maior)</option>
+    </select>
+
+    <button type="button" onclick="carregarEventos()">Aplicar Filtros</button>
+</div>
 
 <table>
     <thead>

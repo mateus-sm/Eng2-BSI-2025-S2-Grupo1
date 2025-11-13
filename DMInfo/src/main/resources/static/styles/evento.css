@@ -1,3 +1,5 @@
+/* Estilos Originais */
+
 body {
     font-family: Arial, sans-serif;
     margin: 2rem;
@@ -19,13 +21,16 @@ form {
 label {
     display: block;
     margin-top: 0.5rem;
+    /* Adicionando espaço abaixo do label para melhor espaçamento com o input */
+    margin-bottom: 0.25rem; 
 }
 
 input,
 textarea {
     width: 100%;
     padding: 0.5rem;
-    margin-top: 0.25rem;
+    /* Removendo margin-top aqui para evitar espaçamento duplo */
+    margin-top: 0; 
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -76,4 +81,41 @@ th {
 
 .delete-btn:hover {
     background: #a71d2a;
+}
+
+/* ---------------------------------------------------------------------- */
+/* NOVOS ESTILOS PARA VALIDAÇÃO E DESTAQUE DE CAMPOS OBRIGATÓRIOS */
+/* ---------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------- */
+/* NOVOS ESTILOS PARA VALIDAÇÃO E DESTAQUE DE CAMPOS OBRIGATÓRIOS */
+/* ---------------------------------------------------------------------- */
+
+/* 1. Destaque dos campos (input/textarea) quando estão INVÁLIDOS */
+
+/* Aplica o estilo de erro apenas se o campo for inválido E não estiver focado
+   (para não atrapalhar enquanto o usuário digita) E não estiver vazio (usando :not(:placeholder-shown))
+   *NOTA:* Para inputs/textareas, o navegador geralmente só aplica o destaque vermelho
+   após o envio do formulário, a menos que você tenha uma regra muito genérica.
+   Este seletor é o mais seguro para funcionar como você deseja. */
+
+input:invalid:not(:focus):not(:placeholder-shown),
+textarea:invalid:not(:focus) {
+    border-color: #dc3545; /* Vermelho padrão para erros */
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); /* Sombra para ênfase */
+}
+
+/* 2. Destaque dos LABELS dos campos obrigatórios (visual * vermelho) */
+/* (Mantenha este, pois ele só adiciona o asterisco e não afeta a borda do input) */
+label:has(+ input[required])::after,
+label:has(+ textarea[required])::after {
+    content: " *";
+    color: #dc3545; /* Vermelho */
+    font-weight: bold;
+}
+
+/* 3. Destaque opcional ao focar em um campo inválido */
+input:focus:invalid,
+textarea:focus:invalid {
+    background-color: #fff8f8; /* Fundo levemente rosado ao focar */
 }

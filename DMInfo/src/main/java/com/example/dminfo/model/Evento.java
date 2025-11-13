@@ -32,8 +32,9 @@ public class Evento {
         this.descricao = descricao;
     }
 
-    public List<Evento> listar() {
-        return dao.getAll();
+    public List<Evento> listar(String termoDescricao, String ordenarPor) {
+        // A EventoDAO deve ter o método `buscarEventos`
+        return dao.buscarEventos(termoDescricao, ordenarPor);
     }
 
     public Evento getById(Integer id) {

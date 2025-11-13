@@ -12,8 +12,8 @@ public class EventoController {
     @Autowired
     private Evento eventoModel;
 
-    public List<Evento> listar() {
-        return eventoModel.listar();
+    public List<Evento> listar(String termoDescricao, String ordenarPor) {
+        return eventoModel.listar(termoDescricao, ordenarPor);
     }
 
     public Evento getById(Integer id) {

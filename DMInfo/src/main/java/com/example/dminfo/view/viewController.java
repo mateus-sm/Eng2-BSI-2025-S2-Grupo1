@@ -60,19 +60,21 @@ public class viewController {
 
     @GetMapping("/app/doador")
     public String paginaGerenciarDoador(Model model, HttpSession session) {
-        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (idAdminLogado == null)
-            return "redirect:/login";
-        model.addAttribute("idAdminLogado", idAdminLogado);
+        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//        model.addAttribute("idAdminLogado", idAdminLogado);
         return "doador";
     }
 
     @GetMapping("/app/doacao")
     public String paginaGerenciarDoacao(Model model, HttpSession session) {
-        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (idAdminLogado == null)
-            return "redirect:/login";
-        model.addAttribute("idAdminLogado", idAdminLogado);
+        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//        model.addAttribute("idAdminLogado", idAdminLogado);
         return "doacao";
     }
 
@@ -88,10 +90,11 @@ public class viewController {
 
     @GetMapping("/app/doacao-form")
     public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {
-        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (idAdminLogado == null)
-            return "redirect:/login";
-        model.addAttribute("idAdminLogado", idAdminLogado);
+        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
+//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
+//        if (idAdminLogado == null)
+//            return "redirect:/login";
+//        model.addAttribute("idAdminLogado", idAdminLogado);
         return "doacao-form";
     }
 

@@ -14,12 +14,9 @@ public class Calendario {
         this.id_criacao = id_criacao;
     }
 
-    public int getId_calendario() {
-        return id_calendario;}
-    public void setId_calendario(int id_calendario) {
-        this.id_calendario = id_calendario;}
-    public CriarRealizacaoAtividades getId_criacao() {
-        return id_criacao;}
+    public int getId_calendario() {return id_calendario;}
+    public void setId_calendario(int id_calendario) {this.id_calendario = id_calendario;}
+    public CriarRealizacaoAtividades getId_criacao() {return id_criacao;}
     public void setId_criacao(CriarRealizacaoAtividades id_criacao) {
         this.id_criacao = id_criacao;
     }

@@ -455,7 +455,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${dataDisplay}
                 </div>
                 <div class="item-acoes">
-                    <button class="btn-membros" data-id="${atividade.id}" title="Adicionar Membros">&#128100;</button> 
+                    <button class="btn-membros" data-id="${atividade.id}" title="Adicionar Membros">&#128100;</button>
+                    <button class="btn-notificar" data-id="${atividade.id}" title="Enviar Notificação Manual">&#128276;</button> <!-- NOVO BOTÃO -->
                     <button class="btn-editar" data-id="${atividade.id}" title="Editar">&#9998;</button>
                     <button class="btn-toggle-calendario ${estaNoCalendario ? 'btn-remover' : 'btn-adicionar'}" data-id="${atividade.id}" title="${estaNoCalendario ? 'Remover do Calendário' : 'Adicionar ao Calendário'}">
                         ${estaNoCalendario ? '&minus;' : '+'}
@@ -634,10 +635,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (target.classList.contains('btn-membros')) {
             const id = target.dataset.id;
             abrirGerenciadorMembros(id);
+
+        } else if (target.classList.contains('btn-notificar')) {
+             const id = target.dataset.id;
+             enviarNotificacaoManual(id);
         }
 
         if (target.id === 'membros-modal-backdrop' || target.classList.contains('fechar-modal-btn')) {
             fecharGerenciadorMembros();
         }
     });
+
+    async function enviarNotificacaoManual(idCriacao) {
+        if (!confirm('Tem certeza que deseja enviar uma notificação manual para todos os membros desta atividade?')) {
+            return;
+        }
+
+        try {
+            // Chama o novo endpoint criado no NotificacaoController.java
+            const response = await fetch(`/apis/notificacao/manual/${idCriacao}`, { method: 'POST' });
+            const message = await response.text();
+
+            if (response.ok) {
+                alert(message);
+            } else {
+                alert(`Erro ao enviar notificação: ${message}`);
+            }
+        } catch (error) {
+            console.error('Erro ao notificar:', error);
+            alert('Ocorreu um erro inesperado ao tentar enviar a notificação.');
+        }
+    }
 });

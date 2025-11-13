@@ -365,3 +365,11 @@
 .atividade-item.realizada .item-acoes button {
     opacity: 0.8;
 }
+
+.btn-notificar {
+    background-color: #6f42c1; /* Roxo (um contraste com os outros botões) */
+    color: white;
+}
+.btn-notificar:hover {
+    background-color: #5d359f;
+}

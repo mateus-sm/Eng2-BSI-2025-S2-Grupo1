@@ -5,14 +5,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class Recurso {
     private int id;
-    private Doacao id_doacao;
+    private int id_doacao;
     private String descricao;
     private String tipo;
     private int quantidade;
 
     public Recurso() { }
 
-    public Recurso(String descricao, int id, Doacao id_doacao, int quantidade, String tipo) {
+    public Recurso(String descricao, int id, int id_doacao, int quantidade, String tipo) {
         this.descricao = descricao;
         this.id = id;
         this.id_doacao = id_doacao;
@@ -36,11 +36,11 @@ public class Recurso {
         this.id = id;
     }
 
-    public Doacao getId_doacao() {
+    public int getId_doacao() {
         return id_doacao;
     }
 
-    public void setId_doacao(Doacao id_doacao) {
+    public void setId_doacao(int id_doacao) {
         this.id_doacao = id_doacao;
     }
 
@@ -58,5 +58,21 @@ public class Recurso {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public static class MembroErro {
+        private String erro;
+
+        public MembroErro(String erro) {
+            this.erro = erro;
+        }
+
+        public String getErro() {
+            return erro;
+        }
+
+        public void setErro(String erro) {
+            this.erro = erro;
+        }
     }
 }

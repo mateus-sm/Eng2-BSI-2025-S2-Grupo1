@@ -28,12 +28,7 @@ public class RecursoDAO {
     private Recurso buildRecurso(ResultSet rs) throws SQLException {
         Recurso r = new Recurso();
         r.setId(rs.getInt("id_recurso"));
-
-        int idDoacao = rs.getInt("id_doacao");
-        if (!rs.wasNull()) {
-            r.setId(idDoacao);
-        }
-
+        r.setId_doacao(rs.getInt("id_doacao"));
         r.setDescricao(rs.getString("descricao"));
         r.setTipo(rs.getString("tipo"));
         r.setQuantidade(rs.getInt("quantidade"));
@@ -97,8 +92,8 @@ public class RecursoDAO {
         if (recurso != null) {
 
             String sql = String.format(
-                    "UPDATE recurso SET id_doacao = %s, descricao = '%s', tipo = '%s', quantidade = %d WHERE id_recurso = %d",
-                    recurso.getId(),
+                    "UPDATE recurso SET id_doacao = %d, descricao = '%s', tipo = '%s', quantidade = %d WHERE id_recurso = %d",
+                    recurso.getId_doacao(),
                     recurso.getDescricao(),
                     recurso.getTipo(),
                     recurso.getQuantidade(),
@@ -115,8 +110,8 @@ public class RecursoDAO {
         return SingletonDB.getConexao().manipular(sql);
     }
 
-    public Recurso consultar(String descricao) {
-        String sql = String.format("SELECT * FROM recurso WHERE descricao = '%s'", descricao);
+    public Recurso consultar(int id) {
+        String sql = String.format("SELECT * FROM recurso WHERE id_recurso = '%d'", id);
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if (rs != null && rs.next()) {

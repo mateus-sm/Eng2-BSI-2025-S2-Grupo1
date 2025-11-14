@@ -32,14 +32,7 @@ public class DistribuicaoDeRecursosDAO {
         DistribuicaoDeRecursos d = new DistribuicaoDeRecursos();
 
         d.setId(rs.getInt("id_distribuicao"));
-
-        int idAdmin = rs.getInt("id_admin");
-        if (!rs.wasNull()) {
-            Administrador admin = new Administrador();
-            admin.setId(idAdmin);
-            d.setAdmin(admin);
-        }
-
+        d.setAdmin(rs.getInt("id_admin"));
         d.setData(rs.getObject("data", LocalDate.class));
         d.setDescricao(rs.getString("descricao"));
         d.setInstituicaoReceptora(rs.getString("instituicaoreceptora"));
@@ -80,13 +73,11 @@ public class DistribuicaoDeRecursosDAO {
             return null;
 
         String sql = String.format(
-                "INSERT INTO distribuicao_de_recursos (id_admin, data, descricao, instituicaoreceptora, valor) " +
-                        "VALUES (%d, '%s', '%s', '%s', %f) RETURNING id_distribuicao",
-                dist.getAdmin().getId(),
+                "INSERT INTO distribuicao_de_recursos (id_admin, data, descricao, instituicaoreceptora, valor) VALUES (%d, '%s', '%s', '%s', " + String.valueOf(dist.getValor()).replace(",", ".") + ") RETURNING id_distribuicao",
+                dist.getAdmin(),
                 dist.getData(),
                 dist.getDescricao(),
-                dist.getInstituicaoReceptora(),
-                dist.getValor()
+                dist.getInstituicaoReceptora()
         );
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
@@ -105,12 +96,11 @@ public class DistribuicaoDeRecursosDAO {
         if (dist != null) {
             String sql = String.format(
                     "UPDATE distribuicao_de_recursos SET id_admin = %d, data = '%s', descricao = '%s', " +
-                            "instituicaoreceptora = '%s', valor = %f WHERE id_distribuicao = %d",
-                    dist.getAdmin().getId(),
+                            "instituicaoreceptora = '%s', valor = " + String.valueOf(dist.getValor()).replace(",", ".") + " WHERE id_distribuicao = %d",
+                    dist.getAdmin(),
                     dist.getData(),
                     dist.getDescricao(),
                     dist.getInstituicaoReceptora(),
-                    dist.getValor(),
                     dist.getId()
             );
 

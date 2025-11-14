@@ -2,31 +2,31 @@ package com.example.dminfo.model;
 
 public class RecursoHasDistribuicaoDeRecursos {
 
-    private Recurso recurso;
-    private DistribuicaoDeRecursos distribuicao;
+    private int recurso;
+    private int distribuicao;
     private int quantidade;
 
     public RecursoHasDistribuicaoDeRecursos() { }
 
-    public RecursoHasDistribuicaoDeRecursos(Recurso recurso, DistribuicaoDeRecursos distribuicao, int quantidade) {
+    public RecursoHasDistribuicaoDeRecursos(int recurso, int distribuicao, int quantidade) {
         this.recurso = recurso;
         this.distribuicao = distribuicao;
         this.quantidade = quantidade;
     }
 
-    public Recurso getRecurso() {
+    public int getRecurso() {
         return recurso;
     }
 
-    public void setRecurso(Recurso recurso) {
+    public void setRecurso(int recurso) {
         this.recurso = recurso;
     }
 
-    public DistribuicaoDeRecursos getDistribuicao() {
+    public int getDistribuicao() {
         return distribuicao;
     }
 
-    public void setDistribuicao(DistribuicaoDeRecursos distribuicao) {
+    public void setDistribuicao(int distribuicao) {
         this.distribuicao = distribuicao;
     }
 

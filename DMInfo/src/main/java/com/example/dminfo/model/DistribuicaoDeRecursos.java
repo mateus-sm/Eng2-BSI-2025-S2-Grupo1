@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Repository
 public class DistribuicaoDeRecursos {
     private int id;
-    private Administrador admin;
+    private int admin;
     private LocalDate data;
     private String descricao;
     private String instituicaoReceptora;
@@ -15,7 +15,7 @@ public class DistribuicaoDeRecursos {
 
     public DistribuicaoDeRecursos() { }
 
-    public DistribuicaoDeRecursos(Administrador admin, LocalDate data, String descricao, int id, String instituicaoReceptora, double valor) {
+    public DistribuicaoDeRecursos(int admin, LocalDate data, String descricao, int id, String instituicaoReceptora, double valor) {
         this.admin = admin;
         this.data = data;
         this.descricao = descricao;
@@ -24,11 +24,11 @@ public class DistribuicaoDeRecursos {
         this.valor = valor;
     }
 
-    public Administrador getAdmin() {
+    public int getAdmin() {
         return admin;
     }
 
-    public void setAdmin(Administrador admin) {
+    public void setAdmin(int admin) {
         this.admin = admin;
     }
 

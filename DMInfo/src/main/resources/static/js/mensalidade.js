@@ -13,8 +13,10 @@ function mostrarAlerta(tipo, mensagem) {
 // ============================
 async function carregarMembros() {
     try {
-        const resposta = await fetch("/membro/listar");
+        const resposta = await fetch("http://localhost:8080/apis/membro");
         const membros = await resposta.json();
+        console.log(membros);
+        //PROCURAR NA API DE USUARIOS O NOME
 
         const select = document.getElementById("selectMembro");
         select.innerHTML = `<option value="">-- Selecione um membro --</option>`;

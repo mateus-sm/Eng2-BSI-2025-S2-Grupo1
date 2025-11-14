@@ -18,25 +18,25 @@ public class AdministradorView {
     private AdministradorController controller;
 
     // Helper de validação de token
-    private ResponseEntity<Object> checkToken(String token) {
-        if (!Token.validarToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MembroErro("Acesso não autorizado. Token inválido ou expirado."));
-        }
-        return null; // Token é válido
-    }
+//    private ResponseEntity<Object> checkToken(String token) {
+//        if (!Token.validarToken(token)) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MembroErro("Acesso não autorizado. Token inválido ou expirado."));
+//        }
+//        return null; // Token é válido
+//    }
 
     @GetMapping
     public ResponseEntity<Object> listar(@RequestHeader("Authorization") String token) {
-        ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+//        ResponseEntity<Object> tokenError = checkToken(token);
+//        if (tokenError != null) return tokenError;
 
         return ResponseEntity.ok(controller.listar());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getById(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
-        ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+//        ResponseEntity<Object> tokenError = checkToken(token);
+//        if (tokenError != null) return tokenError;
 
         Administrador admin = controller.getById(id);
         if (admin == null) {
@@ -47,8 +47,8 @@ public class AdministradorView {
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestHeader("Authorization") String token, @RequestBody Administrador administrador) {
-        ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+//        ResponseEntity<Object> tokenError = checkToken(token);
+//        if (tokenError != null) return tokenError;
 
         try {
             Administrador novoAdmin = controller.salvar(administrador);
@@ -61,8 +61,8 @@ public class AdministradorView {
     // Endpoint para "desativar" (setar dtFim)
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@RequestHeader("Authorization") String token, @PathVariable Integer id, @RequestBody Administrador adminDetails) {
-        ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+//        ResponseEntity<Object> tokenError = checkToken(token);
+//        if (tokenError != null) return tokenError;
 
         try {
             // Espera um JSON simples, ex: {"dtFim": "2025-10-31"}
@@ -76,8 +76,8 @@ public class AdministradorView {
     // Endpoint para "excluir" (hard delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
-        ResponseEntity<Object> tokenError = checkToken(token);
-        if (tokenError != null) return tokenError;
+//        ResponseEntity<Object> tokenError = checkToken(token);
+//        if (tokenError != null) return tokenError;
 
         try {
             if (controller.excluir(id)) {

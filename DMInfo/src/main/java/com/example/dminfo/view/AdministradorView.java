@@ -26,7 +26,7 @@ public class AdministradorView {
 //    }
 
     @GetMapping
-    public ResponseEntity<Object> listar(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<Object> listar() {
 //        ResponseEntity<Object> tokenError = checkToken(token);
 //        if (tokenError != null) return tokenError;
 
@@ -34,7 +34,7 @@ public class AdministradorView {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getById(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<Object> getById(@PathVariable Integer id) {
 //        ResponseEntity<Object> tokenError = checkToken(token);
 //        if (tokenError != null) return tokenError;
 
@@ -46,7 +46,7 @@ public class AdministradorView {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestHeader("Authorization") String token, @RequestBody Administrador administrador) {
+    public ResponseEntity<Object> create(@RequestBody Administrador administrador) {
 //        ResponseEntity<Object> tokenError = checkToken(token);
 //        if (tokenError != null) return tokenError;
 
@@ -60,7 +60,7 @@ public class AdministradorView {
 
     // Endpoint para "desativar" (setar dtFim)
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@RequestHeader("Authorization") String token, @PathVariable Integer id, @RequestBody Administrador adminDetails) {
+    public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody Administrador adminDetails) {
 //        ResponseEntity<Object> tokenError = checkToken(token);
 //        if (tokenError != null) return tokenError;
 
@@ -75,7 +75,7 @@ public class AdministradorView {
 
     // Endpoint para "excluir" (hard delete)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable Integer id) {
 //        ResponseEntity<Object> tokenError = checkToken(token);
 //        if (tokenError != null) return tokenError;
 

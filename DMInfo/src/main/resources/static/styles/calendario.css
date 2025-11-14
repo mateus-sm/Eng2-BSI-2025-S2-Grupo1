@@ -1,7 +1,6 @@
-/* --- LAYOUT PRINCIPAL (DUAS COLUNAS) --- */
 .container-principal {
     display: flex;
-    max-width: 1600px; /* Limite a largura total do conteúdo */
+    max-width: 1600px;
     margin: 20px auto;
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -9,16 +8,15 @@
     overflow: hidden;
 }
 
-/* --- BARRA LATERAL (LISTA DE ATIVIDADES) --- */
 .lista-lateral {
-    width: 350px; /* Largura fixa para a barra lateral */
+    width: 350px;
     min-width: 300px;
     padding: 20px;
     background-color: #f8f9fa;
     border-right: 1px solid #ddd;
     box-sizing: border-box;
-    overflow-y: auto; /* Adiciona scroll se a lista for longa */
-    max-height: 90vh; /* Limita a altura para que o scroll funcione */
+    overflow-y: auto;
+    max-height: 90vh;
 }
 
 .lista-lateral h2 {
@@ -32,10 +30,9 @@
 #lista-atividades-lateral {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaçamento entre os itens */
+    gap: 15px;
 }
 
-/* --- ESTILO DO ITEM DA ATIVIDADE NA LISTA --- */
 .atividade-item {
     padding: 10px 15px;
     border-radius: 6px;
@@ -43,7 +40,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s;
     cursor: default;
-    border-left-width: 5px; /* Define a largura da borda de cor */
+    border-left-width: 5px;
     border-left-style: solid;
     display: flex;
     flex-direction: column;
@@ -67,16 +64,15 @@
     display: inline-block;
 }
 
-/* --- CONTAINER DO CALENDÁRIO --- */
+
 .calendario-conteudo {
-    flex-grow: 1; /* Ocupa o restante do espaço */
+    flex-grow: 1;
     padding: 20px;
 }
 #calendario {
     height: 100%;
 }
 
-/* --- ESTILO DOS BOTÕES DE AÇÃO --- */
 .item-acoes {
     display: flex;
     justify-content: flex-end; /* Alinha botões à direita */
@@ -94,35 +90,31 @@
     transition: background-color 0.2s;
 }
 
-/* Botão Adicionar (+) */
 .btn-adicionar {
-    background-color: #28a745; /* Verde */
+    background-color: #28a745;
     color: white;
 }
 .btn-adicionar:hover {
     background-color: #218838;
 }
 
-/* Botão Remover (-) */
 .btn-remover {
-    background-color: #dc3545; /* Vermelho */
+    background-color: #dc3545;
     color: white;
 }
 .btn-remover:hover {
     background-color: #c82333;
 }
 
-/* Botão Editar (Pincel) */
 .btn-editar {
-    background-color: #007bff; /* Azul */
+    background-color: #007bff;
     color: white;
-    font-size: 0.9em; /* Ícone um pouco menor */
+    font-size: 0.9em;
 }
 .btn-editar:hover {
     background-color: #0056b3;
 }
 
-/* Estilo para status vazio */
 .status-empty {
     text-align: center;
     color: #999;
@@ -130,54 +122,46 @@
     margin-top: 20px;
 }
 .filtro-realizadas {
-    /* Garante que o filtro tenha margem inferior antes de começar a lista */
     margin-bottom: 15px;
     padding: 10px 0;
-    border-top: 1px solid #e9ecef; /* Linha divisória sutil */
+    border-top: 1px solid #e9ecef;
     border-bottom: 1px solid #e9ecef;
 }
 
 .filtro-realizadas label {
-    display: flex; /* Para alinhar o checkbox e o texto */
+    display: flex;
     align-items: center;
     font-size: 0.95em;
     color: #495057;
     cursor: pointer;
-    user-select: none; /* Previne seleção do texto */
+    user-select: none;
 }
 
 .filtro-realizadas input[type="checkbox"] {
-    /* Espaço à direita do checkbox */
     margin-right: 8px;
-    /* Ajusta o tamanho e aparência (opcional, depende do navegador) */
     width: 16px;
     height: 16px;
     cursor: pointer;
 }
-/* Botão Membros */
+
 .btn-membros {
-    background-color: #ffc107; /* Amarelo (cor de aviso/warning) */
-    color: white; /* Cor do ícone (simbolo) */
+    background-color: #ffc107;
+    color: white;
 }
+
 .btn-membros:hover {
-    background-color: #e0a800; /* Um tom de amarelo mais escuro para o hover */
+    background-color: #e0a800;
 }
 
-/* ============================================== */
-/* ESTILOS DE PESQUISA E BOTÃO DE SINCRONIZAÇÃO CUSTOMIZADO */
-/* ============================================== */
-
-/* Botão de Sincronização (Customizado) */
 .sync-button-container {
-    padding-bottom: 10px; /* Margem após o botão */
-    padding-top: 5px; /* Margem antes do botão */
+    padding-bottom: 10px;
+    padding-top: 5px;
 }
 
-/* CORRIGIDO: Botão agora em Azul Escuro */
 .sync-button {
     width: 100%;
     padding: 10px 15px;
-    background-color: #0056b3; /* Azul Escuro */
+    background-color: #0056b3;
     color: white;
     border: 1px solid #004085;
     border-radius: 4px;
@@ -186,29 +170,26 @@
     font-size: 1em;
     transition: background-color 0.2s, border-color 0.2s;
     text-align: center;
-    display: flex; /* Para centralizar o conteúdo (ícone e texto) */
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px; /* Espaço entre o ícone e o texto */
+    gap: 8px;
 }
 
 .sync-button:hover {
-    background-color: #004085; /* Azul Escuro mais intenso no hover */
+    background-color: #004085;
     border-color: #002752;
 }
 
-/* Estilo para o ícone (Emoji) */
 .sync-icon {
     font-size: 1.1em;
-    line-height: 1; /* Alinhamento vertical */
+    line-height: 1;
 }
 
-/* Estilo para o container da pesquisa de atividades */
 .pesquisa-atividades-container {
     margin-bottom: 15px;
 }
 
-/* Estilo para o input de pesquisa de atividades */
 #pesquisa-atividades {
     width: 100%;
     padding: 8px 10px;
@@ -225,7 +206,6 @@
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-/* Estilo para o container da pesquisa de membros no modal */
 #pesquisa-membros {
     width: 100%;
     padding: 10px 12px;
@@ -243,40 +223,32 @@
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-
-/* ============================================== */
-/* ESTILOS DE MODAL (ORIGINAIS) */
-/* ============================================== */
-
-/* --- FUNDO ESCURO (BACKDROP) --- */
 #membros-modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Transparência escura */
-    z-index: 1000; /* Garante que fique acima de tudo */
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
 }
 
-/* --- CONTÊINER PRINCIPAL DO MODAL --- */
 #membros-modal-container {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Centraliza perfeitamente */
+    transform: translate(-50%, -50%);
     width: 90%;
-    max-width: 500px; /* Largura ideal para a lista de membros */
+    max-width: 500px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    z-index: 1001; /* Fica acima do backdrop */
-    animation: fadeIn 0.3s ease-out; /* Efeito de entrada suave */
-    display: flex; /* Adicionado para compatibilidade */
+    z-index: 1001;
+    animation: fadeIn 0.3s ease-out;
+    display: flex;
     flex-direction: column;
 }
 
-/* --- HEADER --- */
 .membros-modal-header {
     display: flex;
     justify-content: space-between;
@@ -304,10 +276,9 @@
     color: #666;
 }
 
-/* --- BODY (LISTA DE MEMBROS) --- */
 .membros-modal-body {
     padding: 20px;
-    max-height: 400px; /* Altura máxima com scroll */
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -324,7 +295,6 @@
     min-height: 16px;
 }
 
-/* --- FOOTER --- */
 .membros-modal-footer {
     padding: 10px 20px;
     border-top: 1px solid #eee;
@@ -345,19 +315,15 @@
     background-color: #0056b3;
 }
 
-/* ============================================== */
-/* ESTILOS: ATIVIDADES JÁ REALIZADAS */
-/* ============================================== */
-
 .atividade-item.realizada {
-    opacity: 0.65; /* Sutilmente mais transparente para indicar conclusão */
-    background-color: #f1f1f1; /* Fundo levemente mais claro/cinza */
+    opacity: 0.65;
+    background-color: #f1f1f1;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .atividade-item.realizada:hover {
-    opacity: 0.65; /* Mantém a opacidade no hover */
-    transform: none; /* Remove o efeito de hover para atividades realizadas */
+    opacity: 0.65;
+    transform: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     cursor: default;
 }
@@ -367,7 +333,7 @@
 }
 
 .btn-notificar {
-    background-color: #6f42c1; /* Roxo (um contraste com os outros botões) */
+    background-color: #6f42c1;
     color: white;
 }
 .btn-notificar:hover {

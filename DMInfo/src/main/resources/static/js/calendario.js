@@ -9,10 +9,9 @@ const PALETA_CORES = [
     '#2add70'
 ];
 
-// FUNÇÃO NOVA DO AMIGO: Lógica de Sincronização com Google Agenda
+//EDUARDO
 async function sincronizarAgenda() {
     const btn = document.getElementById('btn-sync-calendar');
-    // Adicionado um ícone Bi-Calendar-Check-Fill genérico, substitua se usar uma biblioteca diferente
     const iconeOriginal = '<i class="bi bi-calendar-check-fill"></i>';
 
     btn.disabled = true;
@@ -25,7 +24,6 @@ async function sincronizarAgenda() {
         if (resultText.includes("Erro: A autorização do Google não foi concluída")) {
             alert("Autorização do Google Calendar é necessária. Redirecionando para o login do Google...");
             sessionStorage.setItem('googleAuthRedirect', 'true');
-            // Redireciona para o endpoint de autorização no backend
             window.location.href = '/api/calendar/oauth/start';
         }
         else if (resultText.includes("auth_failed")) {
@@ -96,12 +94,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return hoje;
     }
 
-    // Salva ou remove a associação Atividade-Calendário (BD)
     async function persistirEstado(id, acao) {
         const idNum = parseInt(id);
         const method = acao === 'adicionar' ? 'POST' : 'DELETE';
 
-        // --- INÍCIO DA VALIDAÇÃO (Aplicável apenas ao adicionar) ---
         if (acao === 'adicionar') {
             const atividade = todasAtividades.find(a => a.id === idNum);
 
@@ -112,26 +108,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let mensagemErro = '';
 
-            // 1. Verificação de Datas (dtIni E dtfim não nulas)
+            //Verificação de Datas (dtIni E dtfim não nulas)
             if (!atividade.dtIni || !atividade.dtFim || atividade.dtIni === '' || atividade.dtFim === '') {
                 mensagemErro += "• A atividade deve ter Data de Início E Data de Fim preenchidas.\n";
             }
 
-            // 2. Verificação de Membros (mínimo 3)
-            // Faz a busca de membros associados em tempo real (mais seguro)
+            //Verificação de Membros (mínimo 3)
             const idsMembrosAtuais = await buscarMembrosPorAtividade(idNum);
 
             if (idsMembrosAtuais.length < 3) {
                 mensagemErro += `• A atividade deve ter no mínimo 3 membros selecionados (Membros atuais: ${idsMembrosAtuais.length}).\n`;
             }
 
-            // Se houver erros, exibe o alert e interrompe
+            //Se houver erros interrompe
             if (mensagemErro !== '') {
                 alert(`A atividade não pode ser adicionada ao calendário devido às seguintes pendências:\n\n${mensagemErro}`);
                 return;
             }
         }
-        // --- FIM DA VALIDAÇÃO ---
 
         try {
             const response = await fetch(`/apis/calendario/${idNum}`, { method: method });
@@ -140,8 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const errorText = await response.text();
                 throw new Error(`Falha na persistência: ${errorText}`);
             }
-
-            // Sucesso! Recarrega o estado e o calendário
             await carregarEstadoEEventos();
 
         } catch (error) {
@@ -149,14 +141,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Função para redirecionar para edição
     function editarAtividade(id) {
         window.location.href = `/app/finalizar-atividades?id=${id}`;
     }
-
-    // -----------------------------------------------------
-    // FUNÇÕES DE GERENCIAMENTO DE MEMBROS (MODAL)
-    // -----------------------------------------------------
 
     function mostrarGerenciadorMembros() {
         const backdrop = document.getElementById('membros-modal-backdrop');
@@ -176,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // FUNÇÃO PARA FILTRAR MEMBROS NO MODAL (usada pelo oninput)
     window.filtrarMembros = function() {
         const pesquisaInput = document.getElementById('pesquisa-membros');
         if (pesquisaInput) {
@@ -184,7 +170,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Busca a lista completa de membros do BD
     async function buscarTodosOsMembros() {
         try {
             const response = await fetch('/apis/membro');
@@ -197,7 +182,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Busca os IDs dos membros associados a uma atividade específica
     async function buscarMembrosPorAtividade(idCriacao) {
         try {
             const response = await fetch(`/apis/membro/atividade/${idCriacao}`);
@@ -209,25 +193,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Busca nomes dos membros com base nos IDs e na lista 'todosOsMembros'
     async function buscarNomesDosMembros(idAtividade) {
-        // 1. Garante que temos a lista completa de membros
         if (todosOsMembros.length === 0) {
             await buscarTodosOsMembros();
         }
 
-        // 2. Busca os IDs associados a esta atividade
         const idsAssociados = await buscarMembrosPorAtividade(idAtividade);
 
-        // 3. Mapeia IDs para nomes, usando a lista completa
         const nomesMembros = idsAssociados
             .map(id => {
                 const membro = todosOsMembros.find(m => (m.id || m.id_membro) === id);
                 return membro ? (membro.usuario ? membro.usuario.nome : membro.nome) : null;
             })
-            .filter(nome => nome !== null) // Remove nulos
-            .sort(); // Opcional: ordena alfabeticamente
-
+            .filter(nome => nome !== null)
+            .sort();
         return nomesMembros;
     }
 
@@ -347,11 +326,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarGerenciadorMembros();
     }
 
-    // -----------------------------------------------------
-    // FUNÇÕES DE FILTRO E ORDENAÇÃO DE ATIVIDADES (Suas)
-    // -----------------------------------------------------
-
-    // FUNÇÃO 1: Ordena alfabeticamente
     function ordenarAtividadesPorTitulo(lista) {
         return lista.sort((a, b) => {
             const tituloA = (a.atv ? a.atv.descricao : 'Atividade').toLowerCase();
@@ -363,13 +337,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // FUNÇÃO 2: Filtra por status/data e por termo de pesquisa, e então ordena
     window.filtrarEOrdenarAtividades = function(termoPesquisa) {
         let atividadesParaExibir = todasAtividades;
         const mostrarRealizadas = document.getElementById('mostrar-realizadas-checkbox')?.checked || false;
         const ontem = getOntem();
 
-        // 1. Aplicar filtro de Atividades Realizadas (status e data) - MANTIDO
         if (!mostrarRealizadas) {
             atividadesParaExibir = atividadesParaExibir.filter(atividade => {
                 if (atividade.status === true) {
@@ -383,7 +355,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // 2. Aplicar filtro de Pesquisa (Título e Local) - MANTIDO
         const termo = termoPesquisa ? termoPesquisa.toLowerCase().trim() : '';
         if (termo !== '') {
             atividadesParaExibir = atividadesParaExibir.filter(atividade => {
@@ -394,16 +365,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // 3. Aplicar ordenação alfabética - MANTIDO
         const atividadesOrdenadas = ordenarAtividadesPorTitulo(atividadesParaExibir);
 
-        // 4. Renderizar a lista
         renderizarListaAtividades(atividadesOrdenadas, atividadesNoCalendarioIds);
     };
-
-    // -----------------------------------------------------
-    // FUNÇÃO DE RENDERIZAÇÃO
-    // -----------------------------------------------------
 
     function renderizarListaAtividades(lista, idsAtivos) {
         const listaElemento = document.getElementById('lista-atividades-lateral');
@@ -455,7 +420,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${dataDisplay}
                 </div>
                 <div class="item-acoes">
-                    <button class="btn-membros" data-id="${atividade.id}" title="Adicionar Membros">&#128100;</button> 
+                    <button class="btn-membros" data-id="${atividade.id}" title="Adicionar Membros">&#128100;</button>
+                    <button class="btn-notificar" data-id="${atividade.id}" title="Enviar Notificação Manual">&#128276;</button> <!-- NOVO BOTÃO -->
                     <button class="btn-editar" data-id="${atividade.id}" title="Editar">&#9998;</button>
                     <button class="btn-toggle-calendario ${estaNoCalendario ? 'btn-remover' : 'btn-adicionar'}" data-id="${atividade.id}" title="${estaNoCalendario ? 'Remover do Calendário' : 'Adicionar ao Calendário'}">
                         ${estaNoCalendario ? '&minus;' : '+'}
@@ -484,16 +450,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pesquisaInput.value = '';
             }
 
-            // Usa a função combinada de filtro e ordenação
             filtrarEOrdenarAtividades('');
 
             calendario.refetchEvents();
 
-            // Verifica se voltamos de uma autorização do Google - CÓDIGO DO AMIGO
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('status') === 'auth_success') {
                 alert("Autorização do Google concluída! Agora você pode sincronizar suas atividades.");
-                // Limpa o parâmetro da URL
                 history.replaceState(null, '', window.location.pathname);
             }
 
@@ -503,11 +466,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Não foi possível carregar o estado das atividades. " + error.message);
         }
     }
-
-
-    // -----------------------------------------------------
-    // INICIALIZAÇÃO DO FULLCALENDAR
-    // -----------------------------------------------------
 
     const calendario = new FullCalendar.Calendar(calendarioElemento, {
         initialView: 'dayGridMonth',
@@ -600,14 +558,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // -----------------------------------------------------
-    // CHAMA CARREGAMENTO INICIAL E LISTENERS
-    // -----------------------------------------------------
-
     await carregarEstadoEEventos();
     calendario.render();
 
-    // Adiciona o listener da nova função de sincronização do Google
     const syncButton = document.getElementById('btn-sync-calendar');
     if (syncButton) {
         syncButton.addEventListener('click', sincronizarAgenda);
@@ -634,10 +587,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (target.classList.contains('btn-membros')) {
             const id = target.dataset.id;
             abrirGerenciadorMembros(id);
+
+        } else if (target.classList.contains('btn-notificar')) {
+             const id = target.dataset.id;
+             enviarNotificacaoManual(id);
         }
 
         if (target.id === 'membros-modal-backdrop' || target.classList.contains('fechar-modal-btn')) {
             fecharGerenciadorMembros();
         }
     });
+
+    async function enviarNotificacaoManual(idCriacao) {
+        if (!confirm('Tem certeza que deseja enviar uma notificação manual para todos os membros desta atividade?')) {
+            return;
+        }
+
+        try {
+            // Chama o novo endpoint criado no NotificacaoController.java
+            const response = await fetch(`/apis/notificacao/manual/${idCriacao}`, { method: 'POST' });
+            const message = await response.text();
+
+            if (response.ok) {
+                alert(message);
+            } else {
+                alert(`Erro ao enviar notificação: ${message}`);
+            }
+        } catch (error) {
+            console.error('Erro ao notificar:', error);
+            alert('Ocorreu um erro inesperado ao tentar enviar a notificação.');
+        }
+    }
 });

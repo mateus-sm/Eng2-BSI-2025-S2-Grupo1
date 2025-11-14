@@ -22,7 +22,7 @@ async function carregarMembros() {
         select.innerHTML = `<option value="">-- Selecione um membro --</option>`;
 
         membros.forEach(m => {
-            select.innerHTML += `<option value="${m.id_membro}">${m.nome}</option>`;
+            select.innerHTML += `<option value="${m.id}">${m.usuario?.nome || "Sem nome"}</option>`;
         });
 
     } catch (e) {

@@ -81,13 +81,13 @@ public class GoogleCalendarController {
             cookie.setMaxAge(3600); // 1 hora de validade
             response.addCookie(cookie);
 
-            return new RedirectView("/calendario.html?status=auth_success");
+            return new RedirectView("/app/calendario?status=auth_success");
         } catch (TokenResponseException e) {
             System.err.println("Erro na troca do token: " + e.getMessage());
-            return new RedirectView("/calendario.html?error=auth_failed");
+            return new RedirectView("/app/calendario?error=auth_failed");
         } catch (IOException e) {
             System.err.println("Erro de IO ao obter token: " + e.getMessage());
-            return new RedirectView("/calendario.html?error=io_failed");
+            return new RedirectView("/app/calendario?error=io_failed");
         }
     }
 

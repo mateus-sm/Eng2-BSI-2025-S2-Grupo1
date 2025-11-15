@@ -38,7 +38,7 @@ public class LoginController {
         if (usuarioEncontrado != null && usuarioEncontrado.getSenha().equals(senha)) {
             // Login bem-sucedido
             session.setAttribute(ADMIN_ID_SESSION_KEY, usuarioEncontrado.getId());
-            return "redirect:/app/membros";
+            return "principal";
         } else {
             // Login falhou
             model.addAttribute("erro", "Usuário ou senha inválidos.");

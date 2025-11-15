@@ -1,0 +1,25 @@
+.container {
+    max-width: 450px;
+    padding: 30px;
+}
+
+.menu-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    text-decoration: none;
+    font-weight: 500;
+    width: 100%;
+    padding: 10px 5px;
+    font-size: 0.9rem;
+}
+
+.menu-btn:hover {
+    background-color: #0056b3;
+}
+
+.logout-button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+}

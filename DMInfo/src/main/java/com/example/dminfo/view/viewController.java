@@ -38,6 +38,11 @@ public class viewController {
         return "parametrizacaoExibir";
     }
 
+    @GetMapping("/app/mensalidade")
+    public String paginaMensalidade() {
+        return "mensalidade";
+    }
+
     @GetMapping("/app/finalizar-atividades")
     public String paginaListarAtividades() {
         return "finalizarAtividades";
@@ -87,6 +92,12 @@ public class viewController {
     public String paginaEnviarFotosAtividade() {
         return "enviarFotosAtividade";
     }
+
+    @GetMapping("/app/distribuir-recursos")
+    public String paginaDistribuirRecursos() {return "distribuir-recursos";}
+
+    @GetMapping("/app/atribuirconquista")
+    public String paginaAtribuirConquista() {return "atribuir-conquista";}
 
     @GetMapping("/app/doacao-form")
     public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {

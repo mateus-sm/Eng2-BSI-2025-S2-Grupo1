@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lançamento de Frequência em Atividades</title>
+    <link rel="stylesheet" href="/styles/frequencia_atividade.css">
+</head>
+<body>
+
+<h1>📝 Lançamento de Frequência em Atividades</h1>
+
+<div class="card">
+    <h2>Passo 1: Encontre e Selecione a Atividade</h2>
+    <form id="buscaAtividadeForm">
+        <label for="dataBusca">Data da Atividade (DT. INÍCIO):</label>
+        <input type="date" id="dataBusca" required>
+        <button type="submit">Buscar Atividades</button>
+    </form>
+
+    <div id="atividadesResultados" style="margin-top: 15px;">
+    </div>
+</div>
+
+---
+
+<div class="card" id="lancamentoSection" style="display: none;">
+    <h2>Passo 2: Registrar Membros Presentes</h2>
+    <p>Atividade Selecionada:
+        <strong id="atividadeInfo">N/A</strong>
+        (ID Realização: <span id="idAtividadeSelecionadaInfo"></span>)
+    </p>
+
+    <h3>A. Buscar Membro</h3>
+    <label for="buscaNomeMembro">Pesquisar Membro por Nome:</label>
+    <input type="text" id="buscaNomeMembro" placeholder="Comece a digitar o nome...">
+
+    <div id="membrosResultados" style="margin-top: 10px;">
+    </div>
+
+    <hr style="margin: 20px 0;">
+
+    <h3>B. Confirmar Presença</h3>
+    <form id="lancamentoForm" style="display: none;">
+        <input type="hidden" id="idAtividadeSelecionada">
+        <input type="hidden" id="idMembroSelecionado">
+
+        <p>Membro Selecionado: <strong id="membroNomeConfirmacao">N/A</strong></p>
+
+        <div id="membroInfo" style="margin-top: 10px;">
+        </div>
+
+        <button type="submit">Registrar Presença</button>
+    </form>
+
+    <div id="frequenciaLancada" style="margin-top: 20px;">
+        <h3>Frequências Registradas Nesta Sessão:</h3>
+        <ul id="listaFrequencia"></ul>
+    </div>
+</div>
+
+<script src="/js/frequencia_atividade.js"></script>
+</body>
+</html>

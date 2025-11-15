@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectDoador = document.getElementById('id_doador');
     // NOVO: Puxa o valor do ID Admin do campo hidden (injetado pela sessão)
     const inputAdminLogado = document.getElementById('id_admin_logado');
-    const idAdmin = inputAdminLogado ? inputAdminLogado.value : '1'; // Default para '1' se não logado/injetado
+    //colocar no lugar do 1 aí de baixo -> inputAdminLogado ? inputAdminLogado.value : '1';
+    const idAdmin = 1; // Default para '1' se não logado/injetado
 
     const inputObservacao = document.getElementById('observacao');
 

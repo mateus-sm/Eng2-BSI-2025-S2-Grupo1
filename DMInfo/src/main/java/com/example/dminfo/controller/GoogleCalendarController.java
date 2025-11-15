@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -80,13 +81,13 @@ public class GoogleCalendarController {
             cookie.setMaxAge(3600); // 1 hora de validade
             response.addCookie(cookie);
 
-            return new RedirectView("/calendario.html?status=auth_success");
+            return new RedirectView("/app/calendario?status=auth_success");
         } catch (TokenResponseException e) {
             System.err.println("Erro na troca do token: " + e.getMessage());
-            return new RedirectView("/calendario.html?error=auth_failed");
+            return new RedirectView("/app/calendario?error=auth_failed");
         } catch (IOException e) {
             System.err.println("Erro de IO ao obter token: " + e.getMessage());
-            return new RedirectView("/calendario.html?error=io_failed");
+            return new RedirectView("/app/calendario?error=io_failed");
         }
     }
 
@@ -159,9 +160,10 @@ public class GoogleCalendarController {
             end.setDate(new com.google.api.client.util.DateTime(endDateStr));
         }
         else {
-            // Evento com horário específico
             LocalDateTime startDt = LocalDateTime.of(dataInicio, horarioInicio.toLocalTime());
-            LocalDateTime endDt = startDt.plusHours(1); // Assumindo duração de 1 hora se não houver tempo de fim
+
+            LocalTime horaFim = horarioInicio.toLocalTime().plusHours(1);
+            LocalDateTime endDt = LocalDateTime.of(dataFim, horaFim);
 
             // Converte para o formato RFC3339
             String startRfc3339 = startDt.atZone(zoneId).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);

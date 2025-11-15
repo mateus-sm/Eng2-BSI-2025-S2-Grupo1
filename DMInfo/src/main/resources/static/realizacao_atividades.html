@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gerenciamento de Realização de Atividades</title>
+    <link rel="stylesheet" href="styles/realizacao_atividades.css" />
+</head>
+<body>
+
+<h1>Realização de Atividades</h1>
+
+<form id="atividadeForm">
+    <input type="hidden" id="atividadeId" value="" />
+
+    <label for="idAtividade">ID da Atividade (Atv):</label>
+    <input type="number" id="idAtividade" required />
+
+    <label for="idAdmin">ID do Administrador:</label>
+    <input type="number" id="idAdmin" required />
+
+    <label for="horario">Horário (HH:MM:SS):</label>
+    <input type="time" id="horario" step="1" required />
+
+    <label for="local">Local:</label>
+    <input type="text" id="local" required />
+
+    <label for="dtIni">Data Início:</label>
+    <input type="date" id="dtIni" required />
+
+    <label for="custoPrevisto">Custo Previsto:</label>
+    <input type="number" id="custoPrevisto" step="0.01" required />
+
+    <label for="observacoes">Observações (Inicial):</label>
+    <textarea id="observacoes"></textarea>
+
+    <button type="submit" id="submitBtn">Criar Atividade</button>
+</form>
+
+<hr>
+
+<h2>Finalizar Atividade</h2>
+<form id="finalizarForm">
+    <label for="finalizarId">ID da Atividade a Finalizar:</label>
+    <input type="number" id="finalizarId" required />
+
+    <label for="dtFim">Data Fim Real:</label>
+    <input type="date" id="dtFim" required />
+
+    <label for="custoReal">Custo Real (Final):</label>
+    <input type="number" id="custoReal" step="0.01" required />
+
+    <label for="observacoesFim">Observações Finais:</label>
+    <textarea id="observacoesFim"></textarea>
+
+    <button type="submit">Finalizar e Registrar</button>
+</form>
+
+<hr>
+
+<div class="filtros">
+    <label for="searchDesc">Pesquisar por Descrição da Atividade:</label>
+    <input type="text" id="searchDesc" placeholder="Descrição da Atividade" />
+
+    <label for="sortField">Ordenar por:</label>
+    <select id="sortField">
+        <option value="idAsc">ID (Menor p/ Maior)</option>
+        <option value="dtIniAsc">Data Início</option>
+    </select>
+
+    <button type="button" onclick="carregarAtividades()">Aplicar Filtros</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Atividade</th>
+        <th>Admin</th>
+        <th>Local</th>
+        <th>Data/Hora</th>
+        <th>Custo Previsto</th>
+        <th>Custo Real</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody id="atividadesTable"></tbody>
+</table>
+
+<script src="js/realizacao_atividades.js"></script>
+</body>
+</html>

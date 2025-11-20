@@ -61,17 +61,29 @@ document.getElementById('foto').addEventListener('change', function(event) {
     const previewId = 'image-preview';
     let preview = document.getElementById(previewId);
 
+    const labelText = document.getElementById('file-label-text');
+    if (labelText) {
+        if (file) {
+            labelText.textContent = file.name;
+            labelText.classList.add('has-file');
+        } else {
+            labelText.textContent = 'Escolher Evidência (Foto)';
+            labelText.classList.remove('has-file');
+        }
+    }
+
     if (!preview) {
         preview = document.createElement('img');
         preview.id = previewId;
         preview.style.maxWidth = '200px';
         preview.style.display = 'none';
         preview.className = 'mt-3 border rounded';
-        event.target.parentNode.appendChild(preview);
+        event.target.closest('.input-group-wrapper').after(preview);
     }
 
     if (!file) {
         preview.style.display = 'none';
+        preview.src = '';
         return;
     }
 
@@ -120,9 +132,7 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         if (!response.ok) {
             let errorMsg = 'Falha no upload';
             try {
-                // Seu backend retorna Map.of("erro", "Mensagem"), que a View converte para JSON
                 const erro = await response.json();
-                // A chave pode ser 'erro' (do seu backend) ou 'message' (padrão de erro)
                 errorMsg = erro.erro || erro.message || 'Falha no upload';
             } catch(e) {
                 errorMsg = `Falha no upload: ${response.status} ${response.statusText}`;
@@ -133,9 +143,19 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         const resultado = await response.json();
         alert('Foto enviada com sucesso! ID da Foto: ' + resultado.id);
 
-        // Limpar formulário após sucesso
         document.getElementById('upload-form').reset();
-        document.getElementById('image-preview').style.display = 'none';
+
+        const preview = document.getElementById('image-preview');
+        if (preview) {
+            preview.style.display = 'none';
+            preview.src = '';
+        }
+
+        const labelText = document.getElementById('file-label-text');
+        if (labelText) {
+            labelText.textContent = 'Escolher Evidência (Foto)';
+            labelText.classList.remove('has-file');
+        }
 
     } catch (error) {
         console.error('Erro:', error);

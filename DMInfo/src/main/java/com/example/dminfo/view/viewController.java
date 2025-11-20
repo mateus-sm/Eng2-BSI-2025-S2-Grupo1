@@ -115,4 +115,9 @@ public class viewController {
         session.invalidate();
         return "redirect:/login";
     }
+
+    @GetMapping("/app/principal")
+    public String paginaPrincipal() {
+        return "principal";
+    }
 }

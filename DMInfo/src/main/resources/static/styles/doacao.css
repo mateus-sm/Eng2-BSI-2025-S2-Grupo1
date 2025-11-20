@@ -1,53 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
 body {
-    background-color: #f8f9fa;
+    background-color: #fff;
+    color: #333;
+    min-height: 100vh;
+    padding-bottom: 40px;
 }
 
 .container {
     max-width: 1200px;
 }
 
-.form-container, .table-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+/* ===== Header e Logo ===== */
+.page-header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
-#tabelaDoacoes tr:hover {
-    cursor: default;
-    background-color: #eceeef;
+.logo-img {
+    width: 50px;
+    height: auto;
+    filter: brightness(0);
+    margin-bottom: 15px;
 }
 
-.table-responsive {
-    overflow-x: auto;
+h2 {
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 5px;
 }
 
-.form-select {
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+/* ===== Formulários ===== */
+.form-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
+.required-field::after {
+    content: " *";
+    color: #d60000;
+}
+
+.form-control, .form-select {
+    background-color: #f0f0f0 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    padding: 0 20px;
+    color: #555;
+    font-size: 0.95rem;
+    box-shadow: none !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #e8e8e8 !important;
+    outline: none;
+}
+
+textarea.form-control {
+    height: auto;
+    padding-top: 15px;
 }
 
 .campo-escondido {
     display: none;
 }
 
-.required-field::after {
-    content: " *";
-    color: #dc3545;
-    font-weight: bold;
+/* ===== Botões ===== */
+.btn-primary {
+    background-color: #000 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    padding: 0 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.required-field-asterisk {
-    color: #dc3545;
-    font-weight: bold;
+.btn-primary:hover {
+    background-color: #333 !important;
 }
 
-#tabelaDoacoes .btn {
-    padding: 0.25rem 0.5rem;
+/* Botão de "Voltar" ou Cancelar */
+.btn-secondary, .btn-outline-secondary {
+    background-color: #f0f0f0 !important;
+    color: #555 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-#tabelaDoacoes .btn-editar {
-    margin-right: 5px;
+.btn-secondary:hover {
+    background-color: #e0e0e0 !important;
 }
 
-.btn-remover-item i {
-    pointer-events: none;
+/* Botão verde para adicionar Item */
+.btn-success {
+    background-color: #000 !important; /* Mudei para preto para manter identidade */
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    font-weight: 600;
+}
+
+/* ===== Tabela Principal ===== */
+.table-container {
+    margin-top: 30px;
+}
+
+.table {
+    --bs-table-bg: transparent;
+}
+
+.table thead th {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    padding: 15px;
+}
+
+.table thead th:first-child { border-top-left-radius: 10px; }
+.table thead th:last-child { border-top-right-radius: 10px; }
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* Ações da Tabela */
+.btn-action-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-sm-action {
+    height: 32px;
+    border-radius: 8px !important;
+    font-size: 0.8rem;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    background: transparent;
+    color: #555;
+    transition: all 0.2s;
+}
+
+.btn-sm-action:hover {
+    border-color: #000;
+    color: #000;
+}
+
+/* ===== Tabela de Itens (no Form) ===== */
+.table-itens {
+    margin-top: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.table-itens thead th {
+    background-color: #f0f0f0; /* Header cinza claro para diferenciar */
+    color: #333;
+    border-radius: 0;
+}
+
+/* ===== Botão Página Principal (Canto Superior ESQUERDO) ===== */
+.btn-home {
+    position: absolute;
+    top: 20px;
+    left: 20px; /* MUDANÇA AQUI: De 'right' para 'left' */
+    background-color: #f0f0f0;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.btn-home:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+    .btn-home {
+        top: 10px;
+        left: 10px; /* MUDANÇA AQUI TAMBÉM */
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
 }

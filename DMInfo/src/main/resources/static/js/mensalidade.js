@@ -9,14 +9,18 @@ function mostrarAlerta(tipo, mensagem) {
 }
 
 // ============================
+//  CONFIG GLOBAL
+// ============================
+const API = "http://localhost:8080";
+
+// ============================
 //  CARREGAR MEMBROS
 // ============================
 async function carregarMembros() {
     try {
-        const resposta = await fetch("http://localhost:8080/apis/membro");
+        const resposta = await fetch(`${API}/apis/membro`);
         const membros = await resposta.json();
         console.log(membros);
-        //PROCURAR NA API DE USUARIOS O NOME
 
         const select = document.getElementById("selectMembro");
         select.innerHTML = `<option value="">-- Selecione um membro --</option>`;
@@ -62,8 +66,10 @@ function carregarAnos() {
 // ============================
 async function carregarMensalidades(filtro = "") {
     try {
-        let url = "/mensalidade/listar";
-        if (filtro.trim() !== "") url = `/mensalidade/buscar?nome=${encodeURIComponent(filtro)}`;
+        let url = `${API}/apis/mensalidade/listar`;
+        if (filtro.trim() !== "") {
+            url = `${API}/apis/mensalidade/buscar?nome=${encodeURIComponent(filtro)}`;
+        }
 
         const resposta = await fetch(url);
         const lista = await resposta.json();
@@ -129,7 +135,7 @@ async function salvarMensalidade(event) {
     };
 
     try {
-        const res = await fetch("/mensalidade/salvar", {
+        const res = await fetch(`${API}/apis/mensalidade/salvar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(dados)
@@ -151,7 +157,7 @@ async function salvarMensalidade(event) {
 // ============================
 async function editarMensalidade(id) {
     try {
-        const res = await fetch(`/mensalidade/buscar/${id}`);
+        const res = await fetch(`${API}/apis/mensalidade/buscar/${id}`);
         const m = await res.json();
 
         document.getElementById("idMensalidade").value = m.id_mensalidade;
@@ -175,7 +181,7 @@ async function excluirMensalidade(id) {
     if (!confirm("Excluir registro?")) return;
 
     try {
-        const res = await fetch(`/mensalidade/excluir/${id}`, { method: "DELETE" });
+        const res = await fetch(`${API}/apis/mensalidade/excluir/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
 
         mostrarAlerta("success", "Excluído com sucesso!");

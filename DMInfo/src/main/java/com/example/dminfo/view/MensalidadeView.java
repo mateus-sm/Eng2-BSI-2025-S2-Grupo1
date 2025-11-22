@@ -10,8 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@Controller
-@RequestMapping("/mensalidade")
+@RestController
+@RequestMapping("apis/mensalidade")
 public class MensalidadeView {
 
     @Autowired
@@ -29,7 +29,7 @@ public class MensalidadeView {
 
     @GetMapping("/buscar")
     @ResponseBody
-    public ResponseEntity<Object> listarComFiltro(@RequestParam String nome) {
+    public ResponseEntity<Object> listarComFiltro(@RequestParam(required = false, defaultValue = "") String nome) {
         try {
             return ResponseEntity.ok(controller.listar(nome));
         } catch (Exception e) {

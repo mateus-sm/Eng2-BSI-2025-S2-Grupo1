@@ -83,11 +83,13 @@ public class MensalidadeDAO {
 
     public List<Mensalidade> listar(String filtroNome) {
         List<Mensalidade> lista = new ArrayList<>();
-        String sql = "SELECT m.*, mem.nome as nomeMembro FROM mensalidade m " +
-                "JOIN membro mem ON m.id_membro = mem.id_membro ";
+
+        String sql = "SELECT m.*, u.nome AS nomeMembro FROM mensalidade m "
+                + "JOIN membro mem ON m.id_membro = mem.id_membro "
+                + "JOIN usuario u ON mem.id_usuario = u.id ";
 
         if (filtroNome != null && !filtroNome.isEmpty()) {
-            sql += " WHERE mem.nome ILIKE '%" + filtroNome + "%'"; // ILIKE para case-insensitive (PostgreSQL)
+            sql += " WHERE u.nome ILIKE '%" + filtroNome + "%'";
         }
 
         sql += " ORDER BY m.dataPagamento DESC";

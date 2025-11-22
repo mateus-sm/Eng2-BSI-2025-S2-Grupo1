@@ -1,5 +1,6 @@
 package com.example.dminfo.controller;
 
+import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.dao.MensalidadeDAO;
 import com.example.dminfo.model.Mensalidade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,15 @@ public class MensalidadeController {
     @Autowired
     private MensalidadeDAO dao;
 
+    @Autowired
+    private MembroDAO mdao;
+
     public Mensalidade salvar(Mensalidade m) {
-        if (m.getId_mensalidade() > 0) {
-            dao.alterar(m);
+        if (m != null && mdao.get(m.getId_membro()) != null && m.getValor() > 0) { //achou membro no banco
+            dao.gravar(m);
             return m;
         } else {
-            return dao.gravar(m);
+            throw new RuntimeException("Mensalidade Inválida");
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.ConquistaDAO;
+import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -36,50 +37,51 @@ public class Conquista {
         this.descricao = descricao;
     }
 
-    public List<Conquista> listar() {
-        return dao.listar();
+    public List<Conquista> listar(String filtro, Conexao conexao) {
+        return dao.readAll("", conexao);
     }
 
-    public Conquista getById(Integer id) {
-        Conquista conquista = dao.getById(id);
-        if (conquista == null) {
-            throw new RuntimeException("Conquista não encontrada para o ID: " + id);
-        }
-        return conquista;
+    public Conquista getById(Integer id, Conexao conexao) {
+        return dao.getById(id, conexao);
     }
 
-    public Conquista salvar(Conquista conquista) {
+    public Conquista getByDesc(Conquista conquista, Conexao conexao) {
+        return dao.read(conquista, conexao);
+    }
+
+    public Conquista salvar(Conquista conquista, Conexao conexao) {
         if (conquista == null || conquista.getDescricao() == null || conquista.getDescricao().isBlank()) {
             throw new RuntimeException("Descrição da conquista é obrigatória.");
         }
 
-        Conquista existente = dao.consultar(conquista.getDescricao());
+        Conquista existente = dao.read(conquista, conexao);
         if (existente != null) {
             throw new RuntimeException("Já existe uma conquista com essa descrição.");
         }
 
-        return dao.gravar(conquista);
+        return dao.create(conquista, conexao);
     }
 
-    public Conquista update(Integer id, Conquista conquistaDetails) {
-        Conquista conquistaBanco = dao.getById(id);
+    public Conquista update(Integer id, Conquista conquistaDetails, Conexao conexao) {
+        Conquista conquistaBanco = dao.getById(id, conexao);
         if (conquistaBanco == null) {
             throw new RuntimeException("Conquista não encontrada para o ID: " + id);
         }
 
         conquistaBanco.setDescricao(conquistaDetails.getDescricao());
 
-        if (dao.alterar(conquistaBanco)) {
+        Conquista c = dao.update(conquistaBanco, conexao);
+        if (c != null) {
             return conquistaBanco;
         }
         throw new RuntimeException("Erro ao atualizar conquista.");
     }
 
-    public boolean excluir(Integer id) {
-        Conquista conquista = dao.getById(id);
+    public boolean excluir(Integer id, Conexao conexao) {
+        Conquista conquista = dao.getById(id, conexao);
         if (conquista == null) {
             throw new RuntimeException("Conquista não encontrada.");
         }
-        return dao.excluir(id);
+        return dao.delete(id, conexao);
     }
 }

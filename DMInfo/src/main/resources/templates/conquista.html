@@ -14,22 +14,6 @@
             <h2 class="mb-0">Gerenciar Conquistas</h2>
         </div>
 
-        <!-- Seção de Filtro -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
-                        <label for="filtroDescricao" class="form-label fw-semibold">Buscar por Descrição:</label>
-                        <input type="text" id="filtroDescricao" class="form-control" placeholder="Ex: Primeira vitória, Melhor score...">
-                    </div>
-                    <div class="col-md-3 d-flex gap-2">
-                        <button type="button" class="btn btn-success flex-grow-1" id="btnFiltrar">Filtrar</button>
-                        <button type="button" class="btn btn-outline-secondary" id="btnLimparFiltro" title="Limpar filtros">✕</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Formulário -->
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-primary text-white">
@@ -54,6 +38,22 @@
 
         <!-- Mensagens de feedback -->
         <div id="alertaContainer"></div>
+
+        <!-- Seção de Filtro -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-9">
+                        <label for="filtroDescricao" class="form-label fw-semibold">Buscar por Descrição:</label>
+                        <input type="text" id="filtroDescricao" class="form-control" placeholder="Ex: Primeira vitória, Melhor score...">
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="button" class="btn btn-success flex-grow-1" id="btnFiltrar">Filtrar</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnLimparFiltro" title="Limpar filtros">✕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Tabela -->
         <div class="card shadow-sm">
@@ -81,5 +81,6 @@
     </div>
 
     <script th:src="@{/js/conquista.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

@@ -2,9 +2,10 @@ package com.example.dminfo.controller;
 
 import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.AtribuirConquistaMembroDAO;
-import com.example.dminfo.dao.ConquistaDAO;
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.model.AtribuirConquistaMembro;
+import com.example.dminfo.model.Conquista;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class AtribuirConquistaController {
     private AdministradorDAO administradorDAO;
 
     @Autowired
-    private ConquistaDAO conquistaDAO;
+    private Conquista conquistaModel;
 
     public List<AtribuirConquistaMembro> listar() {
         return dao.listar();
@@ -35,7 +36,7 @@ public class AtribuirConquistaController {
 
         if (administradorDAO.get(acm.getId_admin()) == null ||
                 membroDAO.get(acm.getId_membro()) == null ||
-                conquistaDAO.getById(acm.getId_conquista()) == null)
+                conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
 
         if (dao.consultar(acm.getObservacao()) != null)
@@ -49,8 +50,8 @@ public class AtribuirConquistaController {
             throw new RuntimeException("Atribuição inválida para atualização.");
 
         if (administradorDAO.get(acm.getId_admin()) == null ||
-                membroDAO.get(acm.getId_membro()) == null ||
-                conquistaDAO.getById(acm.getId_conquista()) == null)
+                membroDAO.get(acm.getId_membro()) == null  ||
+                conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
 
         return dao.alterar(acm);

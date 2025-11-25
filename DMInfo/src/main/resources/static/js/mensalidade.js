@@ -8,14 +8,8 @@ function mostrarAlerta(tipo, mensagem) {
     setTimeout(() => alertaContainer.innerHTML = "", 6000);
 }
 
-// ============================
-//  CONFIG GLOBAL
-// ============================
 const API = "http://localhost:8080";
 
-// ============================
-//  CARREGAR MEMBROS
-// ============================
 async function carregarMembros() {
     try {
         const resposta = await fetch(`${API}/apis/membro`);
@@ -34,9 +28,6 @@ async function carregarMembros() {
     }
 }
 
-// ============================
-//  CARREGAR MESES / ANOS
-// ============================
 function carregarMeses() {
     const meses = [
         "1 - Janeiro", "2 - Fevereiro", "3 - Março", "4 - Abril", "5 - Maio", "6 - Junho",
@@ -61,9 +52,6 @@ function carregarAnos() {
     }
 }
 
-// ============================
-//  CARREGAR TABELA
-// ============================
 async function carregarMensalidades(filtro = "") {
     try {
         let url = `${API}/apis/mensalidade/listar`;
@@ -92,7 +80,7 @@ async function carregarMensalidades(filtro = "") {
             tabela.innerHTML += `
                 <tr>
                     <td class="text-center">${item.id_mensalidade}</td>
-                    <td>${item.nomeMembro}</td>
+                    <td>${item.id_membro} - ${item.nome_membro || "Sem nome"}</td>
                     <td>${item.mes}</td>
                     <td>${item.ano}</td>
                     <td>R$ ${item.valor.toFixed(2)}</td>
@@ -112,9 +100,6 @@ async function carregarMensalidades(filtro = "") {
     }
 }
 
-// ============================
-//  SALVAR
-// ============================
 async function salvarMensalidade(event) {
     event.preventDefault();
 
@@ -152,9 +137,7 @@ async function salvarMensalidade(event) {
     }
 }
 
-// ============================
-//  EDITAR
-// ============================
+
 async function editarMensalidade(id) {
     try {
         const res = await fetch(`${API}/apis/mensalidade/buscar/${id}`);
@@ -174,9 +157,6 @@ async function editarMensalidade(id) {
     }
 }
 
-// ============================
-//  EXCLUIR
-// ============================
 async function excluirMensalidade(id) {
     if (!confirm("Excluir registro?")) return;
 

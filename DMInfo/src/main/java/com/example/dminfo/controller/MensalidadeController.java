@@ -17,13 +17,33 @@ public class MensalidadeController {
     private MembroDAO mdao;
 
     public Mensalidade salvar(Mensalidade m) {
-        if (m != null && mdao.get(m.getId_membro()) != null && m.getValor() > 0) { //achou membro no banco
-            dao.gravar(m);
-            return m;
-        } else {
-            throw new RuntimeException("Mensalidade Inválida");
+
+        if (m == null || m.getValor() <= 0) {
+            throw new RuntimeException("Mensalidade inválida");
         }
+
+        if (mdao.get(m.getId_membro()) == null) {
+            throw new RuntimeException("Membro não encontrado no banco");
+        }
+
+        Mensalidade existente = null;
+
+        if (m.getId_mensalidade() > 0) {
+            existente = dao.buscarPorId(m.getId_mensalidade());
+        }
+
+        if (existente != null) {
+            boolean ok = dao.alterar(m);
+            if (!ok) {
+                throw new RuntimeException("Erro ao atualizar mensalidade");
+            }
+            return m;
+        }
+
+        return dao.gravar(m);
     }
+
+
 
     public boolean excluir(Integer id) {
         return dao.excluir(id);

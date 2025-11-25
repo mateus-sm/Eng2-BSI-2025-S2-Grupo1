@@ -13,7 +13,6 @@ import java.util.List;
 @Repository
 public class AdministradorDAO {
 
-    // Helper para construir o objeto a partir do banco
     private Administrador buildAdministrador(ResultSet rs) throws SQLException {
         Administrador admin = new Administrador();
         admin.setId(rs.getInt("id_admin"));
@@ -25,12 +24,8 @@ public class AdministradorDAO {
             admin.setDtFim(rs.getDate("dtfim").toLocalDate());
         }
 
-        // Cria e anexa o objeto Usuario (pelo menos o ID)
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
-
-        // Se sua consulta (JOIN) também buscar o nome, adicione aqui
-        // ex: usuario.setNome(rs.getString("nome"));
 
         admin.setUsuario(usuario);
         return admin;
@@ -51,7 +46,6 @@ public class AdministradorDAO {
 
     public List<Administrador> get(String filtro) {
         List<Administrador> admins = new ArrayList<>();
-        // Adicione um JOIN com usuário se precisar do nome na listagem
         String sql = "SELECT * FROM administrador " + filtro;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
@@ -87,7 +81,7 @@ public class AdministradorDAO {
                 admin.getUsuario().getId()
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql); // 'consultar' para pegar o RETURNING
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 admin.setId(rs.getInt("id_admin"));
@@ -99,16 +93,14 @@ public class AdministradorDAO {
         return null;
     }
 
-    // Este 'alterar' segue a lógica do seu 'update', que só seta o dtFim
     public boolean alterar(Administrador admin) {
         String sql = String.format("UPDATE administrador SET dtfim = '%s' WHERE id_admin = %d",
                 admin.getDtFim().toString(),
                 admin.getId()
         );
-        return SingletonDB.getConexao().manipular(sql); // 'manipular' para UPDATE
+        return SingletonDB.getConexao().manipular(sql);
     }
 
-    // Este 'excluir' segue a lógica do seu 'excluir' (hard delete)
     public boolean excluir(int id) {
         String sql = "DELETE FROM administrador WHERE id_admin = " + id;
         return SingletonDB.getConexao().manipular(sql);

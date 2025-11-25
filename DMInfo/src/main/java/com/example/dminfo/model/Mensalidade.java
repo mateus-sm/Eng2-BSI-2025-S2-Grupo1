@@ -1,5 +1,7 @@
 package com.example.dminfo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 
@@ -13,7 +15,8 @@ public class Mensalidade {
     private Double valor;
     private LocalDate dataPagamento;
 
-    private String nomeMembro;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String nome_membro;
 
     public Mensalidade() {}
 
@@ -44,6 +47,6 @@ public class Mensalidade {
     public LocalDate getDataPagamento() { return dataPagamento; }
     public void setDataPagamento(LocalDate dataPagamento) { this.dataPagamento = dataPagamento; }
 
-    public String getNomeMembro() { return nomeMembro; }
-    public void setNomeMembro(String nomeMembro) { this.nomeMembro = nomeMembro; }
+    public String getNome_membro() {return nome_membro;}
+    public void setNome_membro(String nome_membro) {this.nome_membro = nome_membro;}
 }

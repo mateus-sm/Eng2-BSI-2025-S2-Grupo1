@@ -1,6 +1,6 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.dao.AtribuirConquistaMembroDAO;
+import com.example.dminfo.controller.AtribuirConquistaController;
 import com.example.dminfo.model.AtribuirConquistaMembro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class AtribuirConquistaMembroView {
 
     @Autowired
-    private AtribuirConquistaMembroDAO dao;
+    private AtribuirConquistaController acmController;
 
     @GetMapping
     public ResponseEntity<Object> listar() {
         try {
-            return ResponseEntity.ok(dao.listar());
+            return ResponseEntity.ok(acmController.listar());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao listar atribuições: " + e.getMessage());
         }
@@ -28,7 +28,7 @@ public class AtribuirConquistaMembroView {
     @PostMapping
     public ResponseEntity<Object> gravar(@RequestBody AtribuirConquistaMembro acm) {
         try {
-            AtribuirConquistaMembro salvo = dao.gravar(acm);
+            AtribuirConquistaMembro salvo = acmController.salvar(acm);
             if (salvo != null)
                 return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
             else
@@ -41,7 +41,7 @@ public class AtribuirConquistaMembroView {
     @PutMapping
     public ResponseEntity<Object> atualizar(@RequestBody AtribuirConquistaMembro atribuirConquistaMembro) {
         try {
-            dao.alterar(atribuirConquistaMembro);
+            acmController.atualizar(atribuirConquistaMembro);
             return ResponseEntity.ok(atribuirConquistaMembro);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao atualizar atribuição: " + e.getMessage());
@@ -51,7 +51,7 @@ public class AtribuirConquistaMembroView {
     @GetMapping("/{id}")
     public ResponseEntity<Object> buscarPorId(@PathVariable Integer id) {
         try {
-            return ResponseEntity.ok(dao.getById(id));
+            return ResponseEntity.ok(acmController.getById(id));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Erro: " + e.getMessage());
         }
@@ -60,7 +60,7 @@ public class AtribuirConquistaMembroView {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> excluir(@PathVariable Integer id) {
         try {
-            dao.excluir(id);
+            acmController.excluir(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao excluir atribuição: " + e.getMessage());

@@ -1,10 +1,10 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.dao.AdministradorDAO;
-import com.example.dminfo.dao.AtribuirConquistaMembroDAO;
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.model.AtribuirConquistaMembro;
 import com.example.dminfo.model.Conquista;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class AtribuirConquistaController {
     @Autowired
-    private AtribuirConquistaMembroDAO dao;
+    private AtribuirConquistaMembro acmModel;
 
     @Autowired
     private MembroDAO membroDAO;
@@ -27,10 +27,11 @@ public class AtribuirConquistaController {
     private Conquista conquistaModel;
 
     public List<AtribuirConquistaMembro> listar() {
-        return dao.listar();
+        return acmModel.listar("", SingletonDB.getConexao());
     }
 
     public AtribuirConquistaMembro salvar(AtribuirConquistaMembro acm) {
+        Conexao conexao = SingletonDB.getConexao();
         if (acm == null || acm.getId() != 0)
             throw new RuntimeException("Atribuição inválida para criação.");
 
@@ -39,13 +40,13 @@ public class AtribuirConquistaController {
                 conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
 
-        if (dao.consultar(acm.getObservacao()) != null)
+        if (acmModel.getById(acm.getId(), conexao) != null)
             throw new RuntimeException("Atribuição já existe.");
 
-        return dao.gravar(acm);
+        return acmModel.salvar(acm, conexao);
     }
 
-    public boolean atualizar(AtribuirConquistaMembro acm) {
+    public AtribuirConquistaMembro atualizar(AtribuirConquistaMembro acm) {
         if (acm == null || acm.getId() == 0)
             throw new RuntimeException("Atribuição inválida para atualização.");
 
@@ -54,11 +55,12 @@ public class AtribuirConquistaController {
                 conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
 
-        return dao.alterar(acm);
+        acmModel.alterar(acm, SingletonDB.getConexao());
+        return acm;
     }
 
     public AtribuirConquistaMembro getById(Integer id) {
-        AtribuirConquistaMembro acm = dao.getById(id);
+        AtribuirConquistaMembro acm = acmModel.getById(id, SingletonDB.getConexao());
         if (acm == null) {
             throw new RuntimeException("Atribuição não encontrada.");
         }
@@ -69,6 +71,6 @@ public class AtribuirConquistaController {
         if (id == null) {
             throw new RuntimeException("ID inválido para exclusão.");
         }
-        dao.excluir(id);
+        acmModel.excluir(id,  SingletonDB.getConexao());
     }
 }

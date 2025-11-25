@@ -1,7 +1,7 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.AtribuirConquistaMembro;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class AtribuirConquistaMembroDAO {
+public class AtribuirConquistaMembroDAO implements IDAO<AtribuirConquistaMembro> {
 
     private AtribuirConquistaMembro buildACM(ResultSet rs) throws SQLException {
         AtribuirConquistaMembro acm = new AtribuirConquistaMembro();
@@ -24,34 +24,7 @@ public class AtribuirConquistaMembroDAO {
         return acm;
     }
 
-    public List<AtribuirConquistaMembro> listar() {
-        List<AtribuirConquistaMembro> acm = new ArrayList<>();
-        String sql = "SELECT * FROM atribuir_conquista_membro ORDER BY id_atribuir_conquista";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                acm.add(buildACM(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar atribuições: " + e.getMessage());
-        }
-        return acm;
-    }
-
-    public AtribuirConquistaMembro getById(int id) {
-        String sql = "SELECT * FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildACM(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar atribuição por ID: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public AtribuirConquistaMembro gravar(AtribuirConquistaMembro acm) {
+    public AtribuirConquistaMembro create(AtribuirConquistaMembro acm, Conexao conexao) {
         if (acm == null) return null;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -68,7 +41,7 @@ public class AtribuirConquistaMembroDAO {
                 observacao
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 acm.setId(rs.getInt("id_atribuir_conquista"));
@@ -80,9 +53,23 @@ public class AtribuirConquistaMembroDAO {
         return null;
     }
 
-    public boolean alterar(AtribuirConquistaMembro acm) {
+    public AtribuirConquistaMembro read(AtribuirConquistaMembro acm, Conexao conexao) {
+        String observacao = acm.getObservacao();
+        String sql = String.format("SELECT * FROM atribuir_conquista_membro WHERE observacao = '%s'", observacao);
+        ResultSet rs = conexao.consultar(sql);
+        try {
+            if (rs != null && rs.next()) {
+                return buildACM(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao consultar atribuição: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public AtribuirConquistaMembro update(AtribuirConquistaMembro acm, Conexao conexao) {
         System.out.println(acm);
-        if (acm == null) return false;
+        if (acm == null) return null;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String data = (acm.getData() != null) ? sdf.format(acm.getData()) : null;
@@ -104,27 +91,48 @@ public class AtribuirConquistaMembroDAO {
                 acm.getId()
         );
 
-        return SingletonDB.getConexao().manipular(sql);
+        conexao.consultar(sql);
+        return acm;
     }
 
-
-    public boolean excluir(int id) {
+    public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public AtribuirConquistaMembro consultar(String descricao) {
-        String sql = String.format("SELECT * FROM atribuir_conquista_membro WHERE observacao = '%s'", descricao);
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+    public List<AtribuirConquistaMembro> readAll(String filtro, Conexao conexao) {
+        List<AtribuirConquistaMembro> acmList = new ArrayList<>();
+
+        String sql = "SELECT * FROM atribuir_conquista_membro";
+
+        if (filtro != null && !filtro.isBlank()) {
+            sql += " WHERE id_atribuir_conquista LIKE '%" + filtro.replace("'", "''") + "%'";
+        }
+
+        sql += " ORDER BY id_atribuir_conquista";
+
+        ResultSet rs = conexao.consultar(sql);
+        try {
+            while (rs != null && rs.next()) {
+                acmList.add(buildACM(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar atribuições: " + e.getMessage());
+        }
+
+        return acmList;
+    }
+
+    public AtribuirConquistaMembro getById(int id, Conexao conexao) {
+        String sql = "SELECT * FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildACM(rs);
             }
         } catch (SQLException e) {
-            System.out.println("Erro ao consultar atribuição: " + e.getMessage());
+            System.out.println("Erro ao buscar atribuição por ID: " + e.getMessage());
         }
         return null;
     }
-
-
 }

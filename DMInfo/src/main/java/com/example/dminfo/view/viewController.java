@@ -64,22 +64,12 @@ public class viewController {
     }
 
     @GetMapping("/app/doador")
-    public String paginaGerenciarDoador(Model model, HttpSession session) {
-        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
-//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-//        if (idAdminLogado == null)
-//            return "redirect:/login";
-//        model.addAttribute("idAdminLogado", idAdminLogado);
+    public String paginaGerenciarDoador() {
         return "doador";
     }
 
     @GetMapping("/app/doacao")
-    public String paginaGerenciarDoacao(Model model, HttpSession session) {
-        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
-//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-//        if (idAdminLogado == null)
-//            return "redirect:/login";
-//        model.addAttribute("idAdminLogado", idAdminLogado);
+    public String paginaGerenciarDoacao() {
         return "doacao";
     }
 
@@ -100,12 +90,7 @@ public class viewController {
     public String paginaAtribuirConquista() {return "atribuir-conquista";}
 
     @GetMapping("/app/doacao-form")
-    public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {
-        //FAZER A VERIFICACAO SE É ADMIN LOGADO OU NAO
-//        Integer idAdminLogado = (Integer) session.getAttribute(ADMIN_ID_SESSION_KEY);
-//        if (idAdminLogado == null)
-//            return "redirect:/login";
-//        model.addAttribute("idAdminLogado", idAdminLogado);
+    public String paginaGerenciarDoacaoForm() {
         return "doacao-form";
     }
 

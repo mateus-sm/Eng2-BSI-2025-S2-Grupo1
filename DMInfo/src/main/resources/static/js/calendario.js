@@ -386,6 +386,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Define a data de hoje zerada para comparação
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
         lista.forEach(atividade => {
             const estaNoCalendario = idsAtivos.includes(atividade.id);
             const cor = transformarAtividadeParaEvento(atividade).color;
@@ -401,6 +405,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tituloAtividade = atividade.atv ? atividade.atv.descricao : 'Atividade';
             const localAtividade = atividade.local ? ' | ' + atividade.local : '';
 
+            // Lógica para verificar se o prazo expirou
+            let prazoExpirado = false;
+            if (atividade.dtFim) {
+                const dataFim = new Date(atividade.dtFim.replace(/-/g, '/'));
+                if (dataFim < hoje) {
+                    prazoExpirado = true;
+                }
+            }
+
             const item = document.createElement('div');
             item.classList.add('atividade-item');
             item.dataset.id = atividade.id;
@@ -410,6 +423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (atividade.status === true) {
                 item.classList.add('realizada');
             }
+
+            // Definição do estilo e estado do botão de notificação
+            const btnNotificarStyle = prazoExpirado ? 'background-color: #ccc; cursor: not-allowed;' : '';
+            const btnNotificarDisabled = prazoExpirado ? 'disabled' : '';
+            const btnNotificarTitle = prazoExpirado ? 'Prazo expirado' : 'Enviar Notificação Manual';
 
             item.innerHTML = `
                 <div class="item-header">
@@ -421,7 +439,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="item-acoes">
                     <button class="btn-membros" data-id="${atividade.id}" title="Adicionar Membros">&#128100;</button>
-                    <button class="btn-notificar" data-id="${atividade.id}" title="Enviar Notificação Manual">&#128276;</button> <!-- NOVO BOTÃO -->
+
+                    <button class="btn-notificar"
+                            data-id="${atividade.id}"
+                            title="${btnNotificarTitle}"
+                            style="${btnNotificarStyle}"
+                            ${btnNotificarDisabled}>
+                        &#128276;
+                    </button>
+
                     <button class="btn-editar" data-id="${atividade.id}" title="Editar">&#9998;</button>
                     <button class="btn-toggle-calendario ${estaNoCalendario ? 'btn-remover' : 'btn-adicionar'}" data-id="${atividade.id}" title="${estaNoCalendario ? 'Remover do Calendário' : 'Adicionar ao Calendário'}">
                         ${estaNoCalendario ? '&minus;' : '+'}
@@ -599,12 +625,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function enviarNotificacaoManual(idCriacao) {
+        // 1. Encontra a atividade nos dados já carregados na memória
+        const atividade = todasAtividades.find(a => a.id == idCriacao);
+
+        // 2. Verificação de Prazo
+        if (atividade && atividade.dtFim) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0); // Zera hora para comparar apenas a data
+
+            // O replace é importante para garantir compatibilidade de formato de data (yyyy/mm/dd)
+            const dataFim = new Date(atividade.dtFim.replace(/-/g, '/'));
+
+            // Se a data final for menor que hoje (ontem ou antes), bloqueia
+            if (dataFim < hoje) {
+                alert('Não é possível enviar notificação: O prazo desta atividade já foi finalizado.');
+                return;
+            }
+        }
+
+        // 3. Verificação de Status (Opcional: se já estiver concluída/ticada como feita)
+        if (atividade && atividade.status === true) {
+             if (!confirm('Esta atividade já consta como realizada. Deseja notificar mesmo assim?')) {
+                 return;
+             }
+        }
+
         if (!confirm('Tem certeza que deseja enviar uma notificação manual para todos os membros desta atividade?')) {
             return;
         }
 
         try {
-            // Chama o novo endpoint criado no NotificacaoController.java
             const response = await fetch(`/apis/notificacao/manual/${idCriacao}`, { method: 'POST' });
             const message = await response.text();
 

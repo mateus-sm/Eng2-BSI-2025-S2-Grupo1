@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,7 +97,6 @@ public class GoogleCalendarController {
         if (token == null || token.isBlank())
             return "Erro: A autorização do Google não foi concluída. Tente novamente.";
 
-        // Cria a credencial usando o token de acesso
         GoogleCredential credential = new GoogleCredential.Builder()
                 .setTransport(HTTP_TRANSPORT)
                 .setJsonFactory(JSON_FACTORY)
@@ -104,21 +104,26 @@ public class GoogleCalendarController {
                 .build()
                 .setAccessToken(token);
 
-        // Constrói o serviço da Agenda Google
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName("DM Info App")
                 .build();
 
-        List<CriarRealizacaoAtividades> atividadesParaSincronizar;
+        List<CriarRealizacaoAtividades> atividadesParaSincronizar = new ArrayList<>();
         try {
-            // Usa o seu controller local para buscar as atividades
-            atividadesParaSincronizar = calendarioController.listarTodasAtividades();
+            List<CriarRealizacaoAtividades> todasAtividades = calendarioController.listarTodasAtividades();
+
+            List<Integer> idsNoCalendario = calendarioController.listarAtividadesAtivasIds();
+
+            if (todasAtividades != null && idsNoCalendario != null)
+                for (CriarRealizacaoAtividades atv : todasAtividades)
+                    if (idsNoCalendario.contains(atv.getId()))
+                        atividadesParaSincronizar.add(atv);
         } catch (Exception e) {
-            return "Erro ao buscar atividades locais: " + e.getMessage();
+            return "Erro ao buscar e filtrar atividades locais: " + e.getMessage();
         }
 
-        if (atividadesParaSincronizar == null || atividadesParaSincronizar.isEmpty())
-            return "Nenhuma atividade local para sincronizar.";
+        if (atividadesParaSincronizar.isEmpty())
+            return "Nenhuma atividade do calendário para sincronizar.";
 
         String calendarId = "primary";
         int contadorSucesso = 0;
@@ -126,7 +131,6 @@ public class GoogleCalendarController {
         for (CriarRealizacaoAtividades atividade : atividadesParaSincronizar) {
             Event googleEvent = converterParaGoogleEvent(atividade);
             try {
-                // Insere o evento na Agenda principal do usuário
                 service.events().insert(calendarId, googleEvent).execute();
                 contadorSucesso++;
             } catch (IOException e) {

@@ -2,6 +2,7 @@ package com.example.dminfo.view;
 
 import com.example.dminfo.controller.CalendarioController;
 import com.example.dminfo.model.CriarRealizacaoAtividades;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,8 @@ import java.util.List;
 @RestController
 @RequestMapping("apis/calendario")
 public class CalendarioView {
-    private CalendarioController calendarioController = new CalendarioController();
+    @Autowired
+    private CalendarioController calendarioController;
 
     @GetMapping
     public ResponseEntity<List<CriarRealizacaoAtividades>> listarAtividadesParaCalendario() {

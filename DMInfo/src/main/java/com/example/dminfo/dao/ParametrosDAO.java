@@ -1,18 +1,18 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Parametros;
-import com.example.dminfo.util.SingletonDB; // Mantendo seu Singleton
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
-public class ParametrosDAO {
+public class ParametrosDAO implements IDAO<Parametros> {
+
     private String escapeString(String input) {
-        if (input == null) {
-            return "NULL";
-        }
+        if (input == null) return "NULL";
         return "'" + input.replace("'", "''") + "'";
     }
 
@@ -36,9 +36,9 @@ public class ParametrosDAO {
         );
     }
 
-    public Parametros get() {
+    public Parametros get(Conexao conexao) {
         String sql = "SELECT * FROM parametros LIMIT 1";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql); // Mantido
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildParametros(rs);
@@ -49,9 +49,9 @@ public class ParametrosDAO {
         return null;
     }
 
-    public long count() {
+    public long count(Conexao conexao) {
         String sql = "SELECT COUNT(*) AS total FROM parametros";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql); // Mantido
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return rs.getLong("total");
@@ -62,7 +62,8 @@ public class ParametrosDAO {
         return 0;
     }
 
-    public Parametros gravar(Parametros p) {
+    @Override
+    public Parametros create(Parametros p, Conexao conexao) {
         String sql = String.format("INSERT INTO parametros " +
                         "(razao_social, nome_fantasia, descricao, rua, bairro, cidade, cep, uf, telefone, site, email, cnpj, logotipogrande, logotipopequeno) " +
                         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id_parametro",
@@ -71,7 +72,8 @@ public class ParametrosDAO {
                 escapeString(p.getUf()), escapeString(p.getTelefone()), escapeString(p.getSite()), escapeString(p.getEmail()),
                 escapeString(p.getCnpj()), escapeString(p.getLogoGrande()), escapeString(p.getLogoPequeno())
         );
-        ResultSet rs = SingletonDB.getConexao().consultar(sql); // Mantido
+
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 p.setId(rs.getInt("id_parametro"));
@@ -83,7 +85,13 @@ public class ParametrosDAO {
         return null;
     }
 
-    public boolean alterar(Parametros p) {
+    @Override
+    public Parametros read(Parametros obj, Conexao conexao) {
+        return get(conexao);
+    }
+
+    @Override
+    public Parametros update(Parametros p, Conexao conexao) {
         String sql = String.format("UPDATE parametros SET " +
                         "razao_social = %s, nome_fantasia = %s, descricao = %s, rua = %s, bairro = %s, cidade = %s, " +
                         "cep = %s, uf = %s, telefone = %s, site = %s, email = %s, cnpj = %s, " +
@@ -94,11 +102,21 @@ public class ParametrosDAO {
                 escapeString(p.getCnpj()), escapeString(p.getLogoGrande()), escapeString(p.getLogoPequeno()),
                 p.getId()
         );
-        return SingletonDB.getConexao().manipular(sql); // Mantido
+
+        if (conexao.manipular(sql)) {
+            return p;
+        }
+        return null;
     }
 
-    public boolean excluir(int id) {
+    @Override
+    public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM parametros WHERE id_parametro = " + id;
-        return SingletonDB.getConexao().manipular(sql); // Mantido
+        return conexao.manipular(sql);
+    }
+
+    @Override
+    public List<Parametros> readAll(String filtro, Conexao conexao) {
+        return null;
     }
 }

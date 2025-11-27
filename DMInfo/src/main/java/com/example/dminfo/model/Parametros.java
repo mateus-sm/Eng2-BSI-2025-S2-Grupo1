@@ -1,13 +1,12 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.ParametrosDAO;
+import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-@Repository // Não é mais @Entity
+@Repository
 public class Parametros {
-
-    // --- Campos POJO (iguais aos da entidade) ---
     private int id;
     private String razaoSocial;
     private String nomeFantasia;
@@ -24,14 +23,11 @@ public class Parametros {
     private String logoGrande;
     private String logoPequeno;
 
-    // --- Injeção do DAO ---
     @Autowired
     private ParametrosDAO dao;
 
-    // --- Construtores ---
     public Parametros() {}
 
-    // Construtor completo para o DAO
     public Parametros(int id, String razaoSocial, String nomeFantasia, String descricao, String rua, String bairro, String cidade, String cep, String uf, String telefone, String site, String email, String cnpj, String logoGrande, String logoPequeno) {
         this.id = id;
         this.razaoSocial = razaoSocial;
@@ -50,17 +46,10 @@ public class Parametros {
         this.logoPequeno = logoPequeno;
     }
 
-    // Construtor sem ID (para 'gravar')
-    public Parametros(String razaoSocial, String nomeFantasia, String descricao, String rua, String bairro, String cidade, String cep, String uf, String telefone, String site, String email, String cnpj, String logoGrande, String logoPequeno) {
-        // ... (o mesmo do construtor antigo)
-    }
-
-    // --- Getters e Setters (iguais aos da entidade) ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getRazaoSocial() { return razaoSocial; }
     public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
-    // ... (Cole TODOS os outros getters e setters da sua entidade original aqui) ...
     public String getNomeFantasia() { return nomeFantasia; }
     public void setNomeFantasia(String nomeFantasia) { this.nomeFantasia = nomeFantasia; }
     public String getDescricao() { return descricao; }
@@ -89,40 +78,36 @@ public class Parametros {
     public void setLogoPequeno(String logoPequeno) { this.logoPequeno = logoPequeno; }
 
 
-    // --- LÓGICA DE NEGÓCIOS (do antigo ParametrosService) ---
 
-    public Parametros exibir() {
-        return dao.get(); // Retorna o único parâmetro
+    public Parametros exibir(Conexao conexao) {
+        return dao.get(conexao);
     }
 
-    /**
-     * Salva ou Atualiza a (única) linha de parâmetros.
-     */
-    public Parametros salvar(Parametros parametro) {
-        // Validação (ex: CNPJ é obrigatório)
-        if (parametro.getCnpj() == null || parametro.getCnpj().isEmpty()) {
+    public Parametros salvar(Parametros parametro, Conexao conexao) {
+        if (parametro.getRazaoSocial() == null || parametro.getRazaoSocial().trim().isEmpty())
+            throw new RuntimeException("Razão Social é obrigatória.");
+        if (parametro.getCnpj() == null || parametro.getCnpj().isEmpty())
             throw new RuntimeException("CNPJ é obrigatório.");
-        }
 
-        Parametros existente = dao.get();
-        if (existente == null) {
-            // Se não existe, cria (INSERT)
-            return dao.gravar(parametro);
-        } else {
-            // Se já existe, atualiza (UPDATE)
-            parametro.setId(existente.getId()); // Garante que estamos atualizando o ID correto
-            if (dao.alterar(parametro)) {
-                return parametro;
-            }
+        Parametros existente = dao.get(conexao);
+
+        if (existente == null)
+            return dao.create(parametro, conexao);
+        else {
+            parametro.setId(existente.getId());
+            Parametros atualizado = dao.update(parametro, conexao);
+            if (atualizado != null)
+                return atualizado;
+
         }
         throw new RuntimeException("Erro ao salvar parâmetros.");
     }
 
-    public void excluir(Integer id) {
-        dao.excluir(id);
+    public void excluir(Integer id, Conexao conexao) {
+        dao.delete(id, conexao);
     }
 
-    public boolean existeParametro() {
-        return dao.count() > 0;
+    public boolean existeParametro(Conexao conexao) {
+        return dao.count(conexao) > 0;
     }
 }

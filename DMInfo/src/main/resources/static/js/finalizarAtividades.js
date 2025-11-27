@@ -174,17 +174,23 @@ async function carregarAtividades(ordenacao = 'alfabetica', termoBusca = '') {
                 <td>${atividade.local || ''}</td>
                 <td>${atividade.horario || ''}</td>
                 <td>
-                    <input type="date" 
-                           class="input-data-ini" 
-                           id="data-ini-${atividade.id}" 
-                           value="${dataIniFormatada}">
+                    <div style="display: flex; align-items: center;">
+                        <input type="date" 
+                               class="input-data-ini" 
+                               id="data-ini-${atividade.id}" 
+                               value="${dataIniFormatada}">
+                        <span style="color: red; margin-left: 4px; font-weight: bold;">*</span> 
+                    </div>
                 </td>
                 <td>
-                    <input type="date" 
-                           class="input-data-fim" 
-                           id="data-fim-${atividade.id}" 
-                           value="${dataFimFormatada}"
-                           min="${dataIniFormatada}">
+                    <div style="display: flex; align-items: center;">
+                        <input type="date" 
+                               class="input-data-fim" 
+                               id="data-fim-${atividade.id}" 
+                               value="${dataFimFormatada}"
+                               min="${dataIniFormatada}">
+                        <span style="color: red; margin-left: 4px; font-weight: bold;">*</span>
+                    </div>
                 </td>
                 <td>${formatarDinheiro(atividade.custoprevisto)}</td>
                 <td id="custo-real-cell-${atividade.id}">
@@ -201,6 +207,7 @@ async function carregarAtividades(ordenacao = 'alfabetica', termoBusca = '') {
                         <span class="btn-editar-custo" data-id="${atividade.id}">
                             &#9998;
                         </span>
+                        <span style="color: red; margin-left: 4px; font-weight: bold;">*</span>
                     </div>
                 </td>
                 <td id="observacoes-cell-${atividade.id}" data-observacoes="${observacoesText}">

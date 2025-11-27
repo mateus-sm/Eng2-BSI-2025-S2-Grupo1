@@ -1,7 +1,7 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.model.CriarRealizacaoAtividades;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.SingletonDB; // <--- FALTOU ESSE IMPORT
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
@@ -84,7 +84,8 @@ public class GoogleCalendarController {
                     .setApplicationName("DM Info App")
                     .build();
 
-            List<CriarRealizacaoAtividades> todasAtividades = atividadesModel.listarTodas();
+            // --- CORREÇÃO AQUI: Passando a conexão ---
+            List<CriarRealizacaoAtividades> todasAtividades = atividadesModel.listarTodas(SingletonDB.getConexao());
 
             if (todasAtividades == null || todasAtividades.isEmpty())
                 return "Nenhuma atividade encontrada no banco para sincronizar.";
@@ -118,6 +119,7 @@ public class GoogleCalendarController {
                 .setDescription(atividadeApp.getObservacoes());
 
         LocalDate dataInicio = atividadeApp.getDtIni();
+        // Se dtFim for null, usa dtIni como fallback
         LocalDate dataFim = (atividadeApp.getDtFim() != null) ? atividadeApp.getDtFim() : dataInicio;
         Time horarioInicio = atividadeApp.getHorario();
 
@@ -126,14 +128,18 @@ public class GoogleCalendarController {
         ZoneId zoneId = ZoneId.of(TIMEZONE_AMERICA_SAO_PAULO);
 
         if (horarioInicio == null) {
+            // Evento de dia inteiro (All-day event)
             String startDateStr = dataInicio.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            // Google Calendar requer que o fim do "all-day" seja o dia seguinte
             String endDateStr = dataFim.plusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             start.setDate(new com.google.api.client.util.DateTime(startDateStr));
             end.setDate(new com.google.api.client.util.DateTime(endDateStr));
         } else {
+            // Evento com hora marcada
             LocalDateTime startDt = LocalDateTime.of(dataInicio, horarioInicio.toLocalTime());
 
+            // Assume duração padrão de 1 hora se não tiver lógica específica
             LocalTime horaFim = horarioInicio.toLocalTime().plusHours(1);
             LocalDateTime endDt = LocalDateTime.of(dataFim, horaFim);
 

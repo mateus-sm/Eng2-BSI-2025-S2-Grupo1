@@ -4,7 +4,7 @@ import com.example.dminfo.model.CriarRealizacaoAtividades;
 import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.Usuario;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao; // Import necessário
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class CriarRealizacaoAtividadesDAO {
+public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtividades> {
 
     private String escapeString(String input) {
         if (input == null || input.trim().isEmpty()) {
@@ -34,15 +34,39 @@ public class CriarRealizacaoAtividadesDAO {
         return String.valueOf(value);
     }
 
+    private String formatDouble(Double value) {
+        if (value == null) {
+            return "NULL";
+        }
+        return String.valueOf(value);
+    }
+
+    private String formatBoolean(Boolean value) {
+        if (value == null || !value) {
+            return "'FALSE'";
+        }
+        return "'TRUE'";
+    }
+
     private CriarRealizacaoAtividades buildAtividade(ResultSet rs) throws SQLException {
         Administrador admin = new Administrador();
         admin.setId(rs.getInt("id_admin"));
 
+        try {
+            Usuario usuarioAdmin = new Usuario();
+            usuarioAdmin.setLogin(rs.getString("admin_usuario"));
+            admin.setUsuario(usuarioAdmin);
+        } catch (SQLException ignored) {}
+
         Atividade atividade = new Atividade();
         atividade.setId(rs.getInt("id_atividade"));
+        try {
+            atividade.setDescricao(rs.getString("atividade_descricao"));
+        } catch (SQLException ignored) {}
+
 
         CriarRealizacaoAtividades cra = new CriarRealizacaoAtividades();
-        cra.setId(rs.getInt("id_criacao")); // id_criacao
+        cra.setId(rs.getInt("id_criacao"));
         cra.setAdmin(admin);
         cra.setAtv(atividade);
 
@@ -64,7 +88,40 @@ public class CriarRealizacaoAtividadesDAO {
         return cra;
     }
 
-    public List<CriarRealizacaoAtividades> listarTodas() {
+    @Override
+    public CriarRealizacaoAtividades create(CriarRealizacaoAtividades obj, Conexao conexao) {
+        return null;
+    }
+
+    @Override
+    public CriarRealizacaoAtividades read(CriarRealizacaoAtividades obj, Conexao conexao) {
+        if(obj != null)
+            return getById(obj.getId(), conexao);
+
+        return null;
+    }
+
+    @Override
+    public CriarRealizacaoAtividades update(CriarRealizacaoAtividades obj, Conexao conexao) {
+        if (finalizarAtividade(obj, conexao))
+            return obj;
+
+        return null;
+    }
+
+    @Override
+    public boolean delete(int id, Conexao conexao) {
+        String sql = "DELETE FROM criar_realizacao_atividades WHERE id_criacao = " + id;
+        return conexao.manipular(sql);
+    }
+
+    @Override
+    public List<CriarRealizacaoAtividades> readAll(String filtro, Conexao conexao) {
+        return listarTodas(conexao);
+    }
+
+
+    public List<CriarRealizacaoAtividades> listarTodas(Conexao conexao) {
         String sql = "SELECT cra.*, " +
                 "u.usuario AS admin_usuario, " +
                 "atv.descricao AS atividade_descricao " +
@@ -73,26 +130,12 @@ public class CriarRealizacaoAtividadesDAO {
                 "JOIN usuario u ON adm.id_usuario = u.id_usuario " +
                 "JOIN atividade atv ON cra.id_atividade = atv.id_atividade";
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         List<CriarRealizacaoAtividades> atividades = new ArrayList<>();
 
         try {
             while (rs != null && rs.next()) {
-                CriarRealizacaoAtividades cra = buildAtividade(rs);
-                Usuario usuarioAdmin = new Usuario();
-                usuarioAdmin.setLogin(rs.getString("admin_usuario"));
-
-                Administrador admin = new Administrador();
-                admin.setId(rs.getInt("id_admin"));
-                admin.setUsuario(usuarioAdmin);
-
-                cra.setAdmin(admin);
-
-                if(cra.getAtv() != null) {
-                    cra.getAtv().setDescricao(rs.getString("atividade_descricao"));
-                }
-
-                atividades.add(cra);
+                atividades.add(buildAtividade(rs));
             }
         } catch (SQLException e) {
             System.out.println("Erro ao listar atividades: " + e.getMessage());
@@ -100,9 +143,17 @@ public class CriarRealizacaoAtividadesDAO {
         return atividades;
     }
 
-    public CriarRealizacaoAtividades getById(Integer id) {
-        String sql = "SELECT * FROM criar_realizacao_atividades WHERE id_criacao = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+    public CriarRealizacaoAtividades getById(Integer id, Conexao conexao) {
+        String sql = "SELECT cra.*, " +
+                "u.usuario AS admin_usuario, " +
+                "atv.descricao AS atividade_descricao " +
+                "FROM criar_realizacao_atividades cra " +
+                "JOIN administrador adm ON cra.id_admin = adm.id_admin " +
+                "JOIN usuario u ON adm.id_usuario = u.id_usuario " +
+                "JOIN atividade atv ON cra.id_atividade = atv.id_atividade " +
+                "WHERE cra.id_criacao = " + id;
+
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildAtividade(rs);
@@ -113,27 +164,7 @@ public class CriarRealizacaoAtividadesDAO {
         return null;
     }
 
-    private String formatBoolean(Boolean value) {
-        // Se for null (o que não deve acontecer se o controller for chamado, mas por segurança),
-        // definimos como FALSE e adicionamos aspas simples.
-        if (value == null || value == false) {
-            return "'FALSE'";
-        }
-        return "'TRUE'";
-    }
-
-    // Dentro de CriarRealizacaoAtividadesDAO.java
-
-    // Adicionamos tratamento de nulo, caso o Java envie um Double objeto (embora seja double primitivo)
-    private String formatDouble(Double value) {
-        if (value == null) {
-            return "NULL";
-        }
-        // Garante que o separador decimal seja o ponto esperado pelo SQL
-        return String.valueOf(value);
-    }
-
-    public boolean finalizarAtividade(CriarRealizacaoAtividades atividade) {
+    public boolean finalizarAtividade(CriarRealizacaoAtividades atividade, Conexao conexao) {
         String sql = String.format("UPDATE criar_realizacao_atividades SET " +
                         "dtini = %s, dtfim = %s, custoreal = %s, observacoes = %s, status = %s " +
                         "WHERE id_criacao = %d",
@@ -145,10 +176,6 @@ public class CriarRealizacaoAtividadesDAO {
                 atividade.getId()
         );
 
-        // --- TEMPORÁRIO PARA DEBUGGING ---
-        System.out.println("SQL de FINALIZAÇÃO: " + sql);
-        // --- FIM DO TEMPORÁRIO ---
-
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 }

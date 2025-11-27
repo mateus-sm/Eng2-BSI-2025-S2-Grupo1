@@ -10,12 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
     const btnSalvar = document.getElementById('btnSalvar');
 
-    const selectDoador = document.getElementById('id_doador');
-    // NOVO: Puxa o valor do ID Admin do campo hidden (injetado pela sessão)
+    // --- CORREÇÃO 1: RECUPERAR ID DO ADMIN ---
+    // Pega o valor do input hidden injetado pelo Thymeleaf
     const inputAdminLogado = document.getElementById('id_admin_logado');
-    //colocar no lugar do 1 aí de baixo -> inputAdminLogado ? inputAdminLogado.value : '1';
-    const idAdmin = 1; // Default para '1' se não logado/injetado
+    const idAdminValido = inputAdminLogado && inputAdminLogado.value ? inputAdminLogado.value : null;
 
+    // Debug no console para garantir
+    console.log("ID do Admin recuperado para envio:", idAdminValido);
+
+    const selectDoador = document.getElementById('id_doador');
     const inputObservacao = document.getElementById('observacao');
 
     const selectTipoDoacao = document.getElementById('tipo_doacao');
@@ -33,40 +36,60 @@ document.addEventListener('DOMContentLoaded', () => {
     let itensParaDoacao = [];
     let itemEditandoIndex = -1;
 
-    // --- FUNÇÕES DE VALIDAÇÃO VISUAL E FEEDBACK ---
-    function aplicarFeedback(elementId, isValid, feedbackText) {
-        const input = document.getElementById(elementId);
-        const feedback = document.getElementById(`feedback${elementId.charAt(0).toUpperCase() + elementId.slice(1)}`);
+    // Controle para não perder dados ao trocar de tipo
+    let tipoDoacaoAtual = 'monetaria';
 
+    // --- FUNÇÕES DE VALIDAÇÃO VISUAL (Estilo InvalidInput) ---
+
+    function setError(input, message) {
+        // Adiciona a classe de erro (borda vermelha)
+        input.classList.add('invalidInput');
+
+        // Verifica se já existe a mensagem de erro
+        let parent = input.parentElement;
+        let errorDiv = parent.querySelector('.error-msg');
+
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-msg'; // Classe definida no CSS
+            parent.appendChild(errorDiv);
+        }
+
+        // Atualiza o texto da mensagem
+        errorDiv.textContent = message;
+    }
+
+    function clearError(input) {
         if (!input) return;
 
-        if (isValid) {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-        } else {
-            input.classList.remove('is-valid');
-            input.classList.add('is-invalid');
-            if (feedback && feedbackText) {
-                feedback.textContent = feedbackText;
+        // Remove a borda vermelha
+        input.classList.remove('invalidInput');
+
+        // Remove a mensagem de erro se existir
+        let parent = input.parentElement;
+        if (parent) {
+            const errorDiv = parent.querySelector('.error-msg');
+            if (errorDiv) {
+                errorDiv.remove();
             }
         }
     }
 
-    function limparValidacao() {
-        // ID Admin NÃO está mais nesta lista de limpeza, pois não é um input visível
-        const fields = ['id_doador', 'valor'];
-        fields.forEach(id => {
-            const input = document.getElementById(id);
-            if(input) {
-                input.classList.remove('is-valid', 'is-invalid');
-            }
-        });
-        if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
+    function limparTodaValidacao() {
+        // Remove erros dos campos principais
+        if (selectDoador) clearError(selectDoador);
+        if (inputValor) clearError(inputValor);
+        if (inputItemDescricao) clearError(inputItemDescricao);
 
-        // Remove explicitamente a validação do ID do Admin se o campo ainda existisse
-        const oldAdminInput = document.getElementById('id_admin');
-        if (oldAdminInput) oldAdminInput.classList.remove('is-valid', 'is-invalid');
+        // Esconde a div de feedback dos itens
+        if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
     }
+
+    // Listeners para limpar o erro assim que o usuário interagir
+    if (selectDoador) selectDoador.addEventListener('change', () => clearError(selectDoador));
+    if (inputValor) inputValor.addEventListener('input', () => clearError(inputValor));
+    if (inputItemDescricao) inputItemDescricao.addEventListener('input', () => clearError(inputItemDescricao));
+
     // --- FIM VALIDAÇÃO VISUAL ---
 
 
@@ -107,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let obsGeral = '';
         const itemRegex = /\[ITEM\]: (.*?) \| \[QTD\]: (\d+)/g;
 
-        const parts = obs.split('\n---\n', 2);
+        const parts = obs ? obs.split('\n---\n', 2) : [''];
         let itemBlock = parts[0];
         obsGeral = parts.length > 1 ? parts[1].trim() : '';
 
@@ -140,6 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (inputItemDescricao) inputItemDescricao.value = '';
         if (inputItemQuantidade) inputItemQuantidade.value = '';
+
+        clearError(inputItemDescricao); // Limpa erro caso estivesse marcado
     }
 
     function renderizarTabelaItens() {
@@ -150,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sairModoEdicaoItem();
             if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
             return;
+        } else {
+            if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
         }
 
         tabelaItensAdicionados.innerHTML = itensParaDoacao.map((item, index) => `
@@ -188,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Se estivermos editando um item específico, apenas atualizamos ele
         if (itemEditandoIndex !== -1) {
             itensParaDoacao[itemEditandoIndex].descricao = descricao;
             itensParaDoacao[itemEditandoIndex].quantidade = quantidade;
@@ -195,9 +223,24 @@ document.addEventListener('DOMContentLoaded', () => {
             sairModoEdicaoItem();
         }
         else {
-            itensParaDoacao.push({ descricao, quantidade });
+            // Se for NOVO item, verificamos se já existe na lista (case insensitive)
+            const indexExistente = itensParaDoacao.findIndex(item =>
+                item.descricao.toLowerCase() === descricao.toLowerCase()
+            );
+
+            if (indexExistente !== -1) {
+                // Já existe! Soma a quantidade
+                itensParaDoacao[indexExistente].quantidade += quantidade;
+
+                // Opcional: Efeito visual ou alerta rápido
+                // alert(`O item "${descricao}" já existia. Quantidade atualizada para ${itensParaDoacao[indexExistente].quantidade}.`);
+            } else {
+                // Não existe, adiciona novo
+                itensParaDoacao.push({ descricao, quantidade });
+            }
         }
 
+        // Limpa campos e foca
         inputItemDescricao.value = '';
         inputItemQuantidade.value = '';
         inputItemDescricao.focus();
@@ -237,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnAddItem) btnAddItem.addEventListener('click', adicionarItem);
 
-    // --- FUNÇÕES DE LAYOUT E API ---
+    // --- FUNÇÕES DE LAYOUT E PROTEÇÃO DE DADOS ---
 
     function atualizarVisibilidadeForm() {
         const tipo = selectTipoDoacao.value;
@@ -249,6 +292,60 @@ document.addEventListener('DOMContentLoaded', () => {
             if (grupoItem) grupoItem.classList.remove('campo-escondido');
         }
     }
+
+    // Inicializa o valor atual no carregamento
+    if (selectTipoDoacao) {
+        tipoDoacaoAtual = selectTipoDoacao.value;
+    }
+
+    if (selectTipoDoacao) selectTipoDoacao.addEventListener('change', (e) => {
+        const novoTipo = selectTipoDoacao.value;
+        let temDadosPendentes = false;
+
+        // Verifica se há dados no tipo anterior
+        if (tipoDoacaoAtual === 'monetaria') {
+            const val = getValorNumericoManual(inputValor.value);
+            if (val > 0) temDadosPendentes = true;
+        } else if (tipoDoacaoAtual === 'item') {
+            if (itensParaDoacao.length > 0) temDadosPendentes = true;
+            // Verifica também se o usuário começou a digitar um item
+            if (inputItemDescricao.value.trim() !== '' || inputItemQuantidade.value.trim() !== '') {
+                temDadosPendentes = true;
+            }
+        }
+
+        if (temDadosPendentes) {
+            const confirmar = confirm(`Atenção: Você tem dados preenchidos como doação ${tipoDoacaoAtual === 'monetaria' ? 'Monetária' : 'de Itens'}.\n\nMudar o tipo agora irá APAGAR esses dados.\n\nDeseja continuar e limpar os dados atuais?`);
+
+            if (confirmar) {
+                // Limpa os dados do tipo anterior
+                if (tipoDoacaoAtual === 'monetaria') {
+                    inputValor.value = '';
+                } else {
+                    itensParaDoacao = [];
+                    sairModoEdicaoItem();
+                    renderizarTabelaItens();
+                }
+
+                limparTodaValidacao();
+                tipoDoacaoAtual = novoTipo;
+                atualizarVisibilidadeForm();
+
+            } else {
+                // Cancela a troca
+                selectTipoDoacao.value = tipoDoacaoAtual;
+                e.preventDefault();
+            }
+        } else {
+            // Se não tem dados, muda direto
+            tipoDoacaoAtual = novoTipo;
+            limparTodaValidacao();
+            atualizarVisibilidadeForm();
+        }
+    });
+
+
+    // --- FUNÇÕES DE API ---
 
     async function carregarSelectDoadores() {
         if (!selectDoador) return;
@@ -283,15 +380,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (selectDoador) selectDoador.value = doacao.id_doador.id;
 
-            limparValidacao();
+            limparTodaValidacao();
 
             if (doacao.valor > 1.0) {
+                // Modo Monetário
+                tipoDoacaoAtual = 'monetaria';
                 if (selectTipoDoacao) selectTipoDoacao.value = 'monetaria';
                 if (inputValor) inputValor.value = (doacao.valor).toFixed(2).replace('.', ',');
                 if (inputObservacao) inputObservacao.value = doacao.observacao || '';
 
                 itensParaDoacao = [];
             } else {
+                // Modo Item
+                tipoDoacaoAtual = 'item';
                 if (selectTipoDoacao) selectTipoDoacao.value = 'item';
                 if (inputValor) inputValor.value = '';
 
@@ -315,14 +416,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function validarFormulario() {
         let isValid = true;
 
-        if (!selectDoador || selectDoador.value === "") {
-            aplicarFeedback('id_doador', false, "Por favor, selecione um doador.");
-            isValid = false;
-        } else {
-            aplicarFeedback('id_doador', true);
+        // 1. CORREÇÃO DE SEGURANÇA: Valida o ID do Admin
+        if (!idAdminValido) {
+            alert('Erro Crítico de Segurança: Administrador não identificado. A sessão pode ter expirado. Faça login novamente.');
+            return false;
         }
 
-        // REMOVIDA A VALIDAÇÃO DO ADMIN ID, POIS É AUTOMÁTICA.
+        // 2. Valida Doador
+        if (!selectDoador || selectDoador.value === "") {
+            setError(selectDoador, "Por favor, selecione um doador.");
+            isValid = false;
+        } else {
+            clearError(selectDoador);
+        }
 
         // 3. Validação Específica (Monetária vs. Item)
         const tipo = selectTipoDoacao ? selectTipoDoacao.value : 'monetaria';
@@ -330,23 +436,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tipo === 'monetaria') {
             const valorNumerico = inputValor ? getValorNumericoManual(inputValor.value) : 0;
             if (!inputValor || isNaN(valorNumerico) || valorNumerico <= 0) {
-                aplicarFeedback('valor', false, "O valor da doação deve ser positivo.");
+                setError(inputValor, "O valor da doação deve ser positivo.");
                 isValid = false;
             } else {
-                aplicarFeedback('valor', true);
+                clearError(inputValor);
             }
-
             if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
 
         } else { // Tipo Item
             if (itensParaDoacao.length === 0) {
                 isValid = false;
+                // Mostra erro na tabela
                 if(feedbackItensDiv) feedbackItensDiv.style.display = 'block';
+                // Marca o campo de descrição para chamar atenção
+                setError(inputItemDescricao, "Adicione itens à lista abaixo.");
             } else {
                 if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
+                clearError(inputItemDescricao);
             }
 
-            if(inputValor) inputValor.classList.remove('is-valid', 'is-invalid');
+            if(inputValor) clearError(inputValor);
         }
 
         return isValid;
@@ -364,8 +473,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(inputItemQuantidade) inputItemQuantidade.value = '';
 
         itensParaDoacao = [];
+        tipoDoacaoAtual = 'monetaria';
 
-        limparValidacao();
+        limparTodaValidacao();
         sairModoEdicaoItem();
         renderizarTabelaItens();
 
@@ -378,7 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        limparValidacao();
+        // Remove erros antigos antes de validar
+        // limparTodaValidacao(); // Opcional, o validarFormulario já limpa se estiver certo
 
         if (!validarFormulario()) {
             return;
@@ -395,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tipo === 'monetaria') {
             valorParaSalvar = inputValor ? getValorNumericoManual(inputValor.value) : 0;
         } else {
-            valorParaSalvar = 1.0;
+            valorParaSalvar = 1.0; // Valor simbólico
 
             const itensFormatados = itensParaDoacao.map(item =>
                 `[ITEM]: ${item.descricao} | [QTD]: ${item.quantidade}`
@@ -407,8 +518,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const doacao = {
             id_doacao: isEdicao ? parseInt(idParaAtualizar) : 0,
             id_doador: { id: parseInt(selectDoador ? selectDoador.value : '0') },
-            // MUDANÇA CRÍTICA: Puxa o ID do campo hidden (que deve vir da sessão)
-            id_admin: { id: parseInt(idAdmin) },
+
+            // --- CORREÇÃO: Enviando o ID do Admin capturado no início ---
+            id_admin: { id: parseInt(idAdminValido) },
+
             valor: valorParaSalvar,
             observacao: obsParaSalvar
         };
@@ -431,7 +544,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             alert(`Doação ${isEdicao ? 'atualizada' : 'salva'} com sucesso!`);
-            // Redireciona de volta para a lista após salvar/atualizar
             window.location.href = 'doacao';
 
         } catch (error) {
@@ -441,30 +553,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // --- FIM SUBMIT ---
 
-    if (selectTipoDoacao) selectTipoDoacao.addEventListener('change', () => {
-        atualizarVisibilidadeForm();
-        if(selectTipoDoacao.value === 'monetaria') {
-            itensParaDoacao = [];
-            renderizarTabelaItens();
-        }
-    });
-
     if (btnCancelarEdicao) btnCancelarEdicao.addEventListener('click', (e) => {
         e.preventDefault();
-        // Redireciona de volta para a lista ao cancelar
         window.location.href = 'doacao';
     });
 
     // --- Lógica de Inicialização ---
     renderizarTabelaItens();
     atualizarVisibilidadeForm();
-    carregarSelectDoadores();
 
-    // Verifica se é modo de edição e carrega os dados
-    const urlParams = new URLSearchParams(window.location.search);
-    const idEdicao = urlParams.get('id');
+    // Carrega doadores e, se houver ID na URL, carrega para edição
+    carregarSelectDoadores().then(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idEdicao = urlParams.get('id');
 
-    if (idEdicao) {
-        preencherFormularioParaEdicao(idEdicao);
-    }
+        if (idEdicao) {
+            preencherFormularioParaEdicao(idEdicao);
+        }
+    });
 });

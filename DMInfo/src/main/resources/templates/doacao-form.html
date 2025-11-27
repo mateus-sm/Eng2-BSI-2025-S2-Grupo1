@@ -11,119 +11,118 @@
 </head>
 <body>
 
-    <a href="/app/principal" class="btn-home">
-        <i class="fas fa-home"></i> Página Principal
-    </a>
+<a href="/app/principal" class="btn-home">
+    <i class="fas fa-home"></i> Página Principal
+</a>
 
-    <div class="container">
+<div class="container">
 
-        <div class="page-header">
-            <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
-            <h2 id="formTitulo">Registrar Doação</h2>
-        </div>
-
-        <div class="form-section">
-
-            <a th:href="@{/app/doacao}" class="btn btn-secondary mb-4" style="width: auto; padding: 0 20px; font-size: 0.85rem;">
-                <i class="fas fa-arrow-left"></i> Voltar para Lista
-            </a>
-
-            <form id="formDoacao" novalidate>
-                <input type="hidden" id="id_doacao_hidden" name="id_doacao">
-                <input type="hidden" id="id_admin_logado" name="id_admin" th:value="${idAdminLogado}">
-
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="id_doador" class="form-label required-field">Doador</label>
-                            <select id="id_doador" name="id_doador" class="form-select" required>
-                                <option value="">Carregando...</option>
-                            </select>
-                            <div id="feedbackDoador" class="invalid-feedback">Selecione um doador.</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="tipo_doacao" class="form-label required-field">Tipo de Doação</label>
-                            <select id="tipo_doacao" class="form-select">
-                                <option value="monetaria" selected>Monetária (Dinheiro)</option>
-                                <option value="item">Item / Material / Alimento</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4" style="opacity: 0.1;">
-
-                <div id="grupo_monetaria" class="row">
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label for="valor" class="form-label required-field">Valor (R$)</label>
-                            <input type="text" id="valor" name="valor" class="form-control text-center"
-                                   placeholder="0,00" style="font-size: 1.2rem; font-weight: 600;">
-                            <div id="feedbackValor" class="invalid-feedback">Valor inválido.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="grupo_item" class="campo-escondido">
-                    <h4 class="mb-3 text-center" style="font-size: 1.1rem;">Itens da Doação</h4>
-
-                    <div class="row g-2 mb-3 align-items-end">
-                        <div class="col-md-6">
-                            <label for="inputItemDescricao" class="form-label">Descrição</label>
-                            <input type="text" id="inputItemDescricao" class="form-control" placeholder="Ex: Cesta básica">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="inputItemQuantidade" class="form-label">Qtd</label>
-                            <input type="text" id="inputItemQuantidade" class="form-control text-center" placeholder="1">
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-success w-100" id="btnAddItem">
-                                <i class="fas fa-plus"></i> Adicionar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="feedbackItens" class="text-danger mb-3 text-center small" style="display: none;">
-                        Adicione pelo menos um item.
-                    </div>
-
-                    <div class="table-itens">
-                        <table class="table mb-0">
-                            <thead>
-                            <tr>
-                                <th style="width: 10%" class="text-center">#</th>
-                                <th>Descrição</th>
-                                <th style="width: 15%" class="text-center">Qtd</th>
-                                <th style="width: 15%" class="text-center"></th>
-                            </tr>
-                            </thead>
-                            <tbody id="tabelaItensAdicionados">
-                            <tr><td colspan="4" class="text-center text-muted py-3">Nenhum item adicionado.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label for="observacao" class="form-label">Observação (Opcional)</label>
-                            <textarea id="observacao" name="observacao" class="form-control" rows="3"
-                                      placeholder="Detalhes adicionais..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 text-center">
-                    <button type="submit" class="btn btn-primary w-100" id="btnSalvar">Salvar Doação</button>
-                    <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="btnCancelarEdicao">Cancelar Edição</button>
-                </div>
-            </form>
-        </div>
+    <div class="page-header">
+        <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+        <h2 id="formTitulo">Registrar Doação</h2>
     </div>
 
-    <script th:src="@{/js/doacao-form.js}" defer></script>
+    <div class="form-section">
+
+        <a th:href="@{/app/doacao}" class="btn btn-secondary mb-4" style="width: auto; padding: 0 20px; font-size: 0.85rem;">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista
+        </a>
+
+        <form id="formDoacao" novalidate>
+            <input type="hidden" id="id_doacao_hidden" name="id_doacao">
+
+            <input type="hidden" id="id_admin_logado" name="id_admin" th:value="${idAdminLogado}">
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="id_doador" class="form-label required-field">Doador</label>
+                        <select id="id_doador" name="id_doador" class="form-select" required>
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="tipo_doacao" class="form-label required-field">Tipo de Doação</label>
+                        <select id="tipo_doacao" class="form-select">
+                            <option value="monetaria" selected>Monetária (Dinheiro)</option>
+                            <option value="item">Item / Material / Alimento</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" style="opacity: 0.1;">
+
+            <div id="grupo_monetaria" class="row">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="valor" class="form-label required-field">Valor (R$)</label>
+                        <input type="text" id="valor" name="valor" class="form-control text-center"
+                               placeholder="0,00" style="font-size: 1.2rem; font-weight: 600;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="grupo_item" class="campo-escondido">
+                <h4 class="mb-3 text-center" style="font-size: 1.1rem;">Itens da Doação</h4>
+
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-md-6">
+                        <label for="inputItemDescricao" class="form-label">Descrição</label>
+                        <input type="text" id="inputItemDescricao" class="form-control" placeholder="Ex: Cesta básica">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="inputItemQuantidade" class="form-label">Qtd</label>
+                        <input type="text" id="inputItemQuantidade" class="form-control text-center" placeholder="1">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-success w-100" id="btnAddItem">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="feedbackItens" class="text-danger mb-3 text-center small" style="display: none;">
+                    Adicione pelo menos um item.
+                </div>
+
+                <div class="table-itens">
+                    <table class="table mb-0">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%" class="text-center">#</th>
+                            <th>Descrição</th>
+                            <th style="width: 15%" class="text-center">Qtd</th>
+                            <th style="width: 15%" class="text-center"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabelaItensAdicionados">
+                        <tr><td colspan="4" class="text-center text-muted py-3">Nenhum item adicionado.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">Observação (Opcional)</label>
+                        <textarea id="observacao" name="observacao" class="form-control" rows="3"
+                                  placeholder="Detalhes adicionais..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary w-100" id="btnSalvar">Salvar Doação</button>
+                <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="btnCancelarEdicao">Cancelar Edição</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/doacao-form.js}" defer></script>
 </body>
 </html>

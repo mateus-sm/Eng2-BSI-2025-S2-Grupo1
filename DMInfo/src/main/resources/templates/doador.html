@@ -24,8 +24,7 @@
 
         <div class="form-section">
             <h4 class="mb-3 text-center text-muted" style="font-weight: 500;">Cadastro / Edição</h4>
-            <form id="formDoador">
-                <input type="hidden" id="id" name="id">
+            <form id="formDoador" novalidate> <input type="hidden" id="id" name="id">
 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -89,7 +88,15 @@
         <hr style="opacity: 0.1; margin: 40px 0;">
 
         <div class="table-responsive table-container">
-            <h4 class="mb-3 text-muted" style="font-weight: 500;">Doadores Cadastrados</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-muted mb-0" style="font-weight: 500;">Doadores Cadastrados</h4>
+
+                <div class="search-container" style="width: 300px;">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="inputPesquisa" class="form-control search-input" placeholder="Pesquisar doador...">
+                </div>
+            </div>
+
             <table class="table table-hover align-middle">
                 <thead>
                 <tr>

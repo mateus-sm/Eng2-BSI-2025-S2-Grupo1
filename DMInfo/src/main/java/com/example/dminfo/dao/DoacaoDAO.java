@@ -4,7 +4,7 @@ import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.Doacao;
 import com.example.dminfo.model.Doador;
 import com.example.dminfo.model.Usuario;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -40,7 +40,7 @@ public class DoacaoDAO {
         return doacao;
     }
 
-    public Doacao get(int id) {
+    public Doacao get(int id, Conexao conexao) {
         String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
                 "FROM doacao d " +
                 "JOIN doador don ON d.id_doador = don.id_doador " +
@@ -48,7 +48,7 @@ public class DoacaoDAO {
                 "JOIN usuario u ON a.id_usuario = u.id_usuario " +
                 "WHERE d.id_doacao = " + id;
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next())
                 return buildDoacao(rs);
@@ -58,16 +58,19 @@ public class DoacaoDAO {
         return null;
     }
 
-    public List<Doacao> get(String filtro) {
+    public List<Doacao> readAll(String filtro, Conexao conexao) {
         List<Doacao> doacoes = new ArrayList<>();
+        // O filtro pode ser adaptado conforme necessidade, aqui mantive vazio ou genérico
+        String whereClause = (filtro != null && !filtro.isEmpty()) ? filtro : "";
+
         String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
                 "FROM doacao d " +
                 "JOIN doador don ON d.id_doador = don.id_doador " +
                 "JOIN administrador a ON d.id_admin = a.id_admin " +
                 "JOIN usuario u ON a.id_usuario = u.id_usuario " +
-                filtro + " ORDER BY d.data DESC";
+                whereClause + " ORDER BY d.data DESC";
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if(rs != null)
                 while(rs.next())
@@ -78,7 +81,9 @@ public class DoacaoDAO {
         return doacoes;
     }
 
-    public Doacao gravar(Doacao doacao) {
+    public Doacao gravar(Doacao doacao, Conexao conexao) {
+        if (doacao == null) return null;
+
         String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
         String obsEscapada = obsOriginal.replace("'", "''");
 
@@ -92,7 +97,7 @@ public class DoacaoDAO {
                 obsEscapada
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try{
             if(rs != null && rs.next()){
                 doacao.setId_doacao(rs.getInt("id_doacao"));
@@ -100,13 +105,13 @@ public class DoacaoDAO {
             }
         }catch(SQLException e){
             System.out.println("Erro ao gravar Doação (SQL): " + e.getMessage());
-            throw new RuntimeException("Falha no SQL ao gravar: " + e.getMessage());
         }
-
         return null;
     }
 
-    public boolean atualizar(Doacao doacao) {
+    public Doacao atualizar(Doacao doacao, Conexao conexao) {
+        if (doacao == null) return null;
+
         String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
         String obsEscapada = obsOriginal.replace("'", "''");
 
@@ -124,11 +129,12 @@ public class DoacaoDAO {
                 doacao.getId_doacao()
         );
 
-        return SingletonDB.getConexao().manipular(sql);
+        conexao.consultar(sql);
+        return doacao;
     }
 
-    public boolean excluir(int id) {
+    public boolean excluir(int id, Conexao conexao) {
         String sql = String.format("DELETE FROM doacao WHERE id_doacao = %d", id);
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 }

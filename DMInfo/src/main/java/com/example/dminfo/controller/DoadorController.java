@@ -1,7 +1,8 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.model.Doador;
-import com.example.dminfo.dao.DoadorDAO;
+import com.example.dminfo.util.Conexao;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,52 +12,62 @@ import java.util.List;
 public class DoadorController {
 
     @Autowired
-    private DoadorDAO dao;
+    private Doador doadorModel;
 
     public List<Doador> listar() {
-        return dao.get("");
+        return doadorModel.listar("", SingletonDB.getConexao());
     }
 
     public Doador getById(Integer id) {
-        return dao.get(id);
+        Doador d = doadorModel.getById(id, SingletonDB.getConexao());
+        if (d == null) {
+            throw new RuntimeException("Doador não encontrado.");
+        }
+        return d;
     }
 
     public Doador salvar(Doador doador) {
-        if (dao.getByDocumento(doador.getDocumento()) != null)
+        Conexao conexao = SingletonDB.getConexao();
+
+        // Validação de Duplicidade
+        if (doadorModel.getByDocumento(doador.getDocumento(), conexao) != null)
             throw new RuntimeException("Já existe um doador com este documento.");
 
-        return dao.gravar(doador);
+        return doadorModel.salvar(doador, conexao);
     }
 
     public Doador atualizar(Integer id, Doador doadorDetalhes) {
-        Doador doador = dao.get(id);
-        if (doador == null)
+        Conexao conexao = SingletonDB.getConexao();
+
+        Doador doadorExistente = doadorModel.getById(id, conexao);
+        if (doadorExistente == null)
             throw new RuntimeException("Doador não encontrado com id: " + id);
 
-        if (!doador.getDocumento().equals(doadorDetalhes.getDocumento()) && dao.getByDocumento(doadorDetalhes.getDocumento()) != null)
+        // Validação de Duplicidade na edição
+        Doador outroComMesmoDoc = doadorModel.getByDocumento(doadorDetalhes.getDocumento(), conexao);
+        if (outroComMesmoDoc != null && outroComMesmoDoc.getId() != id) {
             throw new RuntimeException("O novo documento já pertence a outro doador.");
+        }
 
-        doador.setNome(doadorDetalhes.getNome());
-        doador.setDocumento(doadorDetalhes.getDocumento());
-        doador.setRua(doadorDetalhes.getRua());
-        doador.setBairro(doadorDetalhes.getBairro());
-        doador.setCidade(doadorDetalhes.getCidade());
-        doador.setUf(doadorDetalhes.getUf());
-        doador.setCep(doadorDetalhes.getCep());
-        doador.setEmail(doadorDetalhes.getEmail());
-        doador.setTelefone(doadorDetalhes.getTelefone());
-        doador.setContato(doadorDetalhes.getContato());
+        // Atualiza os dados do objeto existente com os novos detalhes
+        doadorExistente.setNome(doadorDetalhes.getNome());
+        doadorExistente.setDocumento(doadorDetalhes.getDocumento());
+        doadorExistente.setRua(doadorDetalhes.getRua());
+        doadorExistente.setBairro(doadorDetalhes.getBairro());
+        doadorExistente.setCidade(doadorDetalhes.getCidade());
+        doadorExistente.setUf(doadorDetalhes.getUf());
+        doadorExistente.setCep(doadorDetalhes.getCep());
+        doadorExistente.setEmail(doadorDetalhes.getEmail());
+        doadorExistente.setTelefone(doadorDetalhes.getTelefone());
+        doadorExistente.setContato(doadorDetalhes.getContato());
 
-        if (dao.alterar(doador))
-            return doador;
-
-        throw new RuntimeException("Erro ao atualizar doador no banco de dados.");
+        return doadorModel.alterar(doadorExistente, conexao);
     }
 
     public boolean excluir(Integer id){
-        if (dao.get(id) == null)
-            throw new RuntimeException("Doador não encontrado com id: " + id);
-
-        return dao.excluir(id);
+        if (id == null || id == 0) {
+            throw new RuntimeException("ID inválido.");
+        }
+        return doadorModel.excluir(id, SingletonDB.getConexao());
     }
 }

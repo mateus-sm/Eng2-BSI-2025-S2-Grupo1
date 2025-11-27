@@ -17,14 +17,21 @@ public class DoadorView {
     private DoadorController controller;
 
     @GetMapping
-    public ResponseEntity<Object> listar() {return ResponseEntity.ok(controller.listar());}
+    public ResponseEntity<Object> listar() {
+        try {
+            return ResponseEntity.ok(controller.listar());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MembroErro("Erro ao listar: " + e.getMessage()));
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> buscarPorId(@PathVariable Integer id) {
-        Doador doador = controller.getById(id);
-        if (doador == null)
-            return ResponseEntity.badRequest().body(new MembroErro("Doador não encontrado."));
-        return ResponseEntity.ok(doador);
+        try {
+            return ResponseEntity.ok(controller.getById(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MembroErro(e.getMessage()));
+        }
     }
 
     @PostMapping
@@ -42,7 +49,7 @@ public class DoadorView {
         try{
             Doador atualizado = controller.atualizar(id, doador);
             return ResponseEntity.ok(atualizado);
-        }catch(RuntimeException e){
+        }catch(Exception e){
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }
     }
@@ -50,10 +57,8 @@ public class DoadorView {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletar(@PathVariable Integer id) {
         try {
-            if(controller.excluir(id))
-                return ResponseEntity.noContent().build();
-            else
-                return ResponseEntity.badRequest().body(new MembroErro("Erro ao excluir."));
+            controller.excluir(id);
+            return ResponseEntity.noContent().build();
         }catch(Exception e){
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }

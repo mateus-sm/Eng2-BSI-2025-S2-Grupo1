@@ -1,8 +1,13 @@
 package com.example.dminfo.model;
 
-import org.springframework.stereotype.Component;
+import com.example.dminfo.dao.DoadorDAO;
+import com.example.dminfo.util.Conexao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-@Component
+import java.util.List;
+
+@Repository
 public class Doador {
 
     private int id;
@@ -16,6 +21,9 @@ public class Doador {
     private String email;
     private String telefone;
     private String contato;
+
+    @Autowired
+    private DoadorDAO dao;
 
     public Doador() {}
 
@@ -33,20 +41,7 @@ public class Doador {
         this.contato = contato;
     }
 
-    public Doador(String nome, String documento, String rua, String bairro, String cidade, String uf, String cep, String email, String telefone, String contato) {
-        this.nome = nome;
-        this.documento = documento;
-        this.rua = rua;
-        this.bairro = bairro;
-        this.cidade = cidade;
-        this.uf = uf;
-        this.cep = cep;
-        this.email = email;
-        this.telefone = telefone;
-        this.contato = contato;
-    }
-
-
+    // Getters e Setters
     public int getId() {return id;}
     public void setId(int id) {this.id = id;}
 
@@ -79,4 +74,41 @@ public class Doador {
 
     public String getContato() {return contato;}
     public void setContato(String contato) {this.contato = contato;}
+
+    // --- Métodos de Lógica (Pattern do Projeto) ---
+
+    public List<Doador> listar(String filtro, Conexao conexao) {
+        return dao.readAll(filtro, conexao);
+    }
+
+    public Doador getById(Integer id, Conexao conexao) {
+        return dao.getById(id, conexao);
+    }
+
+    public Doador getByDocumento(String documento, Conexao conexao) {
+        return dao.getByDocumento(documento, conexao);
+    }
+
+    public Doador salvar(Doador doador, Conexao conexao) {
+        if (doador == null) {
+            throw new RuntimeException("Doador nulo");
+        }
+        return dao.create(doador, conexao);
+    }
+
+    public Doador alterar(Doador doador, Conexao conexao) {
+        Doador d = dao.update(doador, conexao);
+        if (d != null) {
+            return doador;
+        }
+        throw new RuntimeException("Erro ao atualizar doador.");
+    }
+
+    public boolean excluir(Integer id, Conexao conexao) {
+        Doador d = dao.getById(id, conexao);
+        if (d == null) {
+            throw new RuntimeException("Doador não encontrado.");
+        }
+        return dao.delete(id, conexao);
+    }
 }

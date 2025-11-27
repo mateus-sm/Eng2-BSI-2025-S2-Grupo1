@@ -1,7 +1,7 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Doador;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -28,9 +28,9 @@ public class DoadorDAO {
         );
     }
 
-    public Doador get(int id) {
+    public Doador getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM doador WHERE id_doador = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try{
             if(rs != null && rs.next())
                 return buildDoador(rs);
@@ -40,10 +40,10 @@ public class DoadorDAO {
         return null;
     }
 
-    public Doador getByDocumento(String documento) {
+    public Doador getByDocumento(String documento, Conexao conexao) {
         String documentoSeguro = documento.replace("'", "''");
         String sql = "SELECT * FROM doador WHERE documento = '" + documentoSeguro + "'";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if(rs != null && rs.next())
                 return buildDoador(rs);
@@ -53,10 +53,11 @@ public class DoadorDAO {
         return null;
     }
 
-    public List<Doador> get(String filtro) {
+    public List<Doador> readAll(String filtro, Conexao conexao) {
         List<Doador> doadores = new ArrayList<>();
-        String sql = "SELECT * FROM doador " + filtro;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        // Aplica filtro se vier preenchido (ex: WHERE nome LIKE ...)
+        String sql = "SELECT * FROM doador " + (filtro != null ? filtro : "");
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null)
                 while (rs.next())
@@ -67,7 +68,7 @@ public class DoadorDAO {
         return doadores;
     }
 
-    public Doador gravar(Doador doador){
+    public Doador create(Doador doador, Conexao conexao){
         String sql = String.format("INSERT INTO doador (nome, documento, rua, bairro, cidade, uf, cep, email, telefone, contato) " +
                         "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING id_doador",
                 doador.getNome().replace("'", "''"),
@@ -82,7 +83,7 @@ public class DoadorDAO {
                 doador.getContato().replace("'", "''")
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try{
             if (rs != null && rs.next()){
                 doador.setId(rs.getInt("id_doador"));
@@ -94,7 +95,7 @@ public class DoadorDAO {
         return null;
     }
 
-    public boolean alterar(Doador doador) {
+    public Doador update(Doador doador, Conexao conexao) {
         String sql = String.format("UPDATE doador SET nome = '%s', documento = '%s', rua = '%s', bairro = '%s', " +
                         "cidade = '%s', uf = '%s', cep = '%s', email = '%s', telefone = '%s', contato = '%s' " +
                         "WHERE id_doador = %d",
@@ -110,11 +111,13 @@ public class DoadorDAO {
                 doador.getContato().replace("'", "''"),
                 doador.getId()
         );
-        return SingletonDB.getConexao().manipular(sql);
+
+        conexao.consultar(sql);
+        return doador;
     }
 
-    public boolean excluir(int id) {
+    public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM doador WHERE id_doador = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 }

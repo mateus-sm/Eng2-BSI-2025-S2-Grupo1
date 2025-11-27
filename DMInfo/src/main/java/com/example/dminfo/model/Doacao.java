@@ -1,9 +1,14 @@
 package com.example.dminfo.model;
 
-import org.springframework.stereotype.Component;
-import java.time.LocalDate;
+import com.example.dminfo.dao.DoacaoDAO;
+import com.example.dminfo.util.Conexao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-@Component
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
 public class Doacao {
 
     private int id_doacao;
@@ -12,6 +17,9 @@ public class Doacao {
     private LocalDate data;
     private double valor;
     private String observacao;
+
+    @Autowired
+    private DoacaoDAO dao;
 
     public Doacao() {}
 
@@ -40,4 +48,37 @@ public class Doacao {
 
     public String getObservacao() {return observacao;}
     public void setObservacao(String observacao) {this.observacao = observacao;}
+
+    // --- Métodos de Lógica (Padrão do Exemplo) ---
+
+    public List<Doacao> listar(String filtro, Conexao conexao) {
+        return dao.readAll(filtro, conexao);
+    }
+
+    public Doacao getById(Integer id, Conexao conexao) {
+        return dao.get(id, conexao);
+    }
+
+    public Doacao salvar(Doacao doacao, Conexao conexao) {
+        if (doacao == null) {
+            throw new RuntimeException("Doação nula");
+        }
+        return dao.gravar(doacao, conexao);
+    }
+
+    public Doacao alterar(Doacao doacao, Conexao conexao) {
+        Doacao d = dao.atualizar(doacao, conexao);
+        if (d != null) {
+            return doacao;
+        }
+        throw new RuntimeException("Erro ao atualizar doação.");
+    }
+
+    public boolean excluir(Integer id, Conexao conexao) {
+        Doacao d = dao.get(id, conexao);
+        if (d == null) {
+            throw new RuntimeException("Doação não encontrada.");
+        }
+        return dao.excluir(id, conexao);
+    }
 }

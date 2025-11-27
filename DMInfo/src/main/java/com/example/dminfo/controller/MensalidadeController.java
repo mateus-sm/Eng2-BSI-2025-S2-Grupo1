@@ -18,12 +18,16 @@ public class MensalidadeController {
 
     public Mensalidade salvar(Mensalidade m) {
 
-        if (m == null || m.getValor() <= 0) {
-            throw new RuntimeException("Mensalidade inválida");
+        if (m.getValor() <= 0) {
+            throw new RuntimeException("Valor precisa ser maior que zero");
         }
 
         if (mdao.get(m.getId_membro()) == null) {
             throw new RuntimeException("Membro não encontrado no banco");
+        }
+
+        if (m.getAno() <= 0 || m.getMes() <= 0 || m.getDataPagamento() == null) {
+            throw new RuntimeException("Data da mensalidade inválida");
         }
 
         Mensalidade existente = null;
@@ -64,4 +68,9 @@ public class MensalidadeController {
     public List<Mensalidade> listarMembro(Integer id) {
         return dao.listarMembro(id);
     }
+
+    public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim) {
+        return dao.filtrar(nome, dataIni, dataFim);
+    }
+
 }

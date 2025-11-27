@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +12,10 @@
 </head>
 
 <body>
+
+<a href="/app/principal" class="btn-home">
+    <i class="fas fa-home"></i> Página Principal
+</a>
 
 <div class="page-header">
     <img src="/images/BrasãoDemolay.png" class="logo-img" alt="Logo">
@@ -40,19 +43,17 @@
             </tr>
             </thead>
 
-            <tbody id="tabela-administradores">
-            </tbody>
+            <tbody id="tabela-administradores"></tbody>
         </table>
-
-        <div id="mensagemVazia" class="text-center text-muted py-3 d-none">
-            Nenhum administrador encontrado.
-        </div>
     </div>
-
+    <div id="mensagemVazia" class="text-center text-muted py-3 d-none">
+        Nenhum administrador encontrado.
+    </div>
 </div>
 
+<!-- ==================== MODAL ADMINISTRADOR ==================== -->
 <div class="modal fade" id="administradorModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -68,16 +69,99 @@
                     <input type="hidden" id="administradorId">
 
                     <div class="mb-3">
-                        <label class="form-label">ID do Usuário *</label>
-                        <input type="number" class="form-control" id="usuarioId" required>
-                        <small class="form-text text-muted">Informe o ID de um usuário já existente.</small>
+                        <label class="form-label fw-bold">Seleção de Usuário</label>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoUsuario" id="radioUsuarioExistente" checked>
+                            <label class="form-check-label" for="radioUsuarioExistente">Selecionar usuário existente</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoUsuario" id="radioNovoUsuario">
+                            <label class="form-check-label" for="radioNovoUsuario">Criar novo usuário</label>
+                        </div>
                     </div>
 
-                    <div class="mb-3" id="campo-dtFim">
-                        <label class="form-label">Data Fim</label>
-                        <input type="date" class="form-control" id="dtFim">
-                        <div id="dtFim-error" class="text-danger d-none mt-1"></div>
+                    <!-- Usuário existente -->
+                    <div id="blocoUsuarioExistente">
+                        <div class="mb-3">
+                            <label class="form-label">Selecione um Usuário *</label>
+                            <select class="form-select" id="usuarioId">
+                                <option value="">Carregando usuários...</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- Novo Usuário -->
+                    <div id="blocoNovoUsuario" class="d-none">
+
+                        <h6 class="mt-3 mb-2 fw-bold">Dados do Novo Usuário</h6>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Nome *</label>
+                                <input type="text" class="form-control" id="novo_nome">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Usuário (login) *</label>
+                                <input type="text" class="form-control" id="novo_usuario">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Senha *</label>
+                                <input type="password" class="form-control" id="novo_senha">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="novo_telefone">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="novo_email">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">CPF</label>
+                                <input type="text" class="form-control" id="novo_cpf">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Data de Nascimento</label>
+                                <input type="text" id="novo_dtnasc" placeholder="(dd/mm/aaaa)" class="form-control">
+                            </div>
+
+                            <h6 class="mt-3 mb-2 fw-bold">Endereço</h6>
+
+                            <div class="col-8 mb-3">
+                                <label class="form-label">Rua</label>
+                                <input type="text" class="form-control" id="novo_rua">
+                            </div>
+
+                            <div class="col-4 mb-3">
+                                <label class="form-label">CEP</label>
+                                <input type="text" class="form-control" id="novo_cep">
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="form-control" id="novo_cidade">
+                            </div>
+
+                            <div class="col-4 mb-3">
+                                <label class="form-label">Bairro</label>
+                                <input type="text" class="form-control" id="novo_bairro">
+                            </div>
+
+                            <div class="col-2 mb-3">
+                                <label class="form-label">UF</label>
+                                <input type="text" maxlength="2" class="form-control" id="novo_uf">
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
 
@@ -90,7 +174,46 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalEditarAdmin" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Administrador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="form-editar-admin">
+
+                    <div class="mb-3">
+                        <label class="form-label">Usuário</label>
+                        <input type="text" class="form-control" id="editUsuario" disabled readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="editDtIni">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="editDtFim">
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarEdicao">Salvar Alterações</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL DELETE ==================== -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

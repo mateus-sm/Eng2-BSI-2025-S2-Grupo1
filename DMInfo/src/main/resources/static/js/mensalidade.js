@@ -100,6 +100,77 @@ async function carregarMensalidades(filtro = "") {
     }
 }
 
+async function carregarMensalidadesComFiltro() {
+    const nome = document.getElementById("filtroNome").value.trim();
+    const dataIni = document.getElementById("filtroDataInicial").value;
+    const dataFim = document.getElementById("filtroDataFinal").value;
+
+    let url = `${API}/apis/mensalidade/listar`;
+
+    const params = [];
+
+    if (nome !== "") params.push(`nome=${encodeURIComponent(nome)}`);
+    if (dataIni !== "") params.push(`dataIni=${dataIni}`);
+    if (dataFim !== "") params.push(`dataFim=${dataFim}`);
+
+    if (params.length > 0)
+        url = `${API}/apis/mensalidade/filtrar?${params.join("&")}`;
+
+    try {
+        const resposta = await fetch(url);
+        const lista = await resposta.json();
+
+        preencherTabela(lista);
+
+    } catch (e) {
+        mostrarAlerta("danger", "Erro ao filtrar mensalidades.");
+    }
+}
+
+function preencherTabela(lista) {
+    const tabela = document.getElementById("tabelaMensalidades");
+    const msgVazia = document.getElementById("mensagemVazia");
+    const total = document.getElementById("totalMensalidades");
+
+    tabela.innerHTML = "";
+
+    if (!lista || lista.length === 0) {
+        msgVazia.classList.remove("d-none");
+        total.textContent = "0";
+        return;
+    }
+
+    msgVazia.classList.add("d-none");
+
+    lista.forEach(item => {
+        tabela.innerHTML += `
+            <tr>
+                <td class="text-center">${item.id_mensalidade}</td>
+                <td>${item.id_membro} - ${item.nome_membro || "Sem nome"}</td>
+                <td>${item.mes}</td>
+                <td>${item.ano}</td>
+                <td>R$ ${item.valor.toFixed(2)}</td>
+                <td>${item.dataPagamento || "--"}</td>
+                <td class="text-center">
+                    <button class="btn btn-warning btn-sm me-1" onclick="editarMensalidade(${item.id_mensalidade})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="excluirMensalidade(${item.id_mensalidade})">Excluir</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    total.textContent = lista.length;
+}
+
+function mostrarRegistro() {
+    document.getElementById("areaRegistro").classList.remove("d-none");
+}
+
+function fecharRegistro() {
+    document.getElementById("formMensalidade").reset();
+    document.getElementById("areaRegistro").classList.add("d-none");
+}
+
 async function salvarMensalidade(event) {
     event.preventDefault();
 

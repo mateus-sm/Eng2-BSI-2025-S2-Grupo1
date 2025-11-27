@@ -169,4 +169,41 @@ public class MensalidadeDAO {
 
         return lista;
     }
+
+    public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim) {
+        List<Mensalidade> lista = new ArrayList<>();
+
+        String sql = """
+        SELECT m.*, u.nome AS nome_membro
+        FROM mensalidade m
+        JOIN membro mem ON m.id_membro = mem.id_membro
+        JOIN usuario u ON mem.id_usuario = u.id_usuario
+        WHERE 1=1
+    """;
+
+        if (nome != null && !nome.isEmpty()) {
+            sql += " AND u.nome ILIKE '%" + nome + "%'";
+        }
+
+        if (dataIni != null && !dataIni.isEmpty()) {
+            sql += " AND m.datapagamento >= '" + dataIni + "'";
+        }
+
+        if (dataFim != null && !dataFim.isEmpty()) {
+            sql += " AND m.datapagamento <= '" + dataFim + "'";
+        }
+
+        sql += " ORDER BY m.datapagamento DESC";
+
+        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+            while (rs != null && rs.next()) {
+                lista.add(buildObject(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
 }

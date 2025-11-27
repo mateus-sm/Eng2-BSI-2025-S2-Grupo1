@@ -11,6 +11,10 @@
 </head>
 
 <body>
+
+<a href="/app/principal" class="btn-home">
+    <i class="bi bi-house-door-fill"></i> Página Principal
+</a>
 <div class="container">
 
     <div class="page-header text-center mt-4 mb-4">
@@ -22,7 +26,7 @@
     </div>
 
     <div class="row mb-4 align-items-center justify-content-center">
-        <div class="col-12 col-md-10">
+        <div class="col-12 col-md-12">
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">Registrar Pagamento</h5>
@@ -86,14 +90,27 @@
 
     <div id="alertaContainer" class="mb-3"></div>
 
-    <div class="row mb-4 align-items-center justify-content-center">
-        <div class="col-12 col-md-8 mb-3 mb-md-0">
-            <input type="text" id="filtro" class="form-control text-center" placeholder="Buscar por nome do membro...">
+    <div class="row mb-4">
+        <div class="row mb-4">
+            <div class="col-md-4 mb-2">
+                <label class="form-label">Nome:</label>
+                <input type="text" id="filtroNome" class="form-control" placeholder="Buscar por nome...">
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <label class="form-label">A partir de:</label>
+                <input type="date" id="filtroDataInicial" class="form-control">
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <label class="form-label">Até:</label>
+                <input type="date" id="filtroDataFinal" class="form-control">
+            </div>
+
+            <div class="col-md-2 mb-2 mt-4">
+                <button class="btn btn-primary w-100" onclick="carregarMensalidadesComFiltro()">Filtrar</button>
+            </div>
         </div>
-        <div class="col-12 col-md-auto">
-            <button id="btnFiltrar" class="btn btn-primary" onclick="carregarMensalidades(document.getElementById('filtro').value)">Filtrar</button>
-        </div>
-    </div>
 
     <p class="text-center text-muted">
         Total de mensalidades: <span id="totalMensalidades">0</span>

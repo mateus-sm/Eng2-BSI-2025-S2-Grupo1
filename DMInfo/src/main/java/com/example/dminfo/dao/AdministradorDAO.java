@@ -15,38 +15,38 @@ public class AdministradorDAO {
 
     private Administrador buildAdministrador(ResultSet rs) throws SQLException {
         Administrador admin = new Administrador();
+
         admin.setId(rs.getInt("id_admin"));
 
-        if (rs.getDate("dtini") != null) {
+        if (rs.getDate("dtini") != null)
             admin.setDtIni(rs.getDate("dtini").toLocalDate());
-        }
-        if (rs.getDate("dtfim") != null) {
+
+        if (rs.getDate("dtfim") != null)
             admin.setDtFim(rs.getDate("dtfim").toLocalDate());
-        }
 
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
+        String nome = null;
+        try { nome = rs.getString("usuario_nome"); } catch (SQLException ignore) {}
+        usuario.setNome(nome);
 
         admin.setUsuario(usuario);
         return admin;
     }
 
-    public Administrador get(int id) {
-        String sql = "SELECT * FROM administrador WHERE id_admin = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildAdministrador(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar Administrador por ID: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public List<Administrador> get(String filtro) {
+    public List<Administrador> get() {
         List<Administrador> admins = new ArrayList<>();
-        String sql = "SELECT * FROM administrador " + filtro;
+        String sql = """
+            SELECT 
+                a.id_admin,
+                a.dtini,
+                a.dtfim,
+                a.id_usuario,
+                u.nome AS usuario_nome
+            FROM administrador a
+            JOIN usuario u ON u.id_usuario = a.id_usuario
+            ORDER BY a.id_admin;
+            """;
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -61,25 +61,57 @@ public class AdministradorDAO {
         return admins;
     }
 
-    public Administrador getByUsuario(int usuarioId) {
-        String sql = "SELECT * FROM administrador WHERE id_usuario = " + usuarioId;
+    public Administrador get(int id) {
+        String sql = String.format("""
+            SELECT 
+                a.id_admin,
+                a.dtini,
+                a.dtfim,
+                a.id_usuario,
+                u.nome AS usuario_nome
+            FROM administrador a
+            JOIN usuario u ON u.id_usuario = a.id_usuario
+            WHERE a.id_admin = %d
+            """, id);
+
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildAdministrador(rs);
             }
         } catch (SQLException e) {
-            System.out.println("Erro ao buscar Administrador por Usuário: " + e.getMessage());
+            System.out.println("Erro ao buscar Administrador por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Administrador getByUsuario(int usuarioId) {
+        String sql = String.format("""
+            SELECT 
+                a.id_admin,
+                a.dtini,
+                a.dtfim,
+                a.id_usuario,
+                u.nome AS usuario_nome
+            FROM administrador a
+            JOIN usuario u ON u.id_usuario = a.id_usuario
+            WHERE a.id_usuario = %d
+            """, usuarioId);
+
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        try {
+            if (rs != null && rs.next()) {
+                return buildAdministrador(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Administrador por Usuario: " + e.getMessage());
         }
         return null;
     }
 
     public Administrador gravar(Administrador admin) {
-        String sql = String.format("INSERT INTO administrador (dtini, id_usuario) " +
-                        "VALUES ('%s', %d) RETURNING id_admin",
-                admin.getDtIni().toString(),
-                admin.getUsuario().getId()
-        );
+        String sql = String.format("INSERT INTO administrador (dtini, id_usuario) VALUES ('%s', %d) RETURNING id_admin",
+                admin.getDtIni().toString(), admin.getUsuario().getId());
 
         ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
@@ -94,10 +126,8 @@ public class AdministradorDAO {
     }
 
     public boolean alterar(Administrador admin) {
-        String sql = String.format("UPDATE administrador SET dtfim = '%s' WHERE id_admin = %d",
-                admin.getDtFim().toString(),
-                admin.getId()
-        );
+        String dtFimSql = (admin.getDtFim() != null) ? ("'" + admin.getDtFim().toString() + "'") : "NULL";
+        String sql = String.format("UPDATE administrador SET dtfim = %s WHERE id_admin = %d", dtFimSql, admin.getId());
         return SingletonDB.getConexao().manipular(sql);
     }
 

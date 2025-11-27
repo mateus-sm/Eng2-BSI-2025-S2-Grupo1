@@ -86,4 +86,19 @@
                 return ResponseEntity.badRequest().body("Erro ao listar por membro: " + e.getMessage());
             }
         }
+
+        @GetMapping("/filtrar")
+        @ResponseBody
+        public ResponseEntity<Object> filtrar(
+                @RequestParam(required = false) String nome,
+                @RequestParam(required = false) String dataIni,
+                @RequestParam(required = false) String dataFim) {
+
+            try {
+                return ResponseEntity.ok(controller.filtrar(nome, dataIni, dataFim));
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Erro ao filtrar: " + e.getMessage());
+            }
+        }
+
     }

@@ -3,12 +3,11 @@ body {
 }
 
 #tabela-administradores .btn-group {
-    min-width: 100px; /* Garante que os botões de ação não quebrem a linha */
+    min-width: 100px;
     display: flex;
     justify-content: flex-end;
 }
 
-/* Esconde o campo Data Fim no modo "Adicionar" */
 #form-administrador:not(.edit-mode) #campo-dtFim {
     display: none;
 }

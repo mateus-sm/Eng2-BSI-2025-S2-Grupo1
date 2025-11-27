@@ -1,12 +1,12 @@
+const msgFeedback = document.getElementById('msg-feedback');
+
 async function carregarEventos() {
     const selectEvento = document.getElementById('id_evento');
     try {
-        const response = await fetch('/apis/eventos');
-        if (!response.ok)
-            throw new Error('Falha ao carregar eventos');
+        const response = await fetch('/apis/atividade/form/eventos');
+        if (!response.ok) throw new Error('Falha ao carregar eventos');
 
         const eventos = await response.json();
-
         selectEvento.innerHTML = '<option value="" disabled selected>Selecione o Evento</option>';
         selectEvento.disabled = false;
 
@@ -17,24 +17,24 @@ async function carregarEventos() {
             selectEvento.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar eventos:', error);
-        selectEvento.innerHTML = '<option value="" disabled selected>Erro ao carregar eventos</option>';
-        selectEvento.disabled = true;
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao carregar eventos.', 'danger');
     }
 }
 
 async function carregarAtividades(idEvento) {
     const selectAtividade = document.getElementById('id_atividade');
+    document.getElementById('galeria-container').classList.add('d-none');
+
     selectAtividade.innerHTML = '<option value="" disabled selected>Carregando atividades...</option>';
     selectAtividade.disabled = true;
 
     try {
-        const response = await fetch(`/apis/eventos/${idEvento}/atividades`);
+        const response = await fetch(`/apis/atividade/form/eventos/${idEvento}/atividades`);
         if (!response.ok)
             throw new Error('Falha ao carregar atividades');
 
         const atividades = await response.json();
-
         selectAtividade.innerHTML = '<option value="" disabled selected>Selecione a Atividade</option>';
         selectAtividade.disabled = false;
 
@@ -51,22 +51,91 @@ async function carregarAtividades(idEvento) {
             selectAtividade.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar atividades:', error);
-        selectAtividade.innerHTML = '<option value="" disabled selected>Erro ao carregar atividades</option>';
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao carregar atividades.', 'danger');
+    }
+}
+
+async function carregarFotos(idAtividade) {
+    const galeriaContainer = document.getElementById('galeria-container');
+    const listaFotos = document.getElementById('lista-fotos');
+    const msgNoFotos = document.getElementById('no-fotos-msg');
+    const loading = document.getElementById('loading-fotos');
+
+    galeriaContainer.classList.remove('d-none');
+    loading.classList.remove('d-none');
+    listaFotos.innerHTML = '';
+    msgNoFotos.classList.add('d-none');
+
+    try {
+        const response = await fetch(`/apis/atividade/${idAtividade}/fotos`);
+        if (!response.ok)
+            throw new Error('Erro ao buscar fotos');
+
+        const fotos = await response.json();
+        loading.classList.add('d-none');
+
+        if (fotos.length === 0) {
+            msgNoFotos.classList.remove('d-none');
+            return;
+        }
+
+        fotos.forEach(foto => {
+            const caminhoFoto = `/uploads/${foto.foto}?t=${new Date().getTime()}`;
+
+            const card = document.createElement('div');
+            card.className = 'foto-card';
+            card.innerHTML = `
+                <img src="${caminhoFoto}" class="foto-img" alt="Foto ${foto.id}" onclick="window.open('${caminhoFoto}', '_blank')">
+                <button type="button" class="btn-delete-foto" onclick="excluirFoto(${foto.id}, ${idAtividade})" title="Excluir foto">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            `;
+            listaFotos.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error(error);
+        loading.innerHTML = 'Erro ao carregar fotos.';
+    }
+}
+
+async function excluirFoto(idFoto, idAtividade) {
+    if (!confirm('Tem certeza que deseja excluir esta foto?'))
+        return;
+
+    try {
+        const response = await fetch(`/apis/fotos/${idFoto}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const erro = await response.json();
+            throw new Error(erro.erro || 'Erro ao excluir');
+        }
+
+        mostrarMensagem('Foto excluída com sucesso.', 'success');
+        carregarFotos(idAtividade);
+
+    } catch (error) {
+        console.error(error);
+        mostrarMensagem(error.message, 'danger');
     }
 }
 
 document.getElementById('foto').addEventListener('change', function(event) {
+    limparErros();
     const file = event.target.files[0];
     const previewId = 'image-preview';
     let preview = document.getElementById(previewId);
-
     const labelText = document.getElementById('file-label-text');
+
     if (labelText) {
         if (file) {
             labelText.textContent = file.name;
             labelText.classList.add('has-file');
-        } else {
+        }
+        else {
             labelText.textContent = 'Escolher Evidência (Foto)';
             labelText.classList.remove('has-file');
         }
@@ -96,32 +165,60 @@ document.getElementById('foto').addEventListener('change', function(event) {
 });
 
 document.getElementById('id_evento').addEventListener('change', function(event) {
+    limparErros();
     const idEventoSelecionado = event.target.value;
     if (idEventoSelecionado)
         carregarAtividades(idEventoSelecionado);
 });
 
+document.getElementById('id_atividade').addEventListener('change', function(event) {
+    limparErros();
+    const idAtividade = event.target.value;
+    if (idAtividade)
+        carregarFotos(idAtividade);
+});
+
+document.getElementById('id_membro').addEventListener('input', limparErros);
+
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    limparErros();
 
-    const idAtividade = document.getElementById('id_atividade').value;
-    const idMembro = document.getElementById('id_membro').value;
+    const idAtividade = document.getElementById('id_atividade');
+    const idMembro = document.getElementById('id_membro');
     const fotoInput = document.getElementById('foto');
 
+    let temErro = false;
+    if (!document.getElementById('id_evento').value) {
+        document.getElementById('id_evento').classList.add('is-invalid');
+        temErro = true;
+    }
+    if (!idAtividade.value) {
+        idAtividade.classList.add('is-invalid');
+        temErro = true;
+    }
+    if (!idMembro.value) {
+        idMembro.classList.add('is-invalid');
+        temErro = true;
+    }
     if (fotoInput.files.length === 0) {
-        alert("Por favor, selecione um arquivo de foto.");
-        return;
+        const label = document.getElementById('file-label-text');
+        const feedback = document.getElementById('feedback-foto');
+        if (label)
+            label.classList.add('is-invalid-custom');
+        if (feedback)
+            feedback.classList.remove('d-none');
+        temErro = true;
     }
-    if (!idAtividade || !idMembro) {
-        alert("Por favor, selecione o Evento e a Atividade, e verifique o ID do Membro.");
+
+    if (temErro)
         return;
-    }
 
     const formData = new FormData();
-    formData.append('id_membro', idMembro);
+    formData.append('id_membro', idMembro.value);
     formData.append('foto', fotoInput.files[0]);
 
-    const API_URL = `/apis/atividade/${idAtividade}/fotos`;
+    const API_URL = `/apis/atividade/${idAtividade.value}/fotos`;
 
     try {
         const response = await fetch(API_URL, {
@@ -134,14 +231,12 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
             try {
                 const erro = await response.json();
                 errorMsg = erro.erro || erro.message || 'Falha no upload';
-            } catch(e) {
-                errorMsg = `Falha no upload: ${response.status} ${response.statusText}`;
-            }
+            } catch(e) { errorMsg = `Status: ${response.status}`; }
             throw new Error(errorMsg);
         }
 
         const resultado = await response.json();
-        alert('Foto enviada com sucesso! ID da Foto: ' + resultado.id);
+        mostrarMensagem(`Foto enviada com sucesso!`, 'success');
 
         document.getElementById('upload-form').reset();
 
@@ -157,10 +252,32 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
             labelText.classList.remove('has-file');
         }
 
+        carregarFotos(idAtividade.value);
+
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro: ' + error.message);
+        mostrarMensagem(error.message, 'danger');
     }
 });
+
+function mostrarMensagem(texto, tipo) {
+    msgFeedback.textContent = texto;
+    msgFeedback.className = `alert alert-${tipo}`;
+    msgFeedback.classList.remove('d-none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(tipo === 'success')
+        setTimeout(() => { msgFeedback.classList.add('d-none'); }, 5000);
+}
+
+function limparErros() {
+    msgFeedback.classList.add('d-none');
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    const label = document.getElementById('file-label-text');
+    const feedbackFoto = document.getElementById('feedback-foto');
+    if (label)
+        label.classList.remove('is-invalid-custom');
+    if (feedbackFoto)
+        feedbackFoto.classList.add('d-none');
+}
 
 carregarEventos();

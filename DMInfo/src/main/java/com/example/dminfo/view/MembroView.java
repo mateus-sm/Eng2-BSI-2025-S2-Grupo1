@@ -1,8 +1,8 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.model.MembroErro;
-import com.example.dminfo.model.Membro;
 import com.example.dminfo.controller.MembroController;
+import com.example.dminfo.model.Membro;
+import com.example.dminfo.model.MembroErro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,11 @@ public class MembroView {
 
     @GetMapping
     public ResponseEntity<Object> listar(@RequestParam(required = false) String filtro) {
-        return ResponseEntity.ok(controller.listar(filtro));
+        try {
+            return ResponseEntity.ok(controller.listar(filtro));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MembroErro("Erro ao listar: " + e.getMessage()));
+        }
     }
 
     @PostMapping
@@ -35,11 +39,11 @@ public class MembroView {
 
     @GetMapping(value="/get-by-id/{id}")
     public ResponseEntity<Object> read(@PathVariable Integer id) {
-        Membro membro = controller.getById(id);
-        if (membro == null) {
-            return ResponseEntity.badRequest().body(new MembroErro("Membro não encontrado"));
+        try {
+            return ResponseEntity.ok(controller.getById(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MembroErro(e.getMessage()));
         }
-        return ResponseEntity.ok(membro);
     }
 
     @PutMapping("/{id}")
@@ -55,17 +59,13 @@ public class MembroView {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable Integer id) {
         try {
-            if (controller.excluir(id)) {
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.badRequest().body(new MembroErro("Erro ao excluir."));
-            }
+            controller.excluir(id);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }
     }
 
-    //comunicação membro_atividade
     @GetMapping("/atividade/{idCriacao}")
     public ResponseEntity<Object> listarMembrosAtividade(@PathVariable Integer idCriacao) {
         try {
@@ -76,30 +76,25 @@ public class MembroView {
         }
     }
 
-    // NOVO: Endpoint para adicionar um membro a uma atividade
     @PostMapping("/atividade/{idCriacao}/{idMembro}")
     public ResponseEntity<Object> adicionarMembroAtividade(@PathVariable Integer idCriacao, @PathVariable Integer idMembro) {
         try {
-            if (controller.adicionarMembroAtividade(idCriacao, idMembro)) {
+            if (controller.adicionarMembroAtividade(idCriacao, idMembro))
                 return ResponseEntity.ok("Membro associado à atividade com sucesso.");
-            }
             return ResponseEntity.badRequest().body(new MembroErro("Falha ao associar membro."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MembroErro("Erro ao salvar associação: " + e.getMessage()));
         }
     }
 
-    // NOVO: Endpoint para remover um membro de uma atividade
     @DeleteMapping("/atividade/{idCriacao}/{idMembro}")
     public ResponseEntity<Object> removerMembroAtividade(@PathVariable Integer idCriacao, @PathVariable Integer idMembro) {
         try {
-            if (controller.removerMembroAtividade(idCriacao, idMembro)) {
+            if (controller.removerMembroAtividade(idCriacao, idMembro))
                 return ResponseEntity.ok("Associação removida com sucesso.");
-            }
             return ResponseEntity.badRequest().body(new MembroErro("Falha ao remover associação."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MembroErro("Erro ao remover associação: " + e.getMessage()));
         }
     }
-
 }

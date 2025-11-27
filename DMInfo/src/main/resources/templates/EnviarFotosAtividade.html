@@ -1,15 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enviar Fotos da Atividade</title>
 
     <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/styles/EnviarFotosAtividade.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" th:href="@{/styles/EnviarFotosAtividade.css}">
 </head>
 <body>
+
+<a href="/app/principal" class="btn-home">
+    <i class="bi bi-house-door-fill"></i> Página Principal
+</a>
 
 <div class="container-upload">
     <div class="logo">
@@ -19,13 +26,16 @@
     <h1>DM Info</h1>
     <h3>Registros fotográficos de Atividades</h3>
 
-    <form id="upload-form">
+    <div id="msg-feedback" class="alert d-none" role="alert"></div>
+
+    <form id="upload-form" novalidate>
 
         <div class="input-group-wrapper">
             <label for="id_evento" class="form-label">Evento</label>
             <select class="form-select" id="id_evento" required>
                 <option value="" disabled selected>Carregando eventos...</option>
             </select>
+            <div class="invalid-feedback">Por favor, selecione um evento.</div>
         </div>
 
         <div class="input-group-wrapper">
@@ -33,11 +43,13 @@
             <select class="form-select" id="id_atividade" disabled required>
                 <option value="" disabled selected>Selecione um evento...</option>
             </select>
+            <div class="invalid-feedback">Por favor, selecione uma atividade.</div>
         </div>
 
         <div class="input-group-wrapper">
             <label for="id_membro" class="form-label">ID do Membro</label>
             <input type="number" class="form-control" id="id_membro" value="1" required placeholder="Digite seu ID">
+            <div class="invalid-feedback">Informe o ID do membro.</div>
         </div>
 
         <div class="input-group-wrapper">
@@ -46,15 +58,31 @@
             <label for="foto" class="file-upload-label" id="file-label-text">
                 Escolher Evidência (Foto)
             </label>
+            <div class="invalid-feedback d-none" id="feedback-foto" style="display: block; text-align: left;">
+                Selecione uma foto para enviar.
+            </div>
         </div>
 
         <img id="image-preview" alt="Pré-visualização">
 
         <button type="submit" class="btn btn-primary">Enviar Registro</button>
     </form>
+
+    <div class="gallery-section d-none" id="galeria-container">
+        <hr>
+        <h4>Fotos Enviadas</h4>
+        <div id="loading-fotos" class="text-muted small mb-3 d-none">Carregando fotos...</div>
+
+        <div id="lista-fotos" class="fotos-grid">
+        </div>
+
+        <div id="no-fotos-msg" class="text-muted small mt-2 d-none">
+            Nenhuma foto enviada para esta atividade ainda.
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/EnviarFotosAtividade.js"></script>
+<script th:src="@{/js/EnviarFotosAtividade.js}"></script>
 </body>
 </html>

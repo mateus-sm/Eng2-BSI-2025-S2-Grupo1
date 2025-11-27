@@ -13,6 +13,10 @@
 </head>
 <body>
 
+<a href="/app/principal" class="btn-home">
+    <i class="bi bi-house-door-fill"></i> Página Principal
+</a>
+
 <div class="container">
 
     <div class="page-header">
@@ -20,13 +24,26 @@
         <h2>Gerenciar Membros</h2>
     </div>
 
-    <div class="row mb-4 align-items-center justify-content-center">
-        <div class="col-12 col-md-6 mb-3 mb-md-0">
-            <input type="text" class="form-control text-center" id="termoBusca" placeholder="Buscar por nome de usuário...">
+    <div class="row g-2 mb-4 align-items-end justify-content-center">
+        <div class="col-12 col-md-4">
+            <label for="termoBusca" class="form-label ms-1">Nome</label>
+            <input type="text" class="form-control text-center" id="termoBusca" placeholder="Buscar usuário...">
         </div>
-        <div class="col-12 col-md-auto">
+
+        <div class="col-6 col-md-3">
+            <label for="filtroDtIni" class="form-label ms-1">A partir de</label>
+            <input type="date" class="form-control text-center" id="filtroDtIni">
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label for="filtroDtFim" class="form-label ms-1">Até</label>
+            <input type="date" class="form-control text-center" id="filtroDtFim">
+        </div>
+
+        <div class="col-12 col-md-2">
+            <label class="form-label d-none d-md-block">&nbsp;</label>
             <button class="btn btn-primary w-100" id="btn-novo-membro">
-                Adicionar Membro
+                <i class="bi bi-plus-lg"></i> Novo
             </button>
         </div>
     </div>
@@ -57,25 +74,31 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="form-membro">
+                <div id="msg-erro-modal" class="alert alert-danger d-none" role="alert"></div>
+
+                <form id="form-membro" novalidate>
                     <input type="hidden" id="membroId">
+                    <input type="hidden" id="dtIniHidden">
 
                     <div class="mb-3">
                         <label for="usuarioId" class="form-label">ID do Usuário *</label>
                         <input type="number" class="form-control" id="usuarioId" required placeholder="Digite o ID">
+                        <div class="invalid-feedback" id="feedback-usuarioId">Informe um ID válido.</div>
                         <small class="form-text text-muted ms-1" style="font-size: 0.75rem;">ID do usuário existente.</small>
                     </div>
 
                     <div class="mb-3">
                         <label for="observacao" class="form-label">Observação</label>
-                        <textarea class="form-control text-start" id="observacao" rows="3" placeholder="Alguma observação sobre o membro?"></textarea>
+                        <textarea class="form-control text-start" id="observacao" rows="3" placeholder="Observações..."></textarea>
                     </div>
 
                     <div class="mb-3" id="campo-dtFim">
                         <label for="dtFim" class="form-label">Data Fim</label>
                         <input type="date" class="form-control" id="dtFim">
+                        <div class="invalid-feedback" id="feedback-dtFim">
+                            A Data Fim não pode ser anterior à Data Início.
+                        </div>
                     </div>
-
                 </form>
             </div>
             <div class="modal-footer">
@@ -96,6 +119,7 @@
             <div class="modal-body text-center py-4">
                 <p class="mb-0">Tem certeza que deseja excluir este membro?</p>
                 <small class="text-danger">Esta ação não pode ser desfeita.</small>
+                <div id="msg-erro-delete" class="alert alert-danger mt-3 d-none" role="alert"></div>
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

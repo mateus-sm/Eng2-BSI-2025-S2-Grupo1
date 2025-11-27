@@ -2,12 +2,12 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.EnviarFotosAtividadeDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Component
+@Repository
 public class EnviarFotosAtividade {
 
     private int id;
@@ -45,7 +45,6 @@ public class EnviarFotosAtividade {
     }
 
     public boolean alterar(EnviarFotosAtividade foto) {
-        // Implementar lógica de negócio aqui, se houver
         return dao.alterar(foto);
     }
 

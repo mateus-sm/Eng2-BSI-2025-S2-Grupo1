@@ -1,17 +1,9 @@
-// administradores.js (corrigido)
-
-// ===============================
-// CONFIGURAÇÕES INICIAIS
-// ===============================
 const API_URL = "/apis/administrador";
 let administradorModal, deleteModal;
 let administradores = [];
 let idParaExcluir = null;
-let modoEdicao = false; // indica se estamos em edição
+let modoEdicao = false;
 
-// ===============================
-// AO CARREGAR A PÁGINA
-// ===============================
 document.addEventListener("DOMContentLoaded", () => {
     administradorModal = new bootstrap.Modal(document.getElementById("administradorModal"));
     deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
@@ -26,9 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     registrarMascaras();
 });
 
-// ===============================
-// RADIO BUTTONS
-// ===============================
+
 function registrarEventosRadio() {
     const rbExistente = document.getElementById("radioUsuarioExistente");
     const rbNovo = document.getElementById("radioNovoUsuario");
@@ -44,20 +34,15 @@ function registrarEventosRadio() {
     });
 }
 
-// ===============================
-// HELPERS FORMATO / MÁSCARAS
-// ===============================
 function formatarData(dt) {
     if (!dt) return "-";
-    // dt no formato ISO yyyy-mm-dd
     const [ano, mes, dia] = dt.split("-");
     return `${dia}/${mes}/${ano}`;
 }
 
 function formatarDataParaBanco(data) {
-    // recebe dd/mm/yyyy -> retorna yyyy-mm-dd
     if (!data) return null;
-    if (data.includes("-")) return data; // já no formato
+    if (data.includes("-")) return data;
     const partes = data.split("/");
     if (partes.length !== 3) return null;
     return `${partes[2].padStart(4,"0")}-${partes[1].padStart(2,"0")}-${partes[0].padStart(2,"0")}`;
@@ -73,9 +58,6 @@ function limparMascaras(usuario) {
     };
 }
 
-// ===============================
-// CARREGAR LISTAS / TABELA
-// ===============================
 async function carregarAdministradores() {
     try {
         const response = await fetch(API_URL);
@@ -117,7 +99,7 @@ async function carregarAdministradores() {
 
 async function carregarUsuariosSelect() {
     const select = document.getElementById("usuarioId");
-    // se elemento é um select
+
     if (!select) return;
     select.innerHTML = "<option value=''>Selecione um usuário...</option>";
 
@@ -136,17 +118,12 @@ async function carregarUsuariosSelect() {
     }
 }
 
-// ===============================
-// MODAL: ADICIONAR
-// ===============================
 async function abrirModalAdicionar() {
     modoEdicao = false;
     document.getElementById("form-administrador").reset();
     document.getElementById("administradorId").value = "";
     hideErrorModal();
-    document.getElementById("campo-dtFim").classList.add("d-none");
 
-    // mostra seleção existente por padrão
     document.getElementById("radioUsuarioExistente").checked = true;
     document.getElementById("blocoUsuarioExistente").classList.remove("d-none");
     document.getElementById("blocoNovoUsuario").classList.add("d-none");
@@ -155,20 +132,15 @@ async function abrirModalAdicionar() {
 
     await carregarUsuariosSelect();
 
-    // garante que select está habilitado (criação)
     const select = document.getElementById("usuarioId");
     if (select) select.disabled = false;
 
-    // remove dtIni input se existir (apenas edição usa)
     const dtIniEl = document.getElementById("dtIni");
     if (dtIniEl) dtIniEl.remove();
 
     administradorModal.show();
 }
 
-// ===============================
-// MODAL: EDITAR (chamado por id)
-// ===============================
 function abrirModalEdicaoById(id) {
     const admin = administradores.find(a => a.id === id);
     if (!admin) {
@@ -180,34 +152,25 @@ function abrirModalEdicaoById(id) {
 
 function abrirModalEdicao(admin) {
 
-    // Preenche o nome + id no campo desabilitado
     document.getElementById("editUsuario").value = admin.usuario.id + " - " + admin.usuario.nome;
 
-    // Datas
     document.getElementById("editDtIni").value = admin.dtIni;
     document.getElementById("editDtFim").value = admin.dtFim;
 
-    // Guarda o ID do admin para salvar depois
     document.getElementById("btnSalvarEdicao").setAttribute("data-id", admin.id);
 
-    // Mostra o modal
     let modal = new bootstrap.Modal(document.getElementById("modalEditarAdmin"));
     modal.show();
 }
 
-// ===============================
-// SALVAR: CRIAR OU EDITAR
-// ===============================
 function salvarAdministrador(event) {
     event.preventDefault();
     hideErrorModal();
 
     const rbExistente = document.getElementById("radioUsuarioExistente");
 
-    // modo existente selecionado
     if (rbExistente && rbExistente.checked) {
         const idUsuario = document.getElementById("usuarioId").value;
-        // se estivermos em edição, o select pode estar disabled, mas value existe
         if ((!idUsuario || idUsuario === "") && !modoEdicao) {
             mostrarErroModal("Selecione um usuário existente.");
             return;
@@ -215,21 +178,16 @@ function salvarAdministrador(event) {
         return criarAdministradorComUsuarioExistente(idUsuario);
     }
 
-    // modo novo usuário
     let dados = coletarDadosNovoUsuario();
     dados = limparMascaras(dados);
     return criarNovoUsuarioEAdministrador(dados);
 }
 
-// ===============================
-// CRIAR USUÁRIO E ADMIN
-// ===============================
 async function criarNovoUsuarioEAdministrador(novoUsuario) {
     try {
-        // backend espera propriedade "usuario" para login, e "nome", "senha", etc.
         const payloadUsuario = {
             nome: novoUsuario.nome,
-            usuario: novoUsuario.usuario, // <- campo 'usuario' (login)
+            login: novoUsuario.usuario,
             senha: novoUsuario.senha,
             telefone: novoUsuario.telefone,
             email: novoUsuario.email,
@@ -242,6 +200,7 @@ async function criarNovoUsuarioEAdministrador(novoUsuario) {
             uf: novoUsuario.uf
         };
 
+
         const respUsuario = await fetch("/apis/usuario", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -250,7 +209,6 @@ async function criarNovoUsuarioEAdministrador(novoUsuario) {
 
         const text = await respUsuario.text();
         if (!respUsuario.ok) {
-            // tenta parsear JSON para mensagem, se possível
             try {
                 const j = JSON.parse(text);
                 mostrarErroModal(j.mensagem || j.erro || JSON.stringify(j));
@@ -263,7 +221,7 @@ async function criarNovoUsuarioEAdministrador(novoUsuario) {
         const usuarioCriado = JSON.parse(text);
         const novoIdUsuario = usuarioCriado.id;
 
-        // agora cria administrador
+
         await criarAdministradorComUsuarioExistente(novoIdUsuario);
 
     } catch (e) {
@@ -272,21 +230,17 @@ async function criarNovoUsuarioEAdministrador(novoUsuario) {
     }
 }
 
-// ===============================
-// CRIAR/ATUALIZAR ADMINISTRADOR (usa POST para criar, PUT para editar)
-// ===============================
 async function criarAdministradorComUsuarioExistente(idUsuario) {
     const idAdmin = document.getElementById("administradorId").value;
-    const dtFim = document.getElementById("dtFim").value || null;
+    const dtFimEl = document.getElementById("dtFim");
+    const dtFim = dtFimEl ? dtFimEl.value || null : null;
 
-    // se criando (sem idAdmin) precisamos enviar dtIni (hoje) para o backend
     const isCriacao = !idAdmin || idAdmin === "";
     const dtIni = isCriacao ? new Date().toISOString().split("T")[0] : (document.getElementById("dtIni") ? document.getElementById("dtIni").value || null : null);
 
     const dados = {
         usuario: { id: parseInt(idUsuario) },
-        dtIni: dtIni,
-        dtFim: dtFim
+        dtIni: dtIni
     };
 
     try {
@@ -294,12 +248,9 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
         let method = "POST";
 
         if (!isCriacao) {
-            // edição: backend espera PUT em /apis/administrador/{id}
             url = `/apis/administrador/${idAdmin}`;
             method = "PUT";
-            // backend update aceita só dtFim; mantemos dtFim (e dtIni se desejar)
-            // para segurança, mandar apenas dtFim in edição (o controller altera só dtFim)
-            // então sobrescrevemos dados com apenas dtFim
+
             const body = { dtFim: dtFim || null };
             const resp = await fetch(url, {
                 method,
@@ -318,7 +269,7 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
                 return;
             }
         } else {
-            // criação
+
             const resp = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
@@ -337,7 +288,7 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
             }
         }
 
-        // sucesso: fecha modal e recarrega
+
         administradorModal.hide();
         modoEdicao = false;
         carregarAdministradores();
@@ -348,13 +299,10 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
     }
 }
 
-// ===============================
-// COLETAR DADOS DO NOVO USUÁRIO (nome dos campos esperados pelo backend)
-// ===============================
 function coletarDadosNovoUsuario() {
     return {
         nome: document.getElementById("novo_nome").value.trim(),
-        usuario: document.getElementById("novo_usuario").value.trim(), // campo 'usuario' é o login
+        usuario: document.getElementById("novo_usuario").value.trim(),
         senha: document.getElementById("novo_senha").value.trim(),
         telefone: document.getElementById("novo_telefone").value,
         email: document.getElementById("novo_email").value.trim(),
@@ -368,9 +316,6 @@ function coletarDadosNovoUsuario() {
     };
 }
 
-// ===============================
-// EXCLUIR
-// ===============================
 function abrirModalDelete(id) {
     idParaExcluir = id;
     deleteModal.show();
@@ -395,9 +340,6 @@ async function excluirAdministrador() {
     }
 }
 
-// ===============================
-// ERROS / UTIL
-// ===============================
 function mostrarErroModal(msg) {
     const errorDiv = document.getElementById("modal-error-message");
     errorDiv.textContent = msg;
@@ -416,9 +358,6 @@ function mostrarErroGlobal(msg) {
     alert(msg);
 }
 
-// ===============================
-// MÁSCARAS E VIA CEP
-// ===============================
 function registrarMascaras() {
     const cpf = document.getElementById("novo_cpf");
     if (cpf) {

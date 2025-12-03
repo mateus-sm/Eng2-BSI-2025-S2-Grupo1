@@ -35,6 +35,20 @@ public class AdministradorDAO {
         return admin;
     }
 
+    public int contar(Conexao conexao) {
+        String sql = "SELECT COUNT(*) AS total FROM administrador";
+        int total = 0;
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            if (rs != null && rs.next()) {
+                total = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao contar administradores: " + e.getMessage());
+        }
+        return total;
+    }
+
     public List<Administrador> get(Conexao conexao) {
         List<Administrador> admins = new ArrayList<>();
         String sql = """

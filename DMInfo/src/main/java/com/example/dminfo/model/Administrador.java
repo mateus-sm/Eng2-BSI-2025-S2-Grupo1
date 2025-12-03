@@ -55,6 +55,11 @@ public class Administrador {
     }
 
     public boolean excluir(Conexao conexao) {
+        int totalAdmins = dao.contar(conexao);
+
+        if (totalAdmins <= 1) {
+            throw new RuntimeException("Existe apenas um Administrador.");
+        }
         return dao.excluir(this.id, conexao);
     }
 

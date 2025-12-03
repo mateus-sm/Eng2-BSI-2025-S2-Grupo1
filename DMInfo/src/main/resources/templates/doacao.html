@@ -11,43 +11,74 @@
 </head>
 <body>
 
-    <a href="/app/principal" class="btn-home">
-        <i class="fas fa-home"></i> Página Principal
-    </a>
+<a href="/app/principal" class="btn-home">
+    <i class="fas fa-home"></i> Página Principal
+</a>
 
-    <div class="container">
+<div class="container">
 
-        <div class="page-header">
-            <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
-            <h2>Doações Registradas</h2>
-        </div>
-
-        <div class="d-flex justify-content-end mb-3">
-            <a th:href="@{/app/doacao-form}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Cadastrar Nova Doação
-            </a>
-        </div>
-
-        <div class="table-responsive table-container">
-            <table class="table table-hover align-middle">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Data</th>
-                    <th>Doador</th>
-                    <th>Responsável</th>
-                    <th>Valor</th>
-                    <th>Observação / Item</th>
-                    <th class="text-center">Ações</th>
-                </tr>
-                </thead>
-                <tbody id="tabelaDoacoes">
-                </tbody>
-            </table>
-        </div>
-
+    <div class="page-header">
+        <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+        <h2>Doações Registradas</h2>
     </div>
 
-    <script th:src="@{/js/doacao-list.js}" defer></script>
+    <div class="d-flex justify-content-end mb-3">
+        <a th:href="@{/app/doacao-form}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Cadastrar Nova Doação
+        </a>
+    </div>
+
+    <div class="table-responsive table-container">
+        <table class="table table-hover align-middle">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Doador</th>
+                <th>Responsável</th>
+                <th>Valor</th>
+                <th>Observação / Item</th>
+                <th class="text-center">Ações</th>
+            </tr>
+            </thead>
+            <tbody id="tabelaDoacoes">
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    <div id="toastNotificacao" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i id="toastIcon" class="fas fa-info-circle"></i>
+                <span id="toastMessage">Mensagem do sistema...</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3 text-warning">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                </div>
+                <h5 class="fw-bold mb-3" id="modalTitulo">Excluir Doação</h5>
+                <p class="text-muted mb-4" id="modalTexto">Tem certeza que deseja excluir? Esta ação não pode ser desfeita.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancelar</button>
+                    <button type="button" class="btn btn-danger px-4" id="btnConfirmarAcao" style="border-radius: 8px;">Sim, Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/doacao-list.js}" defer></script>
 </body>
 </html>

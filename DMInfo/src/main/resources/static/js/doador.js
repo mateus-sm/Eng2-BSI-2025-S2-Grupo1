@@ -3,11 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formDoador');
     const tabelaBody = document.getElementById('tabelaDoadores');
     const btnCancelar = document.getElementById('btnCancelar');
+    const btnSalvar = document.getElementById('btnSalvar');
     const formTitulo = document.querySelector('.form-section h4');
     const hiddenId = document.getElementById('id');
     const inputPesquisa = document.getElementById('inputPesquisa');
 
-    // Elementos para Máscara e Validação
+    // Elementos do Form
     const inputNome = document.getElementById('nome');
     const inputDocumento = document.getElementById('documento');
     const inputTelefone = document.getElementById('telefone');
@@ -17,93 +18,125 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputBairro = document.getElementById('bairro');
     const inputCidade = document.getElementById('cidade');
     const inputUf = document.getElementById('uf');
+    const inputNumero = document.getElementById('numero');
+    const inputContato = document.getElementById('contato');
+
+    // Elementos do Toast
+    const toastEl = document.getElementById('toastNotificacao');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = document.getElementById('toastIcon');
+    // Inicializa o Toast do Bootstrap
+    const toast = new bootstrap.Toast(toastEl);
 
     const apiUrl = '/apis/doador';
 
     let listaGlobalDoadores = [];
 
-    // --- REINICIALIZAÇÃO DAS MÁSCARAS (IMASK) ---
+    // --- FUNÇÃO DE NOTIFICAÇÃO (Substitui o Alert) ---
+    function mostrarNotificacao(mensagem, isErro = false) {
+        toastMessage.textContent = mensagem;
+
+        if (isErro) {
+            toastEl.classList.remove('text-bg-success');
+            toastEl.classList.add('text-bg-danger'); // Fundo vermelho
+            toastIcon.className = 'fas fa-exclamation-circle';
+        } else {
+            toastEl.classList.remove('text-bg-danger');
+            toastEl.classList.add('text-bg-success'); // Fundo verde
+            toastIcon.className = 'fas fa-check-circle';
+        }
+
+        toast.show();
+    }
+
+    // --- MÁSCARAS (IMASK) ---
     if (typeof IMask !== 'undefined') {
-        window.docMask = IMask(inputDocumento, {
-            mask: [
-                { mask: '000.000.000-00', maxLength: 11 },
-                { mask: '00.000.000/0000-00' }
-            ]
-        });
+        if(inputDocumento) {
+            window.docMask = IMask(inputDocumento, {
+                mask: [{ mask: '000.000.000-00', maxLength: 11 }, { mask: '00.000.000/0000-00' }]
+            });
+        }
+        if(inputCep) window.cepMask = IMask(inputCep, { mask: '00000-000' });
+        if(inputTelefone) {
+            window.telMask = IMask(inputTelefone, {
+                mask: [{ mask: '(00) 0000-0000' }, { mask: '(00) 00000-0000' }]
+            });
+        }
+    }
 
-        window.cepMask = IMask(inputCep, { mask: '00000-000' });
-
-        window.telMask = IMask(inputTelefone, {
-            mask: [
-                { mask: '(00) 0000-0000' },
-                { mask: '(00) 00000-0000' }
-            ]
+    // --- VIACEP ---
+    if(inputCep) {
+        inputCep.addEventListener('blur', async () => {
+            const cep = window.cepMask ? window.cepMask.unmaskedValue : inputCep.value.replace(/\D/g, '');
+            if (cep.length === 8) {
+                const placeholderOriginal = inputRua.placeholder;
+                inputRua.placeholder = "Buscando...";
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await response.json();
+                    if (!data.erro) {
+                        inputRua.value = data.logradouro;
+                        inputBairro.value = data.bairro;
+                        inputCidade.value = data.localidade;
+                        inputUf.value = data.uf;
+                        [inputRua, inputBairro, inputCidade, inputUf].forEach(el => clearError(el));
+                        if(inputNumero) inputNumero.focus();
+                    } else {
+                        setError(inputCep, 'CEP não encontrado.');
+                        inputRua.placeholder = placeholderOriginal;
+                    }
+                } catch (error) {
+                    console.error('Erro ViaCEP:', error);
+                    inputRua.placeholder = placeholderOriginal;
+                }
+            }
         });
     }
 
-    // --- FUNÇÕES AUXILIARES DE FORMATAÇÃO VISUAL ---
+    // --- FORMATAÇÃO VISUAL ---
     function formatarDocumentoVisual(valor) {
         if (!valor) return '';
         const limpo = valor.replace(/\D/g, '');
-        if (limpo.length === 11) { // CPF
-            return limpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-        } else if (limpo.length === 14) { // CNPJ
-            return limpo.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-        }
+        if (limpo.length === 11) return limpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        else if (limpo.length === 14) return limpo.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
         return valor;
     }
 
     function formatarTelefoneVisual(valor) {
         if (!valor) return '';
         const limpo = valor.replace(/\D/g, '');
-        if (limpo.length === 10) {
-            return limpo.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-        } else if (limpo.length === 11) {
-            return limpo.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-        }
+        if (limpo.length === 10) return limpo.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+        else if (limpo.length === 11) return limpo.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
         return valor;
     }
 
-    // --- FUNÇÕES DE CONTROLE VISUAL DE ERRO (ATUALIZADO) ---
-
+    // --- CONTROLE DE ERRO VISUAL ---
     function setError(input, message) {
-        // 1. Adiciona a borda vermelha
+        if(!input) return;
         input.classList.add('invalidInput');
-
-        // 2. Procura se já existe a mensagem de erro no pai do input
-        let parent = input.parentElement; // Pega a div .mb-3 ou .col
+        let parent = input.parentElement;
         let errorDiv = parent.querySelector('.error-msg');
-
-        // 3. Se não existir, cria
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'error-msg';
             parent.appendChild(errorDiv);
         }
-
-        // 4. Define o texto da mensagem
         errorDiv.textContent = message;
     }
 
     function clearError(input) {
-        // 1. Remove a borda vermelha
+        if(!input) return;
         input.classList.remove('invalidInput');
-
-        // 2. Remove a mensagem de erro se existir
         let parent = input.parentElement;
         if (parent) {
             const errorDiv = parent.querySelector('.error-msg');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
+            if (errorDiv) errorDiv.remove();
         }
     }
 
-    // Remove o erro assim que o usuário digita algo
-    [inputNome, inputDocumento, inputTelefone, inputCep, inputEmail, inputRua, inputBairro, inputCidade, inputUf].forEach(input => {
-        if(input) {
-            input.addEventListener('input', () => clearError(input));
-        }
+    const inputsValidaveis = [inputNome, inputDocumento, inputTelefone, inputCep, inputEmail, inputRua, inputBairro, inputCidade, inputUf];
+    inputsValidaveis.forEach(input => {
+        if(input) input.addEventListener('input', () => clearError(input));
     });
 
     // --- VALIDAÇÕES LÓGICAS ---
@@ -156,102 +189,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validarFormulario() {
         let isValid = true;
-
         const nome = inputNome.value.trim();
         const documento = window.docMask ? window.docMask.unmaskedValue : inputDocumento.value.trim().replace(/\D/g, '');
         const email = inputEmail.value.trim();
         const telefone = window.telMask ? window.telMask.unmaskedValue : inputTelefone.value.trim().replace(/\D/g, '');
         const cep = window.cepMask ? window.cepMask.unmaskedValue : inputCep.value.trim().replace(/\D/g, '');
-        const rua = inputRua.value.trim();
-        const bairro = inputBairro.value.trim();
-        const cidade = inputCidade.value.trim();
-        const uf = inputUf.value.trim();
 
-        // 1. Nome
-        if (nome.length < 3) {
-            setError(inputNome, 'Nome deve ter no mínimo 3 caracteres');
-            isValid = false;
-        } else {
-            clearError(inputNome);
-        }
+        if (nome.length < 3) { setError(inputNome, 'Mínimo 3 caracteres'); isValid = false; }
+        else clearError(inputNome);
 
-        // 2. Documento
-        if (!validarDocumento(documento)) {
-            setError(inputDocumento, 'CPF ou CNPJ inválido');
-            isValid = false;
-        } else {
-            clearError(inputDocumento);
-        }
+        if (!validarDocumento(documento)) { setError(inputDocumento, 'Inválido'); isValid = false; }
+        else clearError(inputDocumento);
 
-        // 3. Email
-        if (!/\S+@\S+\.\S+/.test(email)) {
-            setError(inputEmail, 'Formato de e-mail inválido');
-            isValid = false;
-        } else {
-            clearError(inputEmail);
-        }
+        if (!/\S+@\S+\.\S+/.test(email)) { setError(inputEmail, 'Inválido'); isValid = false; }
+        else clearError(inputEmail);
 
-        // 4. Telefone
-        if (!/^\d{10,11}$/.test(telefone)) {
-            setError(inputTelefone, 'Telefone incompleto');
-            isValid = false;
-        } else {
-            clearError(inputTelefone);
-        }
+        if (telefone.length < 10) { setError(inputTelefone, 'Inválido'); isValid = false; }
+        else clearError(inputTelefone);
 
-        // 5. CEP e Endereço
         if (cep.length > 0) {
-            if(!/^\d{8}$/.test(cep)) {
-                setError(inputCep, 'CEP incompleto');
-                isValid = false;
-            } else {
-                clearError(inputCep);
-            }
-
-            // Para os campos de endereço, apenas marcamos vermelho sem mensagem para não poluir demais,
-            // ou colocamos uma msg genérica "Campo obrigatório"
-            if(rua.length === 0) { setError(inputRua, 'Obrigatório com CEP'); isValid = false; }
-            if(bairro.length === 0) { setError(inputBairro, 'Obrigatório'); isValid = false; }
-            if(cidade.length === 0) { setError(inputCidade, 'Obrigatório'); isValid = false; }
-            if(uf.length === 0) { setError(inputUf, 'UF'); isValid = false; }
+            if(!/^\d{8}$/.test(cep)) { setError(inputCep, 'Incompleto'); isValid = false; }
+            if(inputRua.value.trim() === '') { setError(inputRua, 'Obrigatório'); isValid = false; }
+            if(inputBairro.value.trim() === '') { setError(inputBairro, 'Obrigatório'); isValid = false; }
+            if(inputCidade.value.trim() === '') { setError(inputCidade, 'Obrigatório'); isValid = false; }
+            if(inputUf.value.trim() === '') { setError(inputUf, 'UF'); isValid = false; }
         }
 
         if(!isValid) {
-            // Pequeno timeout para garantir que a UI atualizou antes do alert travar a tela
-            setTimeout(() => alert('Verifique os campos destacados em vermelho.'), 10);
+            mostrarNotificacao('Verifique os campos em vermelho.', true);
         }
 
         return isValid;
     }
 
-    // --- LÓGICA DE TABELA E FILTRO ---
-
+    // --- CRUD ---
     function renderizarTabela(lista) {
         tabelaBody.innerHTML = '';
-
-        if (lista.length === 0) {
-            tabelaBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum doador encontrado.</td></tr>';
+        if (!lista || lista.length === 0) {
+            tabelaBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-4">Nenhum doador cadastrado.</td></tr>';
             return;
         }
-
         lista.forEach(doador => {
             const tr = document.createElement('tr');
-
-            const docFormatado = formatarDocumentoVisual(doador.documento);
-            const telFormatado = formatarTelefoneVisual(doador.telefone);
-
             tr.innerHTML = `
                 <td>${doador.id}</td>
                 <td>${doador.nome}</td>
-                <td>${docFormatado}</td>
+                <td>${formatarDocumentoVisual(doador.documento)}</td>
                 <td>${doador.email}</td>
-                <td>${telFormatado}</td>
+                <td>${formatarTelefoneVisual(doador.telefone)}</td>
                 <td class="text-center">
-                    <div class="btn-group-actions">
-                        <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${doador.id}">
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${doador.id}" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${doador.id}">
+                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${doador.id}" title="Excluir">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -263,61 +254,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function carregarDoadores() {
         try{
-            const response = await fetch(apiUrl, { method: 'GET' });
-            if(!response.ok) throw new Error('Erro ao buscar doadores');
-
+            const response = await fetch(apiUrl);
+            if(!response.ok) {
+                if(response.status === 404) console.warn('API não conectada (404).');
+                throw new Error('Erro API');
+            }
             const doadores = await response.json();
             listaGlobalDoadores = doadores;
             renderizarTabela(listaGlobalDoadores);
-
         } catch(error){
             console.error('Falha ao carregar doadores:', error);
-            alert('Não foi possível carregar os doadores.');
         }
     }
 
     inputPesquisa.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
-        const doadoresFiltrados = listaGlobalDoadores.filter(d => {
-            return (d.nome && d.nome.toLowerCase().includes(termo)) ||
-                   (d.documento && d.documento.includes(termo)) ||
-                   (d.email && d.email.toLowerCase().includes(termo));
-        });
-        renderizarTabela(doadoresFiltrados);
+        const filtrados = listaGlobalDoadores.filter(d =>
+            (d.nome && d.nome.toLowerCase().includes(termo)) ||
+            (d.documento && d.documento.includes(termo)) ||
+            (d.email && d.email.toLowerCase().includes(termo))
+        );
+        renderizarTabela(filtrados);
     });
 
     function resetarFormulario() {
         form.reset();
         hiddenId.value = '';
-        formTitulo.textContent = 'Cadastro / Edição';
+        if(formTitulo) formTitulo.textContent = 'Cadastro / Edição';
         btnCancelar.classList.add('d-none');
-
         if (window.docMask) window.docMask.value = '';
         if (window.cepMask) window.cepMask.value = '';
         if (window.telMask) window.telMask.value = '';
 
-        const inputs = form.querySelectorAll('.form-control');
-        inputs.forEach(input => clearError(input));
+        form.querySelectorAll('.form-control').forEach(input => clearError(input));
 
-        form.querySelector('input').focus();
+        if(btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar Doador";
+        }
+        inputNome.focus();
     }
 
     async function preencherFormularioParaEdicao(id) {
         try {
-            const response = await fetch(`${apiUrl}/${id}`, { method: 'GET' });
+            const response = await fetch(`${apiUrl}/${id}`);
             if(!response.ok) throw new Error('Doador não encontrado');
-
             const doador = await response.json();
 
-            document.getElementById('id').value = doador.id;
+            hiddenId.value = doador.id;
             inputNome.value = doador.nome;
-
             if (window.docMask) window.docMask.value = doador.documento;
             else inputDocumento.value = doador.documento;
-
             if (window.telMask) window.telMask.value = doador.telefone;
             else inputTelefone.value = doador.telefone;
-
             if (window.cepMask) window.cepMask.value = doador.cep;
             else inputCep.value = doador.cep;
 
@@ -326,19 +315,19 @@ document.addEventListener('DOMContentLoaded', () => {
             inputCidade.value = doador.cidade;
             inputUf.value = doador.uf;
             inputEmail.value = doador.email;
-            document.getElementById('contato').value = doador.contato;
 
-            formTitulo.textContent = 'Editando Doador';
+            if(inputContato && doador.contato) inputContato.value = doador.contato;
+            if(inputNumero && doador.numero) inputNumero.value = doador.numero;
+
+            if(formTitulo) formTitulo.textContent = 'Editando Doador';
             btnCancelar.classList.remove('d-none');
+            form.querySelectorAll('.form-control').forEach(i => clearError(i));
 
-            const inputs = form.querySelectorAll('.form-control');
-            inputs.forEach(input => clearError(input));
-
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
         } catch(error){
-            console.error('Falha ao buscar doador:', error);
-            alert('Não foi possível carregar o doador para edição.');
+            console.error(error);
+            mostrarNotificacao('Erro ao carregar doador.', true);
         }
     }
 
@@ -346,6 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         if (!validarFormulario()) return;
+
+        if(btnSalvar) {
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = "Salvando...";
+        }
 
         const formData = new FormData(form);
         const doador = Object.fromEntries(formData.entries());
@@ -355,9 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doador.cep = window.cepMask ? window.cepMask.unmaskedValue : doador.cep.replace(/\D/g, '');
 
         const id = hiddenId.value;
-        const isEdicao = id > 0;
-        const url = isEdicao ? `${apiUrl}/${id}` : apiUrl;
-        const method = isEdicao ? 'PUT' : 'POST';
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${apiUrl}/${id}` : apiUrl;
 
         try{
             const response = await fetch(url, {
@@ -366,61 +359,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(doador),
             });
 
-            if(!response.ok){
-                const errorData = await response.json();
-                throw new Error(errorData.erro || 'Erro ao salvar doador');
+            // --- AQUI ESTAVA O PROBLEMA: LER O ERRO DO BACKEND ---
+            if(!response.ok) {
+                // Tenta ler o JSON de erro do backend
+                const errorData = await response.json().catch(() => ({}));
+                // Pega a mensagem ou usa uma genérica
+                const errorMsg = errorData.erro || errorData.message || 'Erro ao salvar doador.';
+                throw new Error(errorMsg);
             }
 
-            alert(`Doador ${isEdicao ? 'atualizado' : 'salvo'} com sucesso!`);
+            mostrarNotificacao(`Doador ${id ? 'atualizado' : 'salvo'} com sucesso!`, false);
             resetarFormulario();
             carregarDoadores();
 
         }catch(error){
             console.error('Falha ao salvar:', error);
-            alert(`Não foi possível salvar o doador. ${error.message}`);
+            // Mostra o erro exato (ex: "CPF duplicado") no Toast
+            mostrarNotificacao(error.message, true);
+
+            if(btnSalvar) {
+                btnSalvar.disabled = false;
+                btnSalvar.textContent = "Salvar Doador";
+            }
         }
     });
 
     tabelaBody.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
-
         const id = target.getAttribute('data-id');
 
-        if(target.classList.contains('btn-editar')) {
-            preencherFormularioParaEdicao(id);
-        }
-
-        if(target.classList.contains('btn-excluir')){
-            if (confirm('Tem certeza que deseja excluir este doador?')) {
-                excluirDoador(id);
-            }
+        if(target.classList.contains('btn-editar')) preencherFormularioParaEdicao(id);
+        if(target.classList.contains('btn-excluir')) {
+            if (confirm('Tem certeza que deseja excluir?')) excluirDoador(id);
         }
     });
 
     async function excluirDoador(id) {
         try{
             const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-
-            if(!response.ok){
-                let errorMsg = 'Erro ao excluir doador';
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.erro || errorMsg;
-                } catch(e) {}
-                throw new Error(errorMsg);
+            if(!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.erro || errorData.message || 'Erro ao excluir');
             }
-
-            alert('Doador excluído com sucesso!');
+            mostrarNotificacao('Excluído com sucesso!', false);
             carregarDoadores();
-
         }catch(error){
-            console.error('Falha ao excluir:', error);
-            alert('Não foi possível excluir o doador.');
+            mostrarNotificacao(error.message, true);
         }
     }
 
-    btnCancelar.addEventListener('click', resetarFormulario);
-
+    if(btnCancelar) btnCancelar.addEventListener('click', resetarFormulario);
     carregarDoadores();
 });

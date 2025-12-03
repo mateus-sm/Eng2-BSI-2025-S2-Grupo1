@@ -15,14 +15,12 @@ import java.util.List;
 @Service
 public class DoacaoController {
 
-    // Injeta os Models (que agora agem como repositório/serviço)
     @Autowired
     private Doacao doacaoModel;
 
     @Autowired
-    private Doador doadorModel; // Usamos o Model agora, não o DAO direto
+    private Doador doadorModel;
 
-    // Mantemos o DAO de Admin se ele ainda não foi refatorado para o novo padrão
     @Autowired
     private AdministradorDAO adminDAO;
 

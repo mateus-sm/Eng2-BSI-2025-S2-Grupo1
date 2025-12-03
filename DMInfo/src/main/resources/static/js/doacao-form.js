@@ -5,22 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('formDoacao');
     const formTitulo = document.getElementById('formTitulo');
-
     const hiddenId = document.getElementById('id_doacao_hidden');
     const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
     const btnSalvar = document.getElementById('btnSalvar');
 
-    // --- CORREÇÃO 1: RECUPERAR ID DO ADMIN ---
-    // Pega o valor do input hidden injetado pelo Thymeleaf
+    // Recupera ID do Admin
     const inputAdminLogado = document.getElementById('id_admin_logado');
     const idAdminValido = inputAdminLogado && inputAdminLogado.value ? inputAdminLogado.value : null;
 
-    // Debug no console para garantir
-    console.log("ID do Admin recuperado para envio:", idAdminValido);
-
     const selectDoador = document.getElementById('id_doador');
     const inputObservacao = document.getElementById('observacao');
-
     const selectTipoDoacao = document.getElementById('tipo_doacao');
 
     const grupoMonetaria = document.getElementById('grupo_monetaria');
@@ -35,101 +29,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let itensParaDoacao = [];
     let itemEditandoIndex = -1;
-
-    // Controle para não perder dados ao trocar de tipo
     let tipoDoacaoAtual = 'monetaria';
 
-    // --- FUNÇÕES DE VALIDAÇÃO VISUAL (Estilo InvalidInput) ---
+    // --- FUNÇÕES VISUAIS (SUBSTITUINDO ALERT/CONFIRM) ---
 
-    function setError(input, message) {
-        // Adiciona a classe de erro (borda vermelha)
-        input.classList.add('invalidInput');
+    function mostrarNotificacao(mensagem, tipo = 'sucesso') {
+        const toastEl = document.getElementById('toastNotificacao');
+        // Se o elemento não existir, fallback para alert (segurança)
+        if (!toastEl) { alert(mensagem); return; }
 
-        // Verifica se já existe a mensagem de erro
-        let parent = input.parentElement;
-        let errorDiv = parent.querySelector('.error-msg');
+        const toastBody = toastEl.querySelector('.toast-body');
+        const toastMsg = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
 
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.className = 'error-msg'; // Classe definida no CSS
-            parent.appendChild(errorDiv);
+        // Limpa cores anteriores
+        toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+
+        if (tipo === 'sucesso') {
+            toastEl.classList.add('text-bg-success');
+            toastIcon.className = 'fas fa-check-circle';
+        } else if (tipo === 'erro') {
+            toastEl.classList.add('text-bg-danger');
+            toastIcon.className = 'fas fa-times-circle';
+        } else {
+            toastEl.classList.add('text-bg-warning');
+            toastIcon.className = 'fas fa-exclamation-circle';
         }
 
-        // Atualiza o texto da mensagem
+        toastMsg.textContent = mensagem;
+        const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+        toast.show();
+    }
+
+    function confirmarAcao(titulo, texto, callbackConfirmacao) {
+        const modalEl = document.getElementById('modalConfirmacao');
+        if (!modalEl) {
+            // Fallback se o modal não existir no HTML
+            if(confirm(texto)) callbackConfirmacao();
+            return;
+        }
+
+        const modalTitulo = document.getElementById('modalTitulo');
+        const modalTexto = document.getElementById('modalTexto');
+        const btnConfirmar = document.getElementById('btnConfirmarAcao');
+
+        modalTitulo.textContent = titulo;
+        modalTexto.textContent = texto;
+
+        const modal = new bootstrap.Modal(modalEl);
+
+        // Clona botão para limpar eventos anteriores
+        const novoBtn = btnConfirmar.cloneNode(true);
+        btnConfirmar.parentNode.replaceChild(novoBtn, btnConfirmar);
+
+        novoBtn.addEventListener('click', () => {
+            callbackConfirmacao();
+            modal.hide();
+        });
+
+        modal.show();
+    }
+    // ----------------------------------------------------
+
+    // Validação Visual (Borda Vermelha)
+    function setError(input, message) {
+        input.classList.add('invalidInput');
+        let parent = input.parentElement;
+        let errorDiv = parent.querySelector('.error-msg');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'error-msg';
+            parent.appendChild(errorDiv);
+        }
         errorDiv.textContent = message;
     }
 
     function clearError(input) {
         if (!input) return;
-
-        // Remove a borda vermelha
         input.classList.remove('invalidInput');
-
-        // Remove a mensagem de erro se existir
         let parent = input.parentElement;
         if (parent) {
             const errorDiv = parent.querySelector('.error-msg');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
+            if (errorDiv) errorDiv.remove();
         }
     }
 
     function limparTodaValidacao() {
-        // Remove erros dos campos principais
         if (selectDoador) clearError(selectDoador);
         if (inputValor) clearError(inputValor);
         if (inputItemDescricao) clearError(inputItemDescricao);
-
-        // Esconde a div de feedback dos itens
         if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
     }
 
-    // Listeners para limpar o erro assim que o usuário interagir
     if (selectDoador) selectDoador.addEventListener('change', () => clearError(selectDoador));
     if (inputValor) inputValor.addEventListener('input', () => clearError(inputValor));
     if (inputItemDescricao) inputItemDescricao.addEventListener('input', () => clearError(inputItemDescricao));
 
-    // --- FIM VALIDAÇÃO VISUAL ---
 
-
-    // --- FUNÇÕES DE MÁSCARAS E VALOR ---
+    // Máscaras e Formatação
     function formatarMoedaManual(e) {
         const input = e.target;
-        let value = input.value;
-        value = value.replace(/\D/g, '');
-        if (value === '') {
-            input.value = '';
-            return;
-        }
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') { input.value = ''; return; }
         let numero = parseInt(value, 10) / 100;
-        input.value = new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(numero);
+        input.value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numero);
     }
 
     function getValorNumericoManual(valorFormatado) {
         if (!valorFormatado) return 0.0;
-        let limpo = valorFormatado.replace(/R\$\s*/g, '');
-        limpo = limpo.replace(/\./g, '');
-        limpo = limpo.replace(',', '.');
+        let limpo = valorFormatado.replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.');
         const numero = parseFloat(limpo);
         return isNaN(numero) ? 0.0 : numero;
     }
 
-    if (inputItemQuantidade) inputItemQuantidade.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '');
-    });
+    if (inputItemQuantidade) inputItemQuantidade.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, ''); });
     if (inputValor) inputValor.addEventListener('input', formatarMoedaManual);
-    // --- FIM MÁSCARAS ---
 
-    // --- FUNÇÃO PARA PARSEAR A STRING DE ITENS ---
+
+    // Parse de Itens da String de Observação
     function parseItensFromObservacao(obs) {
         const itens = [];
         let obsGeral = '';
         const itemRegex = /\[ITEM\]: (.*?) \| \[QTD\]: (\d+)/g;
-
         const parts = obs ? obs.split('\n---\n', 2) : [''];
         let itemBlock = parts[0];
         obsGeral = parts.length > 1 ? parts[1].trim() : '';
@@ -137,39 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
         let match;
         let foundItems = false;
         while ((match = itemRegex.exec(itemBlock)) !== null) {
-            itens.push({
-                descricao: match[1].trim(),
-                quantidade: parseInt(match[2], 10)
-            });
+            itens.push({ descricao: match[1].trim(), quantidade: parseInt(match[2], 10) });
             foundItems = true;
         }
-
-        if (!foundItems && parts.length > 0) {
-            obsGeral = obs;
-        }
-
+        if (!foundItems && parts.length > 0) obsGeral = obs;
         return { itens, obsGeral };
     }
-    // --- FIM PARSE ---
 
 
-    // --- GESTÃO DA TABELA DE ITENS ---
+    // Gestão de Itens
     function sairModoEdicaoItem() {
         itemEditandoIndex = -1;
         if (btnAddItem) {
             btnAddItem.textContent = 'Adicionar';
-            btnAddItem.classList.remove('btn-secondary', 'btn-info');
-            btnAddItem.classList.add('btn-success');
+            btnAddItem.classList.replace('btn-secondary', 'btn-success');
         }
         if (inputItemDescricao) inputItemDescricao.value = '';
         if (inputItemQuantidade) inputItemQuantidade.value = '';
-
-        clearError(inputItemDescricao); // Limpa erro caso estivesse marcado
+        clearError(inputItemDescricao);
     }
 
     function renderizarTabelaItens() {
         if (!tabelaItensAdicionados) return;
-
         if (itensParaDoacao.length === 0) {
             tabelaItensAdicionados.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum item adicionado.</td></tr>';
             sairModoEdicaoItem();
@@ -186,93 +196,71 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${item.quantidade}</td>
                 <td>
                     <button type="button" class="btn btn-sm btn-warning btn-editar-item me-1" data-index="${index}">Editar</button>
-                    <button type="button" class="btn btn-sm btn-danger btn-remover-item" data-index="${index}" title="Remover item">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <button type="button" class="btn btn-sm btn-danger btn-remover-item" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>
         `).join('');
 
-        if (itemEditandoIndex === -1) {
-            sairModoEdicaoItem();
-        }
+        if (itemEditandoIndex === -1) sairModoEdicaoItem();
     }
 
     function adicionarItem() {
         if (!inputItemDescricao || !inputItemQuantidade) return;
-
         const descricao = inputItemDescricao.value.trim();
         const quantidade = parseInt(inputItemQuantidade.value, 10);
 
         if (descricao.length < 3) {
-            alert('A descrição do item deve ter pelo menos 3 caracteres.');
+            mostrarNotificacao('A descrição do item deve ter pelo menos 3 caracteres.', 'erro');
             inputItemDescricao.focus();
             return;
         }
         if (isNaN(quantidade) || quantidade <= 0) {
-            alert('A quantidade deve ser um número positivo.');
+            mostrarNotificacao('A quantidade deve ser um número positivo.', 'erro');
             inputItemQuantidade.focus();
             return;
         }
 
-        // Se estivermos editando um item específico, apenas atualizamos ele
         if (itemEditandoIndex !== -1) {
             itensParaDoacao[itemEditandoIndex].descricao = descricao;
             itensParaDoacao[itemEditandoIndex].quantidade = quantidade;
-            alert('Item atualizado com sucesso.');
+            mostrarNotificacao('Item atualizado com sucesso.', 'sucesso');
             sairModoEdicaoItem();
-        }
-        else {
-            // Se for NOVO item, verificamos se já existe na lista (case insensitive)
-            const indexExistente = itensParaDoacao.findIndex(item =>
-                item.descricao.toLowerCase() === descricao.toLowerCase()
-            );
-
+        } else {
+            const indexExistente = itensParaDoacao.findIndex(item => item.descricao.toLowerCase() === descricao.toLowerCase());
             if (indexExistente !== -1) {
-                // Já existe! Soma a quantidade
                 itensParaDoacao[indexExistente].quantidade += quantidade;
-
-                // Opcional: Efeito visual ou alerta rápido
-                // alert(`O item "${descricao}" já existia. Quantidade atualizada para ${itensParaDoacao[indexExistente].quantidade}.`);
+                mostrarNotificacao('Item já existia. Quantidade somada.', 'sucesso');
             } else {
-                // Não existe, adiciona novo
                 itensParaDoacao.push({ descricao, quantidade });
             }
         }
 
-        // Limpa campos e foca
         inputItemDescricao.value = '';
         inputItemQuantidade.value = '';
         inputItemDescricao.focus();
-
         renderizarTabelaItens();
     }
 
     if (tabelaItensAdicionados) tabelaItensAdicionados.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
-
         const index = parseInt(target.getAttribute('data-index'), 10);
 
         if (target.classList.contains('btn-remover-item')) {
-            if (confirm(`Tem certeza que deseja remover o item "${itensParaDoacao[index].descricao}"?`)) {
-                itensParaDoacao.splice(index, 1);
-                renderizarTabelaItens();
-            }
+            // Remoção de item é simples, não vamos usar modal pesado aqui para agilidade
+            itensParaDoacao.splice(index, 1);
+            renderizarTabelaItens();
         }
 
         if (target.classList.contains('btn-editar-item')) {
             const item = itensParaDoacao[index];
             if (inputItemDescricao) inputItemDescricao.value = item.descricao;
             if (inputItemQuantidade) inputItemQuantidade.value = item.quantidade;
-
             itemEditandoIndex = index;
             if (btnAddItem) {
                 btnAddItem.textContent = 'Atualizar Item';
-                btnAddItem.classList.remove('btn-success');
-                btnAddItem.classList.add('btn-secondary');
+                btnAddItem.classList.replace('btn-success', 'btn-secondary');
             }
-
             renderizarTabelaItens();
             if (inputItemDescricao) inputItemDescricao.focus();
         }
@@ -280,8 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnAddItem) btnAddItem.addEventListener('click', adicionarItem);
 
-    // --- FUNÇÕES DE LAYOUT E PROTEÇÃO DE DADOS ---
 
+    // Lógica de Visibilidade e Troca de Tipo
     function atualizarVisibilidadeForm() {
         const tipo = selectTipoDoacao.value;
         if (tipo === 'monetaria') {
@@ -293,51 +281,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Inicializa o valor atual no carregamento
-    if (selectTipoDoacao) {
-        tipoDoacaoAtual = selectTipoDoacao.value;
-    }
+    if (selectTipoDoacao) tipoDoacaoAtual = selectTipoDoacao.value;
 
     if (selectTipoDoacao) selectTipoDoacao.addEventListener('change', (e) => {
         const novoTipo = selectTipoDoacao.value;
         let temDadosPendentes = false;
 
-        // Verifica se há dados no tipo anterior
         if (tipoDoacaoAtual === 'monetaria') {
             const val = getValorNumericoManual(inputValor.value);
             if (val > 0) temDadosPendentes = true;
         } else if (tipoDoacaoAtual === 'item') {
-            if (itensParaDoacao.length > 0) temDadosPendentes = true;
-            // Verifica também se o usuário começou a digitar um item
-            if (inputItemDescricao.value.trim() !== '' || inputItemQuantidade.value.trim() !== '') {
+            if (itensParaDoacao.length > 0 || inputItemDescricao.value.trim() !== '') {
                 temDadosPendentes = true;
             }
         }
 
         if (temDadosPendentes) {
-            const confirmar = confirm(`Atenção: Você tem dados preenchidos como doação ${tipoDoacaoAtual === 'monetaria' ? 'Monetária' : 'de Itens'}.\n\nMudar o tipo agora irá APAGAR esses dados.\n\nDeseja continuar e limpar os dados atuais?`);
+            e.preventDefault();
+            selectTipoDoacao.value = tipoDoacaoAtual; // Volta visualmente
 
-            if (confirmar) {
-                // Limpa os dados do tipo anterior
-                if (tipoDoacaoAtual === 'monetaria') {
-                    inputValor.value = '';
-                } else {
-                    itensParaDoacao = [];
-                    sairModoEdicaoItem();
-                    renderizarTabelaItens();
+            confirmarAcao(
+                'Mudar tipo de doação?',
+                'Ao trocar o tipo (Dinheiro/Item), os dados preenchidos atualmente serão perdidos. Deseja continuar?',
+                () => {
+                    // Usuário confirmou
+                    if (tipoDoacaoAtual === 'monetaria') {
+                        inputValor.value = '';
+                    } else {
+                        itensParaDoacao = [];
+                        sairModoEdicaoItem();
+                        renderizarTabelaItens();
+                    }
+                    limparTodaValidacao();
+                    tipoDoacaoAtual = novoTipo;
+                    selectTipoDoacao.value = novoTipo;
+                    atualizarVisibilidadeForm();
                 }
-
-                limparTodaValidacao();
-                tipoDoacaoAtual = novoTipo;
-                atualizarVisibilidadeForm();
-
-            } else {
-                // Cancela a troca
-                selectTipoDoacao.value = tipoDoacaoAtual;
-                e.preventDefault();
-            }
+            );
         } else {
-            // Se não tem dados, muda direto
             tipoDoacaoAtual = novoTipo;
             limparTodaValidacao();
             atualizarVisibilidadeForm();
@@ -345,8 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- FUNÇÕES DE API ---
-
+    // API: Carregar Doadores
     async function carregarSelectDoadores() {
         if (!selectDoador) return;
         try {
@@ -361,43 +341,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectDoador.appendChild(option);
             });
         } catch (error) {
-            console.error('Falha ao carregar doadores:', error);
-            selectDoador.innerHTML = '<option value="">Erro ao carregar doadores</option>';
+            console.error(error);
+            mostrarNotificacao('Erro ao carregar lista de doadores.', 'erro');
         }
     }
 
+    // API: Preencher para Edição
     async function preencherFormularioParaEdicao(id) {
         try {
             const response = await fetch(`${doacaoApiUrl}/${id}`);
             if (!response.ok) throw new Error('Doação não encontrada.');
             const doacao = await response.json();
 
-            // Configuração do formulário para Edição
             if (hiddenId) hiddenId.value = doacao.id_doacao;
             if (formTitulo) formTitulo.textContent = `Editar Doação ID: ${doacao.id_doacao}`;
             if (btnSalvar) btnSalvar.textContent = 'Atualizar Doação';
             if (btnCancelarEdicao) btnCancelarEdicao.classList.remove('d-none');
-
             if (selectDoador) selectDoador.value = doacao.id_doador.id;
 
             limparTodaValidacao();
 
             if (doacao.valor > 1.0) {
-                // Modo Monetário
                 tipoDoacaoAtual = 'monetaria';
                 if (selectTipoDoacao) selectTipoDoacao.value = 'monetaria';
                 if (inputValor) inputValor.value = (doacao.valor).toFixed(2).replace('.', ',');
                 if (inputObservacao) inputObservacao.value = doacao.observacao || '';
-
                 itensParaDoacao = [];
             } else {
-                // Modo Item
                 tipoDoacaoAtual = 'item';
                 if (selectTipoDoacao) selectTipoDoacao.value = 'item';
                 if (inputValor) inputValor.value = '';
-
                 const { itens, obsGeral } = parseItensFromObservacao(doacao.observacao || '');
-
                 itensParaDoacao = itens;
                 if (inputObservacao) inputObservacao.value = obsGeral;
             }
@@ -408,29 +382,22 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
         } catch (error) {
-            console.error('Erro ao buscar doação para edição:', error);
-            alert('Não foi possível carregar os dados para edição.');
+            mostrarNotificacao('Não foi possível carregar os dados para edição.', 'erro');
         }
     }
 
+    // Validação Final
     function validarFormulario() {
         let isValid = true;
-
-        // 1. CORREÇÃO DE SEGURANÇA: Valida o ID do Admin
         if (!idAdminValido) {
-            alert('Erro Crítico de Segurança: Administrador não identificado. A sessão pode ter expirado. Faça login novamente.');
+            mostrarNotificacao('Erro de Segurança: Sessão de admin inválida ou expirada. Faça login novamente.', 'erro');
             return false;
         }
-
-        // 2. Valida Doador
         if (!selectDoador || selectDoador.value === "") {
             setError(selectDoador, "Por favor, selecione um doador.");
             isValid = false;
-        } else {
-            clearError(selectDoador);
-        }
+        } else { clearError(selectDoador); }
 
-        // 3. Validação Específica (Monetária vs. Item)
         const tipo = selectTipoDoacao ? selectTipoDoacao.value : 'monetaria';
 
         if (tipo === 'monetaria') {
@@ -438,66 +405,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!inputValor || isNaN(valorNumerico) || valorNumerico <= 0) {
                 setError(inputValor, "O valor da doação deve ser positivo.");
                 isValid = false;
-            } else {
-                clearError(inputValor);
-            }
+            } else { clearError(inputValor); }
             if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
-
-        } else { // Tipo Item
+        } else {
             if (itensParaDoacao.length === 0) {
                 isValid = false;
-                // Mostra erro na tabela
                 if(feedbackItensDiv) feedbackItensDiv.style.display = 'block';
-                // Marca o campo de descrição para chamar atenção
                 setError(inputItemDescricao, "Adicione itens à lista abaixo.");
             } else {
                 if(feedbackItensDiv) feedbackItensDiv.style.display = 'none';
                 clearError(inputItemDescricao);
             }
-
             if(inputValor) clearError(inputValor);
         }
-
         return isValid;
     }
 
-    function resetarFormulario() {
-        if(form) form.reset();
-        if(hiddenId) hiddenId.value = '';
-        if(formTitulo) formTitulo.textContent = 'Registrar Nova Doação';
-        if(btnSalvar) btnSalvar.textContent = 'Salvar Doação';
-        if(btnCancelarEdicao) btnCancelarEdicao.classList.add('d-none');
-
-        if(inputValor) inputValor.value = '';
-        if(inputItemDescricao) inputItemDescricao.value = '';
-        if(inputItemQuantidade) inputItemQuantidade.value = '';
-
-        itensParaDoacao = [];
-        tipoDoacaoAtual = 'monetaria';
-
-        limparTodaValidacao();
-        sairModoEdicaoItem();
-        renderizarTabelaItens();
-
-        if(selectTipoDoacao) selectTipoDoacao.value = 'monetaria';
-        atualizarVisibilidadeForm();
-        if(selectDoador) selectDoador.focus();
-    }
-
-    // --- Evento Submit (Lógica de Salvamento) ---
+    // Submit do Formulário
     if (form) form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Remove erros antigos antes de validar
-        // limparTodaValidacao(); // Opcional, o validarFormulario já limpa se estiver certo
-
-        if (!validarFormulario()) {
-            return;
-        }
+        if (!validarFormulario()) return;
 
         const isEdicao = hiddenId ? hiddenId.value !== '' : false;
         const idParaAtualizar = hiddenId ? hiddenId.value : '';
-
         const tipo = selectTipoDoacao ? selectTipoDoacao.value : 'monetaria';
         let valorParaSalvar = 0.0;
         const obsOriginal = inputObservacao ? inputObservacao.value.trim() : '';
@@ -506,22 +436,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tipo === 'monetaria') {
             valorParaSalvar = inputValor ? getValorNumericoManual(inputValor.value) : 0;
         } else {
-            valorParaSalvar = 1.0; // Valor simbólico
-
-            const itensFormatados = itensParaDoacao.map(item =>
-                `[ITEM]: ${item.descricao} | [QTD]: ${item.quantidade}`
-            ).join('\n');
-
+            valorParaSalvar = 1.0;
+            const itensFormatados = itensParaDoacao.map(item => `[ITEM]: ${item.descricao} | [QTD]: ${item.quantidade}`).join('\n');
             obsParaSalvar = obsOriginal === '' ? itensFormatados : `${itensFormatados}\n---\n${obsOriginal}`;
         }
 
         const doacao = {
             id_doacao: isEdicao ? parseInt(idParaAtualizar) : 0,
             id_doador: { id: parseInt(selectDoador ? selectDoador.value : '0') },
-
-            // --- CORREÇÃO: Enviando o ID do Admin capturado no início ---
             id_admin: { id: parseInt(idAdminValido) },
-
             valor: valorParaSalvar,
             observacao: obsParaSalvar
         };
@@ -532,43 +455,39 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(doacao),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.erro || `Erro ao ${isEdicao ? 'atualizar' : 'salvar'} doação`);
+                throw new Error(errorData.erro || `Erro ao ${isEdicao ? 'atualizar' : 'salvar'}`);
             }
 
-            alert(`Doação ${isEdicao ? 'atualizada' : 'salva'} com sucesso!`);
-            window.location.href = 'doacao';
+            mostrarNotificacao(`Doação ${isEdicao ? 'atualizada' : 'salva'} com sucesso!`, 'sucesso');
+
+            // Delay para ler a mensagem antes de sair
+            setTimeout(() => {
+                window.location.href = 'doacao';
+            }, 1500);
 
         } catch (error) {
-            console.error('Falha ao salvar/atualizar:', error);
-            alert(`Não foi possível ${isEdicao ? 'atualizar' : 'salvar'} a doação. ${error.message}`);
+            mostrarNotificacao(error.message, 'erro');
         }
     });
-    // --- FIM SUBMIT ---
 
     if (btnCancelarEdicao) btnCancelarEdicao.addEventListener('click', (e) => {
         e.preventDefault();
         window.location.href = 'doacao';
     });
 
-    // --- Lógica de Inicialização ---
+    // Inicialização
     renderizarTabelaItens();
     atualizarVisibilidadeForm();
 
-    // Carrega doadores e, se houver ID na URL, carrega para edição
     carregarSelectDoadores().then(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const idEdicao = urlParams.get('id');
-
-        if (idEdicao) {
-            preencherFormularioParaEdicao(idEdicao);
-        }
+        if (idEdicao) preencherFormularioParaEdicao(idEdicao);
     });
 });

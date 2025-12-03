@@ -5,34 +5,123 @@ let idParaExcluir = null;
 let modoEdicao = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    administradorModal = new bootstrap.Modal(document.getElementById("administradorModal"));
-    deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+    // Inicializa os Modais do Bootstrap
+    const modalEl = document.getElementById("administradorModal");
+    if (modalEl) administradorModal = new bootstrap.Modal(modalEl);
 
+    const deleteEl = document.getElementById("deleteModal");
+    if (deleteEl) deleteModal = new bootstrap.Modal(deleteEl);
+
+    // Carrega dados iniciais
     carregarAdministradores();
     carregarUsuariosSelect();
 
-    document.getElementById("btn-novo-administrador").addEventListener("click", abrirModalAdicionar);
-    document.getElementById("confirmDelete").addEventListener("click", excluirAdministrador);
+    // Event Listeners dos Botões
+    const btnNovo = document.getElementById("btn-novo-administrador");
+    if (btnNovo) btnNovo.addEventListener("click", abrirModalAdicionar);
 
+    const btnConfirmDelete = document.getElementById("confirmDelete");
+    if (btnConfirmDelete) btnConfirmDelete.addEventListener("click", excluirAdministrador);
+
+    const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
+    if (btnSalvarEdicao) btnSalvarEdicao.addEventListener("click", salvarEdicaoAdmin);
+
+    // Registra comportamentos de interface
     registrarEventosRadio();
     registrarMascaras();
 });
-
 
 function registrarEventosRadio() {
     const rbExistente = document.getElementById("radioUsuarioExistente");
     const rbNovo = document.getElementById("radioNovoUsuario");
 
-    rbExistente.addEventListener("change", () => {
-        document.getElementById("blocoUsuarioExistente").classList.remove("d-none");
-        document.getElementById("blocoNovoUsuario").classList.add("d-none");
-    });
+    if (rbExistente) {
+        rbExistente.addEventListener("change", () => {
+            document.getElementById("blocoUsuarioExistente").classList.remove("d-none");
+            document.getElementById("blocoNovoUsuario").classList.add("d-none");
+            hideErrorModal();
+        });
+    }
 
-    rbNovo.addEventListener("change", () => {
-        document.getElementById("blocoUsuarioExistente").classList.add("d-none");
-        document.getElementById("blocoNovoUsuario").classList.remove("d-none");
-    });
+    if (rbNovo) {
+        rbNovo.addEventListener("change", () => {
+            document.getElementById("blocoUsuarioExistente").classList.add("d-none");
+            document.getElementById("blocoNovoUsuario").classList.remove("d-none");
+            hideErrorModal();
+        });
+    }
 }
+
+// --- MÁSCARAS (IDÊNTICAS AO REGISTER.HTML) ---
+function registrarMascaras() {
+    // Máscara de CPF
+    const cpfInput = document.getElementById("novo_cpf");
+    if (cpfInput) {
+        cpfInput.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            if (value.length > 14) value = value.substring(0, 14);
+            e.target.value = value;
+        });
+    }
+
+    // Máscara de Telefone
+    const telInput = document.getElementById("novo_telefone");
+    if (telInput) {
+        telInput.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+            if (value.length > 15) value = value.substring(0, 15);
+            e.target.value = value;
+        });
+    }
+
+    // Máscara de Data
+    const dateInput = document.getElementById("novo_dtnasc");
+    if (dateInput) {
+        dateInput.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '$1/$2');
+            value = value.replace(/(\d{2})(\d{1,4})$/, '$1/$2');
+            if (value.length > 10) value = value.substring(0, 10);
+            e.target.value = value;
+        });
+    }
+
+    // Busca de CEP (ViaCEP)
+    const cepInput = document.getElementById("novo_cep");
+    if (cepInput) {
+        cepInput.addEventListener("blur", () => {
+            const cep = cepInput.value.replace(/\D/g, "");
+            if (cep.length !== 8) return;
+
+            // Feedback visual de carregamento
+            document.getElementById("novo_rua").value = "...";
+
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(r => r.json())
+                .then(d => {
+                    if (!d.erro) {
+                        document.getElementById('novo_rua').value = d.logradouro || "";
+                        document.getElementById('novo_bairro').value = d.bairro || "";
+                        document.getElementById('novo_cidade').value = d.localidade || "";
+                        document.getElementById('novo_uf').value = d.uf || "";
+                    } else {
+                        document.getElementById("novo_rua").value = "";
+                        alert("CEP não encontrado.");
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("novo_rua").value = "";
+                });
+        });
+    }
+}
+
+// --- FORMATAÇÃO E UTILITÁRIOS ---
 
 function formatarData(dt) {
     if (!dt) return "-";
@@ -40,23 +129,22 @@ function formatarData(dt) {
     return `${dia}/${mes}/${ano}`;
 }
 
+// Converte dd/mm/aaaa para aaaa-mm-dd (para o banco)
 function formatarDataParaBanco(data) {
     if (!data) return null;
-    if (data.includes("-")) return data;
-    const partes = data.split("/");
-    if (partes.length !== 3) return null;
-    return `${partes[2].padStart(4,"0")}-${partes[1].padStart(2,"0")}-${partes[0].padStart(2,"0")}`;
+    // Se já estiver certo
+    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) return data;
+    // Se tiver barra
+    if (data.includes("/")) {
+        const partes = data.split("/");
+        if (partes.length === 3) {
+            return `${partes[2]}-${partes[1]}-${partes[0]}`;
+        }
+    }
+    return null;
 }
 
-function limparMascaras(usuario) {
-    return {
-        ...usuario,
-        telefone: usuario.telefone ? usuario.telefone.replace(/\D/g, "") : "",
-        cep: usuario.cep ? usuario.cep.replace(/\D/g, "") : "",
-        cpf: usuario.cpf ? usuario.cpf.replace(/\D/g, "") : "",
-        dtnasc: formatarDataParaBanco(usuario.dtnasc)
-    };
-}
+// --- CARREGAMENTO DE DADOS ---
 
 async function carregarAdministradores() {
     try {
@@ -90,25 +178,22 @@ async function carregarAdministradores() {
                 </tr>
             `;
         });
-
     } catch (e) {
         console.error(e);
-        mostrarErroGlobal("Erro ao carregar administradores (veja console).");
+        mostrarErroGlobal("Erro ao carregar administradores. Verifique se o backend está rodando.");
     }
 }
 
 async function carregarUsuariosSelect() {
     const select = document.getElementById("usuarioId");
-
     if (!select) return;
-    select.innerHTML = "<option value=''>Selecione um usuário...</option>";
 
+    select.innerHTML = "<option value=''>Selecione um usuário...</option>";
     try {
-        const resp = await fetch("/apis/usuario");
-        if (!resp.ok) {
-            console.error("Falha ao carregar usuários");
-            return;
-        }
+        // Envia parametro vazio para garantir que o backend aceite
+        const resp = await fetch("/apis/usuario?nome=");
+        if (!resp.ok) return;
+
         const lista = await resp.json();
         lista.forEach(u => {
             select.innerHTML += `<option value="${u.id}">${u.id} - ${u.nome}</option>`;
@@ -118,50 +203,44 @@ async function carregarUsuariosSelect() {
     }
 }
 
+// --- LÓGICA DE MODAIS ---
+
 async function abrirModalAdicionar() {
     modoEdicao = false;
     document.getElementById("form-administrador").reset();
     document.getElementById("administradorId").value = "";
     hideErrorModal();
 
-    document.getElementById("radioUsuarioExistente").checked = true;
-    document.getElementById("blocoUsuarioExistente").classList.remove("d-none");
-    document.getElementById("blocoNovoUsuario").classList.add("d-none");
+    // Reseta para a aba de usuário existente
+    const rbExistente = document.getElementById("radioUsuarioExistente");
+    if (rbExistente) {
+        rbExistente.checked = true;
+        rbExistente.dispatchEvent(new Event('change')); // Força atualização visual
+    }
 
     document.getElementById("administradorModalLabel").textContent = "Adicionar Administrador";
-
     await carregarUsuariosSelect();
 
-    const select = document.getElementById("usuarioId");
-    if (select) select.disabled = false;
-
-    const dtIniEl = document.getElementById("dtIni");
-    if (dtIniEl) dtIniEl.remove();
-
-    administradorModal.show();
+    if (administradorModal) administradorModal.show();
 }
 
 function abrirModalEdicaoById(id) {
     const admin = administradores.find(a => a.id === id);
-    if (!admin) {
-        mostrarErroModal("Administrador não encontrado para edição.");
-        return;
-    }
-    abrirModalEdicao(admin);
-}
-
-function abrirModalEdicao(admin) {
+    if (!admin) return;
 
     document.getElementById("editUsuario").value = admin.usuario.id + " - " + admin.usuario.nome;
-
     document.getElementById("editDtIni").value = admin.dtIni;
     document.getElementById("editDtFim").value = admin.dtFim;
 
-    document.getElementById("btnSalvarEdicao").setAttribute("data-id", admin.id);
+    const btnSalvar = document.getElementById("btnSalvarEdicao");
+    if(btnSalvar) btnSalvar.setAttribute("data-id", admin.id);
 
-    let modal = new bootstrap.Modal(document.getElementById("modalEditarAdmin"));
+    const modalEl = document.getElementById("modalEditarAdmin");
+    const modal = new bootstrap.Modal(modalEl);
     modal.show();
 }
+
+// --- SALVAR (CRIAÇÃO) ---
 
 function salvarAdministrador(event) {
     event.preventDefault();
@@ -169,145 +248,66 @@ function salvarAdministrador(event) {
 
     const rbExistente = document.getElementById("radioUsuarioExistente");
 
+    // LÓGICA 1: USUÁRIO JÁ EXISTE NO BANCO
     if (rbExistente && rbExistente.checked) {
         const idUsuario = document.getElementById("usuarioId").value;
-        if ((!idUsuario || idUsuario === "") && !modoEdicao) {
-            mostrarErroModal("Selecione um usuário existente.");
+        if (!idUsuario) {
+            mostrarErroModal("Selecione um usuário existente na lista.");
             return;
         }
         return criarAdministradorComUsuarioExistente(idUsuario);
     }
 
+    // LÓGICA 2: CRIAR NOVO USUÁRIO (Formulário completo)
+    if (!validarFormularioNovoUsuario()) {
+        return; // Para se a validação falhar
+    }
+
     let dados = coletarDadosNovoUsuario();
-    dados = limparMascaras(dados);
+    // Limpamos apenas o que o Java não gosta (ex: parenteses do telefone),
+    // mas mantemos o formato do CPF se o Java regex exigir.
     return criarNovoUsuarioEAdministrador(dados);
 }
 
-async function criarNovoUsuarioEAdministrador(novoUsuario) {
-    try {
-        const payloadUsuario = {
-            nome: novoUsuario.nome,
-            login: novoUsuario.usuario,
-            senha: novoUsuario.senha,
-            telefone: novoUsuario.telefone,
-            email: novoUsuario.email,
-            cpf: novoUsuario.cpf,
-            dtnasc: novoUsuario.dtnasc,
-            rua: novoUsuario.rua,
-            cep: novoUsuario.cep,
-            bairro: novoUsuario.bairro,
-            cidade: novoUsuario.cidade,
-            uf: novoUsuario.uf
-        };
+function validarFormularioNovoUsuario() {
+    // Validação simples de campos obrigatórios no front
+    const camposObrigatorios = [
+        { id: "novo_nome", msg: "Nome é obrigatório." },
+        { id: "novo_usuario", msg: "Login é obrigatório." },
+        { id: "novo_senha", msg: "Senha é obrigatória." },
+        { id: "novo_email", msg: "E-mail é obrigatório." },
+        { id: "novo_cpf", msg: "CPF é obrigatório." },
+        { id: "novo_dtnasc", msg: "Data de Nascimento é obrigatória." }
+    ];
 
-
-        const respUsuario = await fetch("/apis/usuario", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payloadUsuario)
-        });
-
-        const text = await respUsuario.text();
-        if (!respUsuario.ok) {
-            try {
-                const j = JSON.parse(text);
-                mostrarErroModal(j.mensagem || j.erro || JSON.stringify(j));
-            } catch {
-                mostrarErroModal(text || "Erro ao criar usuário.");
-            }
-            return;
+    for (let campo of camposObrigatorios) {
+        const el = document.getElementById(campo.id);
+        if (!el || !el.value.trim()) {
+            mostrarErroModal(campo.msg);
+            el.focus();
+            return false;
         }
-
-        const usuarioCriado = JSON.parse(text);
-        const novoIdUsuario = usuarioCriado.id;
-
-
-        await criarAdministradorComUsuarioExistente(novoIdUsuario);
-
-    } catch (e) {
-        console.error(e);
-        mostrarErroModal("Erro inesperado ao criar usuário + administrador.");
     }
-}
 
-async function criarAdministradorComUsuarioExistente(idUsuario) {
-    const idAdmin = document.getElementById("administradorId").value;
-    const dtFimEl = document.getElementById("dtFim");
-    const dtFim = dtFimEl ? dtFimEl.value || null : null;
-
-    const isCriacao = !idAdmin || idAdmin === "";
-    const dtIni = isCriacao ? new Date().toISOString().split("T")[0] : (document.getElementById("dtIni") ? document.getElementById("dtIni").value || null : null);
-
-    const dados = {
-        usuario: { id: parseInt(idUsuario) },
-        dtIni: dtIni
-    };
-
-    try {
-        let url = "/apis/administrador";
-        let method = "POST";
-
-        if (!isCriacao) {
-            url = `/apis/administrador/${idAdmin}`;
-            method = "PUT";
-
-            const body = { dtFim: dtFim || null };
-            const resp = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-
-            const txt = await resp.text();
-            if (!resp.ok) {
-                try {
-                    const j = JSON.parse(txt);
-                    mostrarErroModal(j.mensagem || j.erro || txt);
-                } catch {
-                    mostrarErroModal(txt || "Erro ao atualizar administrador.");
-                }
-                return;
-            }
-        } else {
-
-            const resp = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dados)
-            });
-
-            const txt = await resp.text();
-            if (!resp.ok) {
-                try {
-                    const j = JSON.parse(txt);
-                    mostrarErroModal(j.mensagem || j.erro || txt);
-                } catch {
-                    mostrarErroModal(txt || "Erro ao criar administrador.");
-                }
-                return;
-            }
-        }
-
-
-        administradorModal.hide();
-        modoEdicao = false;
-        carregarAdministradores();
-
-    } catch (e) {
-        console.error(e);
-        mostrarErroModal("Erro inesperado ao salvar administrador.");
+    // Valida tamanho do CPF
+    const cpf = document.getElementById("novo_cpf").value;
+    if (cpf.length < 14) {
+        mostrarErroModal("CPF incompleto.");
+        return false;
     }
+
+    return true;
 }
 
 function coletarDadosNovoUsuario() {
     return {
         nome: document.getElementById("novo_nome").value.trim(),
-        usuario: document.getElementById("novo_usuario").value.trim(),
+        usuario: document.getElementById("novo_usuario").value.trim(), // Login
         senha: document.getElementById("novo_senha").value.trim(),
-        telefone: document.getElementById("novo_telefone").value,
+        telefone: document.getElementById("novo_telefone").value, // Vamos limpar depois
         email: document.getElementById("novo_email").value.trim(),
-        cpf: document.getElementById("novo_cpf").value,
-        dtnasc: document.getElementById("novo_dtnasc").value,
+        cpf: document.getElementById("novo_cpf").value, // Mantemos formato
+        dtnasc: document.getElementById("novo_dtnasc").value, // Vamos converter
         rua: document.getElementById("novo_rua").value.trim(),
         cep: document.getElementById("novo_cep").value,
         bairro: document.getElementById("novo_bairro").value.trim(),
@@ -316,9 +316,121 @@ function coletarDadosNovoUsuario() {
     };
 }
 
-function abrirModalDelete(id) {
-    idParaExcluir = id;
-    deleteModal.show();
+async function criarNovoUsuarioEAdministrador(dados) {
+    try {
+        // PREPARAÇÃO DOS DADOS PARA O BACKEND
+        const payloadUsuario = {
+            ...dados,
+            // Login no Model Java chama 'login', no Register chama 'usuario'.
+            // Seu UsuarioController mapeia 'usuario' da request?
+            // O ideal é enviar o nome que o Java espera. Se for Usuario.java:
+            login: dados.usuario,
+
+            // Limpa telefone (Java geralmente salva limpo ou aceita tudo,
+            // mas no Register.html ele limpa).
+            telefone: dados.telefone.replace(/\D/g, ""),
+
+            // Converte data dd/mm/aaaa -> aaaa-mm-dd
+            dtnasc: formatarDataParaBanco(dados.dtnasc),
+
+            // O CPF vai formatado mesmo, pois o regex do Java exige pontos e traço
+            cpf: dados.cpf
+        };
+
+        const respUsuario = await fetch("/apis/usuario", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payloadUsuario)
+        });
+
+        const text = await respUsuario.text();
+
+        if (!respUsuario.ok) {
+            // Tenta ler o JSON de erro do backend (MembroErro)
+            try {
+                const j = JSON.parse(text);
+                mostrarErroModal(j.mensagem || j.erro || "Erro ao criar usuário.");
+            } catch {
+                mostrarErroModal(text || "Erro desconhecido ao criar usuário.");
+            }
+            return;
+        }
+
+        // Se criou o usuário, pega o ID e cria o Administrador
+        const usuarioCriado = JSON.parse(text);
+        await criarAdministradorComUsuarioExistente(usuarioCriado.id);
+
+    } catch (e) {
+        console.error(e);
+        mostrarErroModal("Erro de conexão ao criar usuário.");
+    }
+}
+
+async function criarAdministradorComUsuarioExistente(idUsuario) {
+    // Data de hoje para o início
+    const dtIni = new Date().toISOString().split("T")[0];
+
+    const payloadAdmin = {
+        usuario: { id: parseInt(idUsuario) },
+        dtIni: dtIni
+    };
+
+    try {
+        const resp = await fetch("/apis/administrador", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payloadAdmin)
+        });
+
+        const txt = await resp.text();
+        if (!resp.ok) {
+            try {
+                const j = JSON.parse(txt);
+                mostrarErroModal(j.mensagem || j.erro || txt);
+            } catch {
+                mostrarErroModal("Erro ao transformar usuário em administrador.");
+            }
+            return;
+        }
+
+        // Sucesso total
+        if (administradorModal) administradorModal.hide();
+        carregarAdministradores();
+
+    } catch (e) {
+        console.error(e);
+        mostrarErroModal("Erro ao salvar administrador.");
+    }
+}
+
+// --- EDICÃO E EXCLUSÃO ---
+
+async function salvarEdicaoAdmin() {
+    const idAdmin = this.getAttribute("data-id");
+    const dtFimVal = document.getElementById("editDtFim").value;
+
+    const body = {
+        id: parseInt(idAdmin),
+        dtFim: dtFimVal || null
+    };
+
+    try {
+        const response = await fetch(`/apis/administrador/${idAdmin}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+            alert("Atualizado com sucesso!");
+            location.reload();
+        } else {
+            const txt = await response.text();
+            alert("Erro: " + txt);
+        }
+    } catch(e) {
+        alert("Erro ao conectar.");
+    }
 }
 
 async function excluirAdministrador() {
@@ -327,23 +439,33 @@ async function excluirAdministrador() {
     try {
         const resp = await fetch(`${API_URL}/${idParaExcluir}`, { method: "DELETE" });
         if (!resp.ok) {
-            const txt = await resp.text();
-            mostrarErroModal(txt || "Erro ao excluir.");
+            const j = await resp.json().catch(() => ({ mensagem: "Erro ao excluir" }));
+            alert(j.mensagem || "Erro ao excluir."); // Usa alert pois o modal de erro fica dentro do outro modal
             return;
         }
         deleteModal.hide();
         idParaExcluir = null;
         carregarAdministradores();
     } catch (e) {
-        console.error(e);
-        mostrarErroModal("Erro inesperado ao excluir.");
+        alert("Erro inesperado.");
     }
 }
 
+function abrirModalDelete(id) {
+    idParaExcluir = id;
+    if (deleteModal) deleteModal.show();
+}
+
+// --- MENSAGENS DE ERRO ---
+
 function mostrarErroModal(msg) {
     const errorDiv = document.getElementById("modal-error-message");
-    errorDiv.textContent = msg;
-    errorDiv.classList.remove("d-none");
+    if (errorDiv) {
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove("d-none");
+    } else {
+        alert(msg);
+    }
 }
 
 function hideErrorModal() {
@@ -355,81 +477,6 @@ function hideErrorModal() {
 }
 
 function mostrarErroGlobal(msg) {
-    alert(msg);
+    // Pode exibir em um toast ou alert
+    console.warn(msg);
 }
-
-function registrarMascaras() {
-    const cpf = document.getElementById("novo_cpf");
-    if (cpf) {
-        cpf.addEventListener("input", (e) => {
-            let v = e.target.value.replace(/\D/g, "");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2")
-                .replace(/(\d{3})(\d)/, "$1.$2")
-                .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            e.target.value = v.substring(0, 14);
-        });
-    }
-
-    const tel = document.getElementById("novo_telefone");
-    if (tel) {
-        tel.addEventListener("input", (e) => {
-            let v = e.target.value.replace(/\D/g, "");
-            v = v.replace(/^(\d{2})(\d)/, "($1) $2")
-                .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
-            e.target.value = v.substring(0, 15);
-        });
-    }
-
-    const nasc = document.getElementById("novo_dtnasc");
-    if (nasc) {
-        nasc.addEventListener("input", (e) => {
-            let v = e.target.value.replace(/\D/g, "");
-            v = v.replace(/(\d{2})(\d)/, "$1/$2")
-                .replace(/(\d{2})(\d{1,4})$/, "$1/$2");
-            e.target.value = v.substring(0, 10);
-        });
-    }
-
-    const cep = document.getElementById("novo_cep");
-    if (cep) {
-        cep.addEventListener("blur", () => {
-            const num = cep.value.replace(/\D/g, "");
-            if (num.length !== 8) return;
-
-            fetch(`https://viacep.com.br/ws/${num}/json/`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.erro) return;
-                    document.getElementById("novo_rua").value = data.logradouro || "";
-                    document.getElementById("novo_bairro").value = data.bairro || "";
-                    document.getElementById("novo_cidade").value = data.localidade || "";
-                    document.getElementById("novo_uf").value = data.uf || "";
-                });
-        });
-    }
-}
-
-document.getElementById("btnSalvarEdicao").addEventListener("click", async function () {
-
-    const idAdmin = this.getAttribute("data-id");
-
-    const body = {
-        dtFim: document.getElementById("editDtFim").value || null
-    };
-
-    const response = await fetch(`/apis/administrador/${idAdmin}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
-
-    if (response.ok) {
-        alert("Administrador atualizado com sucesso!");
-        location.reload();
-    } else {
-        const txt = await response.text();
-        alert("Erro ao salvar: " + txt);
-    }
-});
-
-

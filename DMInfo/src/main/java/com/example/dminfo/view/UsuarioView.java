@@ -18,11 +18,9 @@ public class UsuarioView {
     @Autowired
     private UsuarioController controller;
 
-
-
     @PostMapping("/login")
     public ResponseEntity<Object> logar(@RequestBody Map<String, String> dados) {
-        String login = dados.get("usuario"); // 'usuario' é o campo de login
+        String login = dados.get("usuario");
         String senha = dados.get("senha");
 
         if (login == null || login.isEmpty() || senha == null || senha.isEmpty()) {
@@ -30,9 +28,7 @@ public class UsuarioView {
         }
 
         try {
-
             Map<String, Object> json = controller.logar(login, senha);
-
             if ((boolean) json.get("isLogado")) {
                 return ResponseEntity.ok(json);
             } else {
@@ -43,10 +39,11 @@ public class UsuarioView {
         }
     }
 
-
+    // AJUSTE: Adicionei (required = false) para evitar erro 400 se não passar filtro
     @GetMapping
-    public ResponseEntity<Object> listar() {
+    public ResponseEntity<Object> listar(@RequestParam(required = false) String nome) {
         try {
+            // Se quiser filtrar por nome no futuro, passe o parametro 'nome' para o controller
             return ResponseEntity.ok(controller.listar());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
@@ -69,9 +66,11 @@ public class UsuarioView {
     @PostMapping
     public ResponseEntity<Object> create(@RequestBody Usuario usuario) {
         try {
+            // O controller vai chamar usuario.salvar() que fará as validações
             Usuario novoUsuario = controller.salvar(usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
         } catch (Exception e) {
+            // Se der erro de validação (CPF duplicado, etc), cai aqui e devolve 400
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }
     }
@@ -90,7 +89,6 @@ public class UsuarioView {
     public ResponseEntity<Object> delete(@PathVariable int id) {
         try {
             if (controller.excluir(id)) {
-                // Retorna 200 OK com uma mensagem, pois foi exclusão lógica
                 return ResponseEntity.ok(Map.of("mensagem", "Usuário desativado com sucesso."));
             } else {
                 return ResponseEntity.badRequest().body(new MembroErro("Erro ao desativar usuário."));

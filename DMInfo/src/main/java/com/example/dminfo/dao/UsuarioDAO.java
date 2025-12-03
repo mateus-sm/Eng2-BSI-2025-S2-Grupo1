@@ -67,6 +67,20 @@ public class UsuarioDAO {
         return null;
     }
 
+    public Usuario getUsuarioByTelefone(String telefone) {
+        // Atenção: O telefone no banco deve estar limpo (apenas números) se o front mandar limpo
+        String sql = String.format("SELECT * FROM usuario WHERE telefone = '%s'", telefone);
+
+        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
+                return buildUsuario(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar usuário por telefone: " + e.getMessage());
+        }
+        return null;
+    }
+
     public Usuario getUsuarioByEmail(String email) {
         String sql = "SELECT * FROM usuario WHERE email = ? AND dtfim IS NULL";
         try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {

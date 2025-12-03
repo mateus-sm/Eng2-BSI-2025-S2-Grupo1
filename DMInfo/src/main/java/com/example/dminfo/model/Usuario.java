@@ -1,7 +1,12 @@
 package com.example.dminfo.model;
 
+import com.example.dminfo.dao.UsuarioDAO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
-public class  Usuario {
+import java.util.regex.Pattern;
+
+public class Usuario {
 
     private int id;
     private String nome;
@@ -19,6 +24,10 @@ public class  Usuario {
     private String uf;
     private String foto;
     private LocalDate dtfim;
+
+    // --- IMPORTANTE: Instância da DAO com @JsonIgnore para evitar erro 500 ---
+    @JsonIgnore
+    private UsuarioDAO dao = new UsuarioDAO();
 
     public Usuario() {}
 
@@ -42,6 +51,57 @@ public class  Usuario {
         this.dtfim = dtfim;
     }
 
+    // --- MÉTODO DE NEGÓCIO (VALIDAÇÃO E SALVAMENTO) ---
+    public Usuario salvar() {
+        validar(); // Executa as verificações
+
+        // Define data de início se não tiver
+        if (this.dtini == null) {
+            this.dtini = LocalDate.now();
+        }
+
+        // Chama a DAO para gravar
+        return dao.gravar(this);
+    }
+
+    private void validar() {
+        if (nome == null || nome.trim().isEmpty()) throw new RuntimeException("Nome é obrigatório.");
+        if (senha == null || senha.trim().isEmpty()) throw new RuntimeException("Senha é obrigatória.");
+        if (login == null || login.trim().isEmpty()) throw new RuntimeException("Login (usuário) é obrigatório.");
+        if (dtnasc == null) throw new RuntimeException("Data de nascimento é obrigatória.");
+
+        if (this.dtnasc.isAfter(LocalDate.now())) {
+            throw new RuntimeException("A data de nascimento não pode ser maior que a data atual.");
+        }
+
+        if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
+            throw new RuntimeException("Formato de CPF inválido (esperado: 000.000.000-00).");
+        }
+        if (dao.getUsuarioByCpf(this.cpf) != null) {
+            throw new RuntimeException("Este CPF já está em uso.");
+        }
+
+        if (telefone == null || telefone.trim().isEmpty()) {
+            throw new RuntimeException("Telefone é obrigatório.");
+        }
+        if (dao.getUsuarioByTelefone(this.telefone) != null) {
+            throw new RuntimeException("Este Telefone já está em uso.");
+        }
+
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        if (email == null || !Pattern.matches(emailRegex, email)) {
+            throw new RuntimeException("Formato de E-mail inválido.");
+        }
+        if (dao.getUsuarioByEmail(this.email) != null) {
+            throw new RuntimeException("Este E-mail já está em uso.");
+        }
+
+        if (dao.getUsuario(this.login) != null) {
+            throw new RuntimeException("Este nome de usuário (login) já está em uso.");
+        }
+    }
+
+    // --- Getters e Setters ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getNome() { return nome; }
@@ -72,5 +132,6 @@ public class  Usuario {
     public void setUf(String uf) { this.uf = uf; }
     public LocalDate getDtfim() { return dtfim; }
     public void setDtfim(LocalDate dtfim) { this.dtfim = dtfim; }
-
+    public String getFoto() { return foto; }
+    public void setFoto(String foto) { this.foto = foto; }
 }

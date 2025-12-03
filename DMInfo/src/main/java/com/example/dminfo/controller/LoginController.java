@@ -46,6 +46,13 @@ public class LoginController {
         }
     }
 
+    // === LOGOUT ===
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
+
     // === REGISTRO ===
     @PostMapping("/register")
     public String processarRegistro(
@@ -119,6 +126,7 @@ public class LoginController {
         redirectAttributes.addFlashAttribute("sucesso", "Conta criada com sucesso! Faça o login.");
         return "redirect:/login";
     }
+
     private Map<String, String> validarRegistro(Usuario usuario) {
         Map<String, String> errors = new HashMap<>();
 

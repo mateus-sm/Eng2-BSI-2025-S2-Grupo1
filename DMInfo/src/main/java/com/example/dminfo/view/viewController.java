@@ -110,13 +110,6 @@ public class viewController {
         return "doacao-form";
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.removeAttribute(ADMIN_ID_SESSION_KEY);
-        session.invalidate();
-        return "redirect:/login";
-    }
-
     @GetMapping("/app/principal")
     public String paginaPrincipal() {
         return "principal";

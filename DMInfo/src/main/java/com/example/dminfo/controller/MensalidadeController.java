@@ -1,76 +1,39 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.MembroDAO;
-import com.example.dminfo.dao.MensalidadeDAO;
 import com.example.dminfo.model.Mensalidade;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service; // ou @RestController dependendo do seu projeto
 import java.util.List;
 
 @Service
 public class MensalidadeController {
 
-    @Autowired
-    private MensalidadeDAO dao;
-
-    @Autowired
-    private MembroDAO mdao;
-
     public Mensalidade salvar(Mensalidade m) {
-
-        if (m.getValor() <= 0) {
-            throw new RuntimeException("Valor precisa ser maior que zero");
-        }
-
-        if (mdao.get(m.getId_membro()) == null) {
-            throw new RuntimeException("Membro não encontrado no banco");
-        }
-
-        if (m.getAno() <= 0 || m.getMes() <= 0 || m.getDataPagamento() == null) {
-            throw new RuntimeException("Data da mensalidade inválida");
-        }
-
-        Mensalidade existente = null;
-
-        if (m.getId_mensalidade() > 0) {
-            existente = dao.buscarPorId(m.getId_mensalidade());
-        }
-
-        if (existente != null) {
-            boolean ok = dao.alterar(m);
-            if (!ok) {
-                throw new RuntimeException("Erro ao atualizar mensalidade");
-            }
-            return m;
-        }
-
-        return dao.gravar(m);
+        return m.salvar();
     }
 
-
-
     public boolean excluir(Integer id) {
-        return dao.excluir(id);
+        Mensalidade m = new Mensalidade();
+        m.setId_mensalidade(id);
+        return m.excluir();
     }
 
     public Mensalidade getById(Integer id) {
-        return dao.buscarPorId(id);
+        return Mensalidade.buscarPorId(id);
     }
 
     public List<Mensalidade> listar(String filtroNome) {
-        return dao.listar(filtroNome);
+        return Mensalidade.listarTodos(filtroNome);
     }
 
     public List<Mensalidade> listarMesAno(int mes, int ano) {
-        return dao.listarMesAno(mes, ano);
+        return Mensalidade.listarPorMesAno(mes, ano);
     }
 
     public List<Mensalidade> listarMembro(Integer id) {
-        return dao.listarMembro(id);
+        return Mensalidade.listarPorMembro(id);
     }
 
     public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim) {
-        return dao.filtrar(nome, dataIni, dataFim);
+        return Mensalidade.filtrarAvancado(nome, dataIni, dataFim);
     }
-
 }

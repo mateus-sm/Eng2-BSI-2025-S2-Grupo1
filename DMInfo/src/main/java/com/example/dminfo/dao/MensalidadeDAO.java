@@ -206,4 +206,23 @@ public class MensalidadeDAO {
         return lista;
     }
 
+    public Mensalidade buscarPorMembroMesAno(int idMembro, int mes, int ano) {
+        String sql = String.format("""
+            SELECT m.*, u.nome AS nome_membro
+            FROM mensalidade m
+            JOIN membro mem ON m.id_membro = mem.id_membro
+            JOIN usuario u ON mem.id_usuario = u.id_usuario
+            WHERE m.id_membro = %d AND m.mes = %d AND m.ano = %d
+            """, idMembro, mes, ano);
+
+        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
+                return buildObject(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

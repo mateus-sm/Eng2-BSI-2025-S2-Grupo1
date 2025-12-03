@@ -339,3 +339,59 @@
 .btn-notificar:hover {
     background-color: #5d359f;
 }
+
+/* --- Notificações Toast (Centralizado com Fade) --- */
+#toast-container {
+    visibility: hidden;
+    min-width: 300px;
+    max-width: 90%; /* Garante que não estoure em telas pequenas */
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+    border-radius: 8px;
+    padding: 20px; /* Um pouco mais de preenchimento para destaque */
+    position: fixed;
+    z-index: 2000;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    border-left: 6px solid #333;
+
+    top: 50%;
+    left: 50%;
+    /* Isso move o elemento para trás 50% de sua própria largura/altura, centralizando perfeitamente */
+    transform: translate(-50%, -50%) scale(0.9);
+
+    opacity: 0;
+    /* Transição suave de opacidade e um leve efeito de escala */
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, visibility 0.4s;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em; /* Texto um pouco maior */
+}
+
+#toast-container.mostrar {
+    visibility: visible;
+    opacity: 1;
+    /* Quando mostra, ele cresce para o tamanho normal (escala 1) */
+    transform: translate(-50%, -50%) scale(1);
+}
+
+#toast-close-btn {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 1.5em; /* Botão fechar maior */
+    cursor: pointer;
+    margin-left: 20px;
+    padding: 0 5px;
+}
+
+#toast-close-btn:hover {
+    color: #333;
+}
+
+/* Tipos de notificação (Cores mantidas) */
+.toast-sucesso { border-left-color: #28a745 !important; }
+.toast-erro { border-left-color: #dc3545 !important; }
+.toast-info { border-left-color: #007bff !important; }

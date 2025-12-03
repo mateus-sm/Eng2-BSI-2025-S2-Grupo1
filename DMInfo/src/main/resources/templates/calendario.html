@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário de Atividades</title>
     <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" th:href="@{/styles/calendario.css}">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 </head>
 <body>
 <div class="container-principal">
@@ -49,6 +50,10 @@
             <button id="btn-salvar-membros" onclick="fecharGerenciadorMembros()">Fechar</button>
         </div>
     </div>
+</div>
+<div id="toast-container">
+    <span id="toast-message">Mensagem aqui...</span>
+    <button id="toast-close-btn" onclick="fecharToast()">&times;</button>
 </div>
 <script th:src="@{/js/calendario.js}"></script>
 </body>

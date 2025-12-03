@@ -22,20 +22,28 @@ async function sincronizarAgenda() {
         const resultText = await response.text();
 
         if (resultText.includes("Erro: A autorização do Google não foi concluída")) {
-            alert("Autorização do Google Calendar é necessária. Redirecionando para o login do Google...");
+            // SUBSTITUI O ALERT:
+            mostrarToast("Redirecionando para login do Google...", "info");
+
             sessionStorage.setItem('googleAuthRedirect', 'true');
-            window.location.href = '/api/calendar/oauth/start';
+
+            // Pequeno delay para o usuário ler a mensagem antes de sair da página
+            setTimeout(() => {
+                window.location.href = '/api/calendar/oauth/start';
+            }, 1500);
         }
         else if (resultText.includes("auth_failed")) {
-            alert("Erro na autorização. Por favor, tente sincronizar novamente.");
+            // SUBSTITUI O ALERT:
+            mostrarToast("Erro na autorização. Tente novamente.", "erro");
         }
         else {
-            alert(resultText);
+            // SUBSTITUI O ALERT DE SUCESSO:
+            mostrarToast(resultText, "sucesso");
         }
 
     } catch (error) {
         console.error('Erro ao sincronizar:', error);
-        alert('Ocorreu um erro inesperado ao tentar sincronizar.');
+        mostrarToast('Erro inesperado ao sincronizar.', 'erro');
     } finally {
         btn.disabled = false;
         btn.innerHTML = `${iconeOriginal} Sincronizar Google Agenda`;
@@ -482,13 +490,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('status') === 'auth_success') {
-                alert("Autorização do Google concluída! Agora você pode sincronizar suas atividades.");
+                // ALTERAÇÃO AQUI: Substituído alert por mostrarToast
+                mostrarToast("Conectado ao Google com sucesso!", "sucesso");
                 history.replaceState(null, '', window.location.pathname);
             }
 
 
         } catch (error) {
             console.error("Erro ao carregar estado inicial:", error);
+            // Este erro é crítico, talvez seja bom manter como alert ou usar toast de erro
             alert("Não foi possível carregar o estado das atividades. " + error.message);
         }
     }
@@ -615,8 +625,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             abrirGerenciadorMembros(id);
 
         } else if (target.classList.contains('btn-notificar')) {
-             const id = target.dataset.id;
-             enviarNotificacaoManual(id);
+            const id = target.dataset.id;
+            enviarNotificacaoManual(id);
         }
 
         if (target.id === 'membros-modal-backdrop' || target.classList.contains('fechar-modal-btn')) {
@@ -645,9 +655,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 3. Verificação de Status (Opcional: se já estiver concluída/ticada como feita)
         if (atividade && atividade.status === true) {
-             if (!confirm('Esta atividade já consta como realizada. Deseja notificar mesmo assim?')) {
-                 return;
-             }
+            if (!confirm('Esta atividade já consta como realizada. Deseja notificar mesmo assim?')) {
+                return;
+            }
         }
 
         if (!confirm('Tem certeza que deseja enviar uma notificação manual para todos os membros desta atividade?')) {
@@ -669,3 +679,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
+
+// Função para exibir a "telazinha" (Toast)
+function mostrarToast(mensagem, tipo = 'info') {
+    const toast = document.getElementById('toast-container');
+    const msgElement = document.getElementById('toast-message');
+
+    if (!toast || !msgElement) return;
+
+    // Define a mensagem
+    msgElement.innerText = mensagem;
+
+    // Remove classes antigas e adiciona a nova cor
+    toast.className = '';
+    toast.classList.add('mostrar');
+
+    if (tipo === 'sucesso') toast.classList.add('toast-sucesso');
+    else if (tipo === 'erro') toast.classList.add('toast-erro');
+    else toast.classList.add('toast-info');
+
+    // Auto-fechar após 5 segundos (opcional)
+    setTimeout(() => {
+        fecharToast();
+    }, 6000);
+}
+
+function fecharToast() {
+    const toast = document.getElementById('toast-container');
+    if (toast) {
+        toast.classList.remove('mostrar');
+    }
+}

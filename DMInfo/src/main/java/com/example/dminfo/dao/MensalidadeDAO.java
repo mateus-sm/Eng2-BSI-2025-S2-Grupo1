@@ -1,6 +1,7 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Mensalidade;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
@@ -28,11 +29,11 @@ public class MensalidadeDAO {
         return m;
     }
 
-    public Mensalidade gravar(Mensalidade m) {
+    public Mensalidade gravar(Mensalidade m, Conexao conexao){
         String sql = "INSERT INTO mensalidade (id_membro, mes, ano, valor, datapagamento) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = SingletonDB.getConexao().getConnection()
+        try (PreparedStatement stmt = conexao.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, m.getId_membro());
@@ -55,11 +56,11 @@ public class MensalidadeDAO {
         }
     }
 
-    public boolean alterar(Mensalidade m) {
+    public boolean alterar(Mensalidade m, Conexao conexao) {
         String sql = "UPDATE mensalidade SET id_membro = ?, mes = ?, ano = ?, valor = ?, datapagamento = ? " +
                 "WHERE id_mensalidade = ?";
 
-        try (PreparedStatement stmt = SingletonDB.getConexao().getConnection().prepareStatement(sql)) {
+        try (PreparedStatement stmt = conexao.getConnection().prepareStatement(sql)) {
 
             stmt.setInt(1, m.getId_membro());
             stmt.setInt(2, m.getMes());
@@ -76,12 +77,12 @@ public class MensalidadeDAO {
         }
     }
 
-    public boolean excluir(Integer id) {
+    public boolean excluir(Integer id, Conexao conexao) {
         String sql = "DELETE FROM mensalidade WHERE id_mensalidade = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public List<Mensalidade> listar(String filtroNome) {
+    public List<Mensalidade> listar(String filtroNome, Conexao conexao) {
         List<Mensalidade> lista = new ArrayList<>();
 
         String sql = """
@@ -97,7 +98,7 @@ public class MensalidadeDAO {
 
         sql += " ORDER BY m.datapagamento DESC";
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             while (rs != null && rs.next()) {
                 lista.add(buildObject(rs));
             }
@@ -108,7 +109,7 @@ public class MensalidadeDAO {
         return lista;
     }
 
-    public Mensalidade buscarPorId(Integer id) {
+    public Mensalidade buscarPorId(Integer id, Conexao conexao) {
         String sql = """
         SELECT m.*, u.nome AS nome_membro
         FROM mensalidade m
@@ -117,7 +118,7 @@ public class MensalidadeDAO {
         WHERE m.id_mensalidade = %d
         """.formatted(id);
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             if (rs != null && rs.next()) {
                 return buildObject(rs);
             }
@@ -128,7 +129,7 @@ public class MensalidadeDAO {
         return null;
     }
 
-    public List<Mensalidade> listarMesAno(int mes, int ano) {
+    public List<Mensalidade> listarMesAno(int mes, int ano, Conexao conexao) {
         List<Mensalidade> lista = new ArrayList<>();
 
         String sql = """
@@ -138,7 +139,7 @@ public class MensalidadeDAO {
                 ORDER BY m.datapagamento DESC
                 """.formatted(mes, ano);
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             while (rs != null && rs.next()) {
                 lista.add(buildObject(rs));
             }
@@ -149,7 +150,7 @@ public class MensalidadeDAO {
         return lista;
     }
 
-    public List<Mensalidade> listarMembro(int idMembro) {
+    public List<Mensalidade> listarMembro(int idMembro, Conexao conexao) {
         List<Mensalidade> lista = new ArrayList<>();
 
         String sql = """
@@ -159,7 +160,7 @@ public class MensalidadeDAO {
                 ORDER BY m.datapagamento DESC
                 """.formatted(idMembro);
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             while (rs != null && rs.next()) {
                 lista.add(buildObject(rs));
             }
@@ -170,7 +171,7 @@ public class MensalidadeDAO {
         return lista;
     }
 
-    public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim) {
+    public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim,Conexao conexao) {
         List<Mensalidade> lista = new ArrayList<>();
 
         String sql = """
@@ -195,7 +196,7 @@ public class MensalidadeDAO {
 
         sql += " ORDER BY m.datapagamento DESC";
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             while (rs != null && rs.next()) {
                 lista.add(buildObject(rs));
             }
@@ -206,7 +207,7 @@ public class MensalidadeDAO {
         return lista;
     }
 
-    public Mensalidade buscarPorMembroMesAno(int idMembro, int mes, int ano) {
+    public Mensalidade buscarPorMembroMesAno(int idMembro, int mes, int ano, Conexao conexao) {
         String sql = String.format("""
             SELECT m.*, u.nome AS nome_membro
             FROM mensalidade m
@@ -215,7 +216,7 @@ public class MensalidadeDAO {
             WHERE m.id_membro = %d AND m.mes = %d AND m.ano = %d
             """, idMembro, mes, ano);
 
-        try (ResultSet rs = SingletonDB.getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) {
             if (rs != null && rs.next()) {
                 return buildObject(rs);
             }

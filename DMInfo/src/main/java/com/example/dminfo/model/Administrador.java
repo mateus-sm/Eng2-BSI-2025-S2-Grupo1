@@ -2,11 +2,14 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.UsuarioDAO;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import com.example.dminfo.util.Conexao;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public class Administrador {
 
     private int id;
@@ -14,45 +17,53 @@ public class Administrador {
     private LocalDate dtFim;
     private Usuario usuario;
 
-    @JsonIgnore
+    @Autowired
     private AdministradorDAO dao = new AdministradorDAO();
 
-    @JsonIgnore
+    @Autowired
     private UsuarioDAO usuarioDAO = new UsuarioDAO();
 
-    public Administrador() {}
+    public Administrador() {
 
-    public Administrador salvar() {
+    }
+
+    public Administrador(LocalDate dtIni, LocalDate dtFim, Usuario usuario) {
+        this.dtIni = dtIni;
+        this.dtFim = dtFim;
+        this.usuario = usuario;
+    }
+
+    public Administrador salvar(Conexao conexao) {
         if (usuarioDAO.get(this.usuario.getId()) == null) {
             throw new RuntimeException("Usuário não existente");
         }
 
-        if (dao.getByUsuario(this.usuario.getId()) != null) {
+        if (dao.getByUsuario(this.usuario.getId(), conexao) != null) {
             throw new RuntimeException("Usuário já é um Administrador");
         }
 
-        return dao.gravar(this);
+        return dao.gravar(this, conexao);
     }
 
-    public boolean atualizarDtFim(LocalDate novaDtFim) {
+    public boolean atualizarDtFim(LocalDate novaDtFim, Conexao conexao) {
         if (novaDtFim != null && novaDtFim.isBefore(this.dtIni)) {
             throw new RuntimeException("A data fim não pode ser menor que a data inicial.");
         }
 
         this.dtFim = novaDtFim;
-        return dao.alterar(this);
+        return dao.alterar(this, conexao);
     }
 
-    public boolean excluir() {
-        return dao.excluir(this.id);
+    public boolean excluir(Conexao conexao) {
+        return dao.excluir(this.id, conexao);
     }
 
-    public static Administrador buscarPorId(int id) {
-        return new AdministradorDAO().get(id);
+    public static Administrador buscarPorId(int id, Conexao conexao) {
+        return new AdministradorDAO().get(id, conexao);
     }
 
-    public static List<Administrador> listarTodos() {
-        return new AdministradorDAO().get();
+    public static List<Administrador> listarTodos(Conexao conexao) {
+        return new AdministradorDAO().get(conexao);
     }
 
     public int getId() {return id;}

@@ -2,6 +2,7 @@ package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Evento;
 import com.example.dminfo.model.Administrador;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -25,7 +26,7 @@ public class EventoDAO {
 
     private Evento buildEvento(ResultSet rs) throws SQLException {
         int adminId = rs.getInt("id_admin");
-        Administrador admin = adminDAO.get(adminId);
+        Administrador admin = adminDAO.get(adminId, SingletonDB.getConexao());
 
         // se nao tiver admin com o id, usa o mock
         if (admin == null) {

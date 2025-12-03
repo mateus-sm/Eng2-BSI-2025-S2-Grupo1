@@ -2,6 +2,7 @@ package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.Usuario;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +35,7 @@ public class AdministradorDAO {
         return admin;
     }
 
-    public List<Administrador> get() {
+    public List<Administrador> get(Conexao conexao) {
         List<Administrador> admins = new ArrayList<>();
         String sql = """
             SELECT 
@@ -48,7 +49,7 @@ public class AdministradorDAO {
             ORDER BY a.id_admin;
             """;
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null) {
                 while (rs.next()) {
@@ -61,7 +62,7 @@ public class AdministradorDAO {
         return admins;
     }
 
-    public Administrador get(int id) {
+    public Administrador get(int id, Conexao conexao) {
         String sql = String.format("""
             SELECT 
                 a.id_admin,
@@ -74,7 +75,7 @@ public class AdministradorDAO {
             WHERE a.id_admin = %d
             """, id);
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildAdministrador(rs);
@@ -85,7 +86,7 @@ public class AdministradorDAO {
         return null;
     }
 
-    public Administrador getByUsuario(int usuarioId) {
+    public Administrador getByUsuario(int usuarioId, Conexao conexao) {
         String sql = String.format("""
             SELECT 
                 a.id_admin,
@@ -98,7 +99,7 @@ public class AdministradorDAO {
             WHERE a.id_usuario = %d
             """, usuarioId);
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 return buildAdministrador(rs);
@@ -109,11 +110,11 @@ public class AdministradorDAO {
         return null;
     }
 
-    public Administrador gravar(Administrador admin) {
+    public Administrador gravar(Administrador admin, Conexao conexao) {
         String sql = String.format("INSERT INTO administrador (dtini, id_usuario) VALUES ('%s', %d) RETURNING id_admin",
                 admin.getDtIni().toString(), admin.getUsuario().getId());
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
         try {
             if (rs != null && rs.next()) {
                 admin.setId(rs.getInt("id_admin"));
@@ -125,14 +126,14 @@ public class AdministradorDAO {
         return null;
     }
 
-    public boolean alterar(Administrador admin) {
+    public boolean alterar(Administrador admin, Conexao conexao) {
         String dtFimSql = (admin.getDtFim() != null) ? ("'" + admin.getDtFim().toString() + "'") : "NULL";
         String sql = String.format("UPDATE administrador SET dtfim = %s WHERE id_admin = %d", dtFimSql, admin.getId());
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public boolean excluir(int id) {
+    public boolean excluir(int id, Conexao conexao) {
         String sql = "DELETE FROM administrador WHERE id_admin = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 }

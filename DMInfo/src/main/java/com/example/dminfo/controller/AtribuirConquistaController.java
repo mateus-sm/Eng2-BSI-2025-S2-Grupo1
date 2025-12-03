@@ -35,7 +35,7 @@ public class AtribuirConquistaController {
         if (acm == null || acm.getId() != 0)
             throw new RuntimeException("Atribuição inválida para criação.");
 
-        if (administradorDAO.get(acm.getId_admin()) == null ||
+        if (administradorDAO.get(acm.getId_admin(), conexao) == null ||
                 membroDAO.get(acm.getId_membro()) == null ||
                 conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");
@@ -47,10 +47,11 @@ public class AtribuirConquistaController {
     }
 
     public AtribuirConquistaMembro atualizar(AtribuirConquistaMembro acm) {
+
         if (acm == null || acm.getId() == 0)
             throw new RuntimeException("Atribuição inválida para atualização.");
 
-        if (administradorDAO.get(acm.getId_admin()) == null ||
+        if (administradorDAO.get(acm.getId_admin(),SingletonDB.getConexao()) == null ||
                 membroDAO.get(acm.getId_membro()) == null  ||
                 conquistaModel.getById(acm.getId_conquista(), SingletonDB.getConexao()) == null)
             throw new RuntimeException("Administrador, membro ou conquista não encontrados.");

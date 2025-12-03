@@ -2,6 +2,7 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.dao.MensalidadeDAO;
+import com.example.dminfo.util.Conexao;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -37,7 +38,7 @@ public class Mensalidade {
         this.dataPagamento = dataPagamento;
     }
 
-    public Mensalidade salvar() {
+    public Mensalidade salvar(Conexao conexao) {
         if (this.valor == null || this.valor <= 0) {
             throw new RuntimeException("Valor precisa ser maior que zero");
         }
@@ -50,7 +51,7 @@ public class Mensalidade {
             throw new RuntimeException("Membro não encontrado no banco");
         }
 
-        Mensalidade duplicada = dao.buscarPorMembroMesAno(this.id_membro, this.mes, this.ano);
+        Mensalidade duplicada = dao.buscarPorMembroMesAno(this.id_membro, this.mes, this.ano,conexao);
 
         if (duplicada != null) {
 
@@ -61,40 +62,40 @@ public class Mensalidade {
 
         Mensalidade existente = null;
         if (this.id_mensalidade > 0) {
-            existente = dao.buscarPorId(this.id_mensalidade);
+            existente = dao.buscarPorId(this.id_mensalidade, conexao);
         }
 
         if (existente != null) {
-            boolean ok = dao.alterar(this);
+            boolean ok = dao.alterar(this, conexao);
             if (!ok) throw new RuntimeException("Erro ao atualizar mensalidade");
             return this;
         } else {
-            return dao.gravar(this);
+            return dao.gravar(this, conexao);
         }
     }
 
-    public boolean excluir() {
-        return dao.excluir(this.id_mensalidade);
+    public boolean excluir(Conexao conexao) {
+        return dao.excluir(this.id_mensalidade,conexao);
     }
 
-    public static Mensalidade buscarPorId(Integer id) {
-        return new MensalidadeDAO().buscarPorId(id);
+    public static Mensalidade buscarPorId(Integer id, Conexao conexao) {
+        return new MensalidadeDAO().buscarPorId(id, conexao);
     }
 
-    public static List<Mensalidade> listarTodos(String filtroNome) {
-        return new MensalidadeDAO().listar(filtroNome);
+    public static List<Mensalidade> listarTodos(String filtroNome, Conexao conexao) {
+        return new MensalidadeDAO().listar(filtroNome, conexao);
     }
 
-    public static List<Mensalidade> listarPorMesAno(int mes, int ano) {
-        return new MensalidadeDAO().listarMesAno(mes, ano);
+    public static List<Mensalidade> listarPorMesAno(int mes, int ano, Conexao conexao) {
+        return new MensalidadeDAO().listarMesAno(mes, ano, conexao);
     }
 
-    public static List<Mensalidade> listarPorMembro(Integer idMembro) {
-        return new MensalidadeDAO().listarMembro(idMembro);
+    public static List<Mensalidade> listarPorMembro(Integer idMembro, Conexao conexao) {
+        return new MensalidadeDAO().listarMembro(idMembro, conexao);
     }
 
-    public static List<Mensalidade> filtrarAvancado(String nome, String dataIni, String dataFim) {
-        return new MensalidadeDAO().filtrar(nome, dataIni, dataFim);
+    public static List<Mensalidade> filtrarAvancado(String nome, String dataIni, String dataFim, Conexao conexao) {
+        return new MensalidadeDAO().filtrar(nome, dataIni, dataFim, conexao);
     }
 
 

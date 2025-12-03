@@ -1,31 +1,32 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.model.Administrador;
-import org.springframework.stereotype.Component;
+import com.example.dminfo.util.SingletonDB;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class AdministradorController {
 
     public Administrador buscar(int id) {
-        return Administrador.buscarPorId(id);
+        return Administrador.buscarPorId(id, SingletonDB.getConexao());
     }
 
     public List<Administrador> listar() {
-        return Administrador.listarTodos();
+        return Administrador.listarTodos(SingletonDB.getConexao());
     }
 
     public Administrador salvar(Administrador administrador) {
-        return administrador.salvar();
+        return administrador.salvar(SingletonDB.getConexao());
     }
 
     public Administrador update(int id, Administrador adminDetails) {
-        Administrador existente = Administrador.buscarPorId(id);
+        Administrador existente = Administrador.buscarPorId(id, SingletonDB.getConexao());
 
         if (existente == null) return null;
 
-        existente.atualizarDtFim(adminDetails.getDtFim());
+        existente.atualizarDtFim(adminDetails.getDtFim(),SingletonDB.getConexao());
 
         return existente;
     }
@@ -33,6 +34,6 @@ public class AdministradorController {
     public boolean excluir(int id) {
         Administrador admin = new Administrador();
         admin.setId(id);
-        return admin.excluir();
+        return admin.excluir(SingletonDB.getConexao());
     }
 }

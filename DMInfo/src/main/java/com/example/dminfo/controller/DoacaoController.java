@@ -97,7 +97,7 @@ public class DoacaoController {
 
         // Como AdminDAO ainda é o antigo (provavelmente), usamos o método antigo dele
         // Se AdminDAO já foi refatorado, mude para adminModel.getById(id, conexao)
-        Administrador admin = adminDAO.get(doacao.getId_admin().getId());
+        Administrador admin = adminDAO.get(doacao.getId_admin().getId(), conexao);
         if (admin == null)
             throw new RuntimeException("Administrador não encontrado.");
 

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -52,11 +53,18 @@ public class EnviarFotosAtividadeView {
     }
 
     @PostMapping("/apis/atividade/{idAtividade}/fotos")
-    public ResponseEntity<Object> enviarFoto(@PathVariable int idAtividade, @RequestParam("foto") MultipartFile file, @RequestParam("id_membro") int idMembro) {
+    public ResponseEntity<Object> enviarFoto(@PathVariable int idAtividade, @RequestParam("foto") MultipartFile file, HttpSession session) {
         try {
-            EnviarFotosAtividade fotoSalva = controller.salvar(file, idMembro, idAtividade);
+            Integer idUsuario = (Integer) session.getAttribute("ADMIN_ID_SESSION");
+
+            if (idUsuario == null)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MembroErro("Sessão expirada ou usuário não logado."));
+
+            EnviarFotosAtividade fotoSalva = controller.salvar(file, idUsuario, idAtividade);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", fotoSalva.getId(), "foto", fotoSalva.getFoto(), "mensagem", "Sucesso"));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));
         }
     }

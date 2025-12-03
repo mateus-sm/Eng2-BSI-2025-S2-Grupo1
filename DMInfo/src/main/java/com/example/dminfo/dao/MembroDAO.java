@@ -128,4 +128,22 @@ public class MembroDAO {
         }
         return false;
     }
+
+    public Membro getPorUsuario(int idUsuario) {
+        String sql = "SELECT " +
+                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
+                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
+                "    u.nome AS nome " +
+                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " +
+                "WHERE m.id_usuario = " + idUsuario;
+
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        try {
+            if (rs != null && rs.next())
+                return buildMembro(rs);
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Membro por Usuário: " + e.getMessage());
+        }
+        return null;
+    }
 }

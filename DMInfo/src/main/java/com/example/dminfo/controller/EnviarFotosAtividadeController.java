@@ -22,7 +22,6 @@ import java.util.UUID;
 @Service
 public class EnviarFotosAtividadeController {
 
-    // Caminho correto com o nome do projeto incluído
     private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/DMInfo/src/main/resources/static/uploads/";
 
     @Autowired
@@ -53,10 +52,10 @@ public class EnviarFotosAtividadeController {
         return foto;
     }
 
-    public EnviarFotosAtividade salvar(MultipartFile arquivo, int idMembro, int idAtividade) {
-        Membro m = membroDAO.get(idMembro);
+    public EnviarFotosAtividade salvar(MultipartFile arquivo, int idUsuario, int idAtividade) {
+        Membro m = membroDAO.getPorUsuario(idUsuario);
         if (m == null)
-            throw new RuntimeException("Membro não encontrado com ID: " + idMembro);
+            throw new RuntimeException("Membro não encontrado para o usuário logado (ID Usuário: " + idUsuario + ")");
 
         Atividade a = atividadeDAO.getById(idAtividade);
         if (a == null)

@@ -178,14 +178,11 @@ document.getElementById('id_atividade').addEventListener('change', function(even
         carregarFotos(idAtividade);
 });
 
-document.getElementById('id_membro').addEventListener('input', limparErros);
-
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     limparErros();
 
     const idAtividade = document.getElementById('id_atividade');
-    const idMembro = document.getElementById('id_membro');
     const fotoInput = document.getElementById('foto');
 
     let temErro = false;
@@ -195,10 +192,6 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     }
     if (!idAtividade.value) {
         idAtividade.classList.add('is-invalid');
-        temErro = true;
-    }
-    if (!idMembro.value) {
-        idMembro.classList.add('is-invalid');
         temErro = true;
     }
     if (fotoInput.files.length === 0) {
@@ -215,7 +208,6 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         return;
 
     const formData = new FormData();
-    formData.append('id_membro', idMembro.value);
     formData.append('foto', fotoInput.files[0]);
 
     const API_URL = `/apis/atividade/${idAtividade.value}/fotos`;
@@ -231,7 +223,12 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
             try {
                 const erro = await response.json();
                 errorMsg = erro.erro || erro.message || 'Falha no upload';
-            } catch(e) { errorMsg = `Status: ${response.status}`; }
+            } catch(e) {
+                if(response.status === 401)
+                    errorMsg = "Sessão expirada. Faça login novamente.";
+                else
+                    errorMsg = `Status: ${response.status}`;
+            }
             throw new Error(errorMsg);
         }
 

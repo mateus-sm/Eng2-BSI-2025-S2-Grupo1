@@ -30,18 +30,15 @@ public class FinalizarAtividadesView {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> finalizarAtividadeCompleta(
-            @PathVariable Integer id,
-            @RequestBody CriarRealizacaoAtividades dados) {
+    public ResponseEntity<String> finalizarAtividadeCompleta(@PathVariable Integer id, @RequestBody CriarRealizacaoAtividades dados) {
 
         try {
-            dados.setId(id); // Garante que o ID da URL é o ID do objeto
+            dados.setId(id);
 
-            if (atividadesController.finalizarAtividade(dados)) {
+            if (atividadesController.finalizarAtividade(dados))
                 return ResponseEntity.ok("Atividade finalizada com sucesso.");
-            } else {
+            else
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ID de atividade não encontrado ou falha na atualização.");
-            }
 
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Formato de data inválido.");

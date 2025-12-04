@@ -1,6 +1,8 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.MembroDAO;
+import com.example.dminfo.dao.UsuarioDAO;
+import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +20,9 @@ public class Membro {
     @Autowired
     private MembroDAO dao;
 
+    @Autowired
+    private UsuarioDAO usuarioDAO;
+
     public Membro() {}
 
     public int getId() { return id; }
@@ -31,27 +36,51 @@ public class Membro {
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public List<Membro> listar(String filtro) {
-        return dao.get(filtro);
+    public List<Membro> listar(String filtro, Conexao conexao) {
+        return dao.get(filtro, conexao);
     }
 
-    public Membro getById(Integer id) {
-        return dao.get(id);
+    public Membro getById(Integer id, Conexao conexao) {
+        if (id == null || id == 0)
+            throw new RuntimeException("ID inválido.");
+        return dao.get(id, conexao);
     }
 
-    public Membro salvar(Membro membro) {
-        if (membro.getDtIni() == null)
-            membro.setDtIni(LocalDate.now());
-        return dao.gravar(membro);
+    public Membro salvar(Conexao conexao) {
+        if (this.usuario == null || this.usuario.getId() == 0)
+            throw new RuntimeException("Usuário inválido ou não informado.");
+
+        if (dao.getByUsuario(this.usuario.getId(), conexao) != null)
+            throw new RuntimeException("Usuário já é um Membro.");
+
+        if (this.dtIni == null)
+            this.dtIni = LocalDate.now();
+
+        if (this.observacao == null)
+            this.observacao = "";
+
+        return dao.gravar(this, conexao);
     }
 
-    public Membro alterar(Membro membro) {
-        if (dao.alterar(membro))
-            return membro;
-        throw new RuntimeException("Erro ao atualizar membro no banco de dados.");
+    public Membro atualizar(int id, Membro membroDetails, Conexao conexao) {
+        Membro membroBanco = dao.get(id, conexao);
+        if (membroBanco == null)
+            throw new RuntimeException("Membro não encontrado para atualização.");
+
+        if (membroDetails == null)
+            throw new RuntimeException("Dados inválidos.");
+
+        membroBanco.setObservacao(membroDetails.getObservacao());
+        membroBanco.setDtFim(membroDetails.getDtFim());
+
+        if (dao.alterar(membroBanco, conexao))
+            return membroBanco;
+        throw new RuntimeException("Erro ao atualizar dados do membro.");
     }
 
-    public boolean excluir(Integer id) {
-        return dao.excluir(id);
+    public boolean excluir(Integer id, Conexao conexao) {
+        if (id == null || id <= 0)
+            throw new RuntimeException("ID inválido.");
+        return dao.excluir(id, conexao);
     }
 }

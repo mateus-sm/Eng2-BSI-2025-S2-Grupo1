@@ -23,9 +23,8 @@ public class FinalizarAtividadesController {
 
         CriarRealizacaoAtividades existente = atividadeModel.buscarPorId(dadosNovos.getId(), conexao);
 
-        if (existente == null) {
+        if (existente == null)
             return false;
-        }
 
         if (dadosNovos.getDtIni() != null)
             existente.setDtIni(dadosNovos.getDtIni());

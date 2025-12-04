@@ -75,6 +75,11 @@ h2 {
     animation: shake 0.3s ease-in-out;
 }
 
+.required-field::after {
+    content: " *";
+    color: #d60000;
+}
+
 /* Nova classe para a mensagem de texto */
 .error-msg {
     color: #dc3545;

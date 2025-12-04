@@ -1,25 +1,87 @@
-.container {
-    max-width: 450px;
-    padding: 30px;
+/* Reset básico e Fonte */
+body {
+    font-family: 'Poppins', sans-serif;
+    /* Fundo cinza suave para destacar os cards brancos e reduzir o brilho */
+    background-color: #e9ecef;
+    min-height: 100vh;
 }
 
-.menu-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
+/* Títulos das seções */
+.tracking-wide {
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    color: #495057; /* Cinza chumbo */
+    margin-left: 5px;
+}
+
+/* --- LOGO BRANCO ---
+   Transforma a imagem do brasão em branco puro para contrastar com o menu preto.
+   Filtro: Grayscale (tira cor) -> Brightness 0 (vira preto) -> Invert 1 (vira branco)
+*/
+.logo-white {
+    filter: grayscale(100%) brightness(0) invert(1);
+    opacity: 0.95;
+}
+
+/* Estilo do Card Minimalista */
+.card-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 8px; /* Cantos levemente arredondados */
+    padding: 24px;
     text-decoration: none;
+    color: #212529; /* Texto quase preto */
+
+    /* Sombra suave e borda branca para "saltar" do fundo cinza */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    border: 1px solid #fff;
+
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 100%;
+    min-height: 120px;
+}
+
+/* Ícone neutro */
+.icon-large {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: #6c757d; /* Cinza médio (neutro) */
+    transition: all 0.3s ease;
+}
+
+/* Efeito Hover: Realce Preto */
+.card-menu:hover {
+    transform: translateY(-5px); /* Sobe um pouco */
+    box-shadow: 0 12px 20px rgba(0,0,0,0.1); /* Sombra mais forte */
+
+    /* Borda preta fina e texto preto */
+    border-color: #000;
+    color: #000;
+}
+
+/* Ao passar o mouse, o ícone também fica preto */
+.card-menu:hover .icon-large {
+    color: #000;
+    transform: scale(1.1); /* Aumenta levemente */
+}
+
+/* Texto do card */
+.card-menu span {
     font-weight: 500;
-    width: 100%;
-    padding: 10px 5px;
     font-size: 0.9rem;
+    text-align: center;
 }
 
-.menu-btn:hover {
-    background-color: #0056b3;
-}
-
-.logout-button {
-    width: 100%;
-    margin-top: 20px;
-    padding: 10px;
+/* Ajustes para Telas Pequenas (Mobile) */
+@media (max-width: 576px) {
+    .card-menu {
+        padding: 15px;
+        min-height: 100px;
+    }
+    .icon-large {
+        font-size: 1.6rem;
+    }
 }

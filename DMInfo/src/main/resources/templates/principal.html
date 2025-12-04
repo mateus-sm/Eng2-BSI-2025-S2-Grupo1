@@ -3,125 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Principal - DM Info</title>
-
+    <title>Dashboard - DM Info</title>
     <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/styles/login.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles/principal.css}">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 </head>
 <body>
 
-<div class="container">
-    <div class="logo">
-        <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow border-bottom border-secondary">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center gap-2">
+            <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo" height="40" class="logo-white">
+            <span class="fw-bold text-white">DM Info</span>
+        </a>
+
+        <div class="d-flex align-items-center">
+            <span class="me-3 d-none d-md-block" style="color: #adb5bd; font-size: 0.9rem;">Bem-vindo, Irmão!</span>
+            <form th:action="@{/logout}" method="POST" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5">
+
+    <h6 class="text-uppercase fw-bold mb-3 small tracking-wide">Gestão & Secretaria</h6>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/membros}" class="card-menu">
+                <i class="fas fa-users icon-large"></i>
+                <span>Membros</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/administradores}" class="card-menu">
+                <i class="fas fa-user-shield icon-large"></i>
+                <span>Administradores</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/lancarmembroativo}" class="card-menu">
+                <i class="fas fa-user-plus icon-large"></i>
+                <span>Lançar Ativo</span>
+            </a>
+        </div>
     </div>
 
-    <h1>DM Info</h1>
-    <h3>Escolha uma opção, Irmão!</h3>
-
-    <div class="main-menu">
-        <div class="row g-2 mt-4">
-
-            <div class="col-6">
-                <a th:href="@{/app/membros}" class="btn btn-primary btn-block menu-btn">Gerenciar Membros</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/calendario}" class="btn btn-primary btn-block menu-btn">Visualizar Calendário</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/evento}" class="btn btn-primary btn-block menu-btn">Gerenciar Eventos</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/frequencia_atividade}" class="btn btn-primary btn-block menu-btn">Frequência Atividades</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/conquista}" class="btn btn-primary btn-block menu-btn">Conquistas</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/atribuirconquista}" class="btn btn-primary btn-block menu-btn">Atribuir Conquista</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/distribuir-recursos}" class="btn btn-primary btn-block menu-btn">Distribuir Recursos</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/doacao}" class="btn btn-primary btn-block menu-btn">Gerenciar Doações</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/doador}" class="btn btn-primary btn-block menu-btn">Gerenciar Doadores</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/finalizar-atividades}" class="btn btn-primary btn-block menu-btn">Finalizar Atividades</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/enviarfotosatividade}" class="btn btn-primary btn-block menu-btn">Enviar Fotos</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/administradores}" class="btn btn-primary btn-block menu-btn">Gerenciar Admins</a>
-            </div>
-
-            <div class="col-6">
-                <a th:href="@{/app/parametrizacao}" class="btn btn-primary btn-block menu-btn">Parametrização</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/parametrizacao/exibir}" class="btn btn-primary btn-block menu-btn">Exibir Parâmetros</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/mensalidade}" class="btn btn-primary btn-block menu-btn">Mensalidade</a>
-            </div>
-            <div class="col-6">
-                <a th:href="@{/app/lancarmembroativo}" class="btn btn-primary btn-block menu-btn">Lançar Membro Ativo</a>
-            </div>
-
+    <h6 class="text-uppercase fw-bold mb-3 small tracking-wide">Atividades</h6>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/calendario}" class="card-menu">
+                <i class="fas fa-calendar-day icon-large"></i>
+                <span>Calendário</span>
+            </a>
         </div>
-
-        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
-            <div id="toastAlerta" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body d-flex align-items-center gap-2">
-                        <i class="fas fa-exclamation-circle"></i> <span id="toastMensagem">Mensagem de erro...</span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/evento}" class="card-menu">
+                <i class="fas fa-bullhorn icon-large"></i>
+                <span>Eventos</span>
+            </a>
         </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/frequencia_atividade}" class="card-menu">
+                <i class="fas fa-clipboard-list icon-large"></i>
+                <span>Frequência</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/finalizar-atividades}" class="card-menu">
+                <i class="fas fa-check-double icon-large"></i>
+                <span>Finalizar Ativ.</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/enviarfotosatividade}" class="card-menu">
+                <i class="fas fa-camera icon-large"></i>
+                <span>Fotos</span>
+            </a>
+        </div>
+    </div>
 
-        <script th:inline="javascript">
-            document.addEventListener('DOMContentLoaded', () => {
-                /* O Thymeleaf vai injetar o valor da variável 'erroPermissao' aqui.
-                   Se não tiver erro, a variável será null.
-                */
-                const msgErro = /*[[${erroPermissao}]]*/ null;
+    <h6 class="text-uppercase fw-bold mb-3 small tracking-wide">Financeiro</h6>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/doacao}" class="card-menu">
+                <i class="fas fa-hand-holding-usd icon-large"></i>
+                <span>Doações</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/doador}" class="card-menu">
+                <i class="fas fa-user-tie icon-large"></i>
+                <span>Doadores</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/mensalidade}" class="card-menu">
+                <i class="fas fa-file-invoice-dollar icon-large"></i>
+                <span>Mensalidades</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/distribuir-recursos}" class="card-menu">
+                <i class="fas fa-dolly icon-large"></i>
+                <span>Recursos</span>
+            </a>
+        </div>
+    </div>
 
-                if (msgErro) {
-                    const toastEl = document.getElementById('toastAlerta');
-                    const toastMsg = document.getElementById('toastMensagem');
+    <h6 class="text-uppercase fw-bold mb-3 small tracking-wide">Configurações</h6>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/conquista}" class="card-menu">
+                <i class="fas fa-trophy icon-large"></i>
+                <span>Conquistas</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/atribuirconquista}" class="card-menu">
+                <i class="fas fa-medal icon-large"></i>
+                <span>Atribuir Conq.</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/parametrizacao}" class="card-menu">
+                <i class="fas fa-sliders-h icon-large"></i>
+                <span>Parâmetros</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/app/parametrizacao/exibir}" class="card-menu">
+                <i class="fas fa-eye icon-large"></i>
+                <span>Ver Parâmetros</span>
+            </a>
+        </div>
+    </div>
 
-                    if(toastEl && toastMsg) {
-                        toastMsg.textContent = msgErro;
-                        const toast = new bootstrap.Toast(toastEl, { delay: 5000 }); // 5 segundos
-                        toast.show();
-                    }
-                }
-            });
-        </script>
+</div>
 
-        <form th:action="@{/logout}" method="POST">
-            <button type="submit" class="btn btn-danger logout-button">Sair</button>
-        </form>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    <div id="toastAlerta" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="fas fa-lock"></i> <span id="toastMensagem">Mensagem de erro...</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
     </div>
 </div>
 
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const msgErro = /*[[${erroPermissao}]]*/ null;
+        if (msgErro) {
+            const toastEl = document.getElementById('toastAlerta');
+            const toastMsg = document.getElementById('toastMensagem');
+            if(toastEl && toastMsg) {
+                toastMsg.textContent = msgErro;
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            }
+        }
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

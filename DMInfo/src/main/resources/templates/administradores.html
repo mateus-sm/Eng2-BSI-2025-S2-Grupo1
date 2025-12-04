@@ -14,7 +14,7 @@
 <body>
 
 <a href="/app/principal" class="btn-home">
-    <i class="fas fa-home"></i> Página Principal
+    <i class="bi bi-house-door-fill"></i> Página Principal
 </a>
 
 <div class="page-header">
@@ -29,6 +29,27 @@
         <button class="btn btn-primary" id="btn-novo-administrador">
             <i class="bi bi-plus-lg"></i> Novo Administrador
         </button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-2">
+            <label class="form-label">Nome:</label>
+            <input type="text" id="filtroNome" class="form-control" placeholder="Buscar por nome...">
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label class="form-label">A partir de:</label>
+            <input type="date" id="filtroDataInicial" class="form-control">
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label class="form-label">Até:</label>
+            <input type="date" id="filtroDataFinal" class="form-control">
+        </div>
+
+        <div class="col-md-2 mb-2 mt-4">
+            <button class="btn btn-primary w-100" onclick="carregarAdministradoresComFiltro()">Filtrar</button>
+        </div>
     </div>
 
     <div class="table-container">
@@ -111,22 +132,22 @@
                             </div>
 
                             <div class="col-6 mb-3">
-                                <label class="form-label">Telefone</label>
+                                <label class="form-label">Telefone *</label>
                                 <input type="text" class="form-control" id="novo_telefone">
                             </div>
 
                             <div class="col-6 mb-3">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">Email *</label>
                                 <input type="email" class="form-control" id="novo_email">
                             </div>
 
                             <div class="col-6 mb-3">
-                                <label class="form-label">CPF</label>
+                                <label class="form-label">CPF *</label>
                                 <input type="text" class="form-control" id="novo_cpf">
                             </div>
 
                             <div class="col-6 mb-3">
-                                <label class="form-label">Data de Nascimento</label>
+                                <label class="form-label">Data de Nascimento *</label>
                                 <input type="text" id="novo_dtnasc" placeholder="(dd/mm/aaaa)" class="form-control">
                             </div>
 

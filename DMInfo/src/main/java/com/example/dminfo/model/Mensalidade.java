@@ -5,10 +5,13 @@ import com.example.dminfo.dao.MensalidadeDAO;
 import com.example.dminfo.util.Conexao;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public class Mensalidade {
 
     private int id_mensalidade;
@@ -21,10 +24,10 @@ public class Mensalidade {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nome_membro;
 
-    @JsonIgnore
+    @Autowired
     private MensalidadeDAO dao = new MensalidadeDAO();
 
-    @JsonIgnore
+    @Autowired
     private MembroDAO membroDAO = new MembroDAO();
 
     public Mensalidade() {}
@@ -49,6 +52,10 @@ public class Mensalidade {
 
         if (membroDAO.get(this.id_membro) == null) {
             throw new RuntimeException("Membro não encontrado no banco");
+        }
+
+        if (this.dataPagamento.isAfter(LocalDate.now()) ) {
+            throw new RuntimeException("Data do pagamento não pode ser no futuro");
         }
 
         Mensalidade duplicada = dao.buscarPorMembroMesAno(this.id_membro, this.mes, this.ano,conexao);
@@ -78,23 +85,23 @@ public class Mensalidade {
         return dao.excluir(this.id_mensalidade,conexao);
     }
 
-    public static Mensalidade buscarPorId(Integer id, Conexao conexao) {
+    public Mensalidade buscarPorId(Integer id, Conexao conexao) {
         return new MensalidadeDAO().buscarPorId(id, conexao);
     }
 
-    public static List<Mensalidade> listarTodos(String filtroNome, Conexao conexao) {
+    public List<Mensalidade> listarTodos(String filtroNome, Conexao conexao) {
         return new MensalidadeDAO().listar(filtroNome, conexao);
     }
 
-    public static List<Mensalidade> listarPorMesAno(int mes, int ano, Conexao conexao) {
+    public List<Mensalidade> listarPorMesAno(int mes, int ano, Conexao conexao) {
         return new MensalidadeDAO().listarMesAno(mes, ano, conexao);
     }
 
-    public static List<Mensalidade> listarPorMembro(Integer idMembro, Conexao conexao) {
+    public List<Mensalidade> listarPorMembro(Integer idMembro, Conexao conexao) {
         return new MensalidadeDAO().listarMembro(idMembro, conexao);
     }
 
-    public static List<Mensalidade> filtrarAvancado(String nome, String dataIni, String dataFim, Conexao conexao) {
+    public List<Mensalidade> filtrarAvancado(String nome, String dataIni, String dataFim, Conexao conexao) {
         return new MensalidadeDAO().filtrar(nome, dataIni, dataFim, conexao);
     }
 

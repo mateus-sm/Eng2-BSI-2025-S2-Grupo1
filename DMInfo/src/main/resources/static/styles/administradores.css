@@ -11,3 +11,239 @@ body {
 #form-administrador:not(.edit-mode) #campo-dtFim {
     display: none;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #fff;
+    color: #333;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+.btn-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: #f0f0f0;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.btn-home:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+@media (max-width: 576px) {
+    .btn-home {
+        top: 10px;
+        left: 10px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
+
+.page-header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.logo-img {
+    width: 50px;
+    height: auto;
+    filter: brightness(0);
+    margin-bottom: 15px;
+}
+
+h2 {
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    background-color: #f0f0f0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    height: 45px;
+    padding: 0 20px;
+    color: #555;
+    font-size: 0.95rem;
+    box-shadow: none !important;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    background-color: #e8e8e8 !important;
+    outline: none;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: none !important;
+}
+
+textarea.form-control {
+    height: auto;
+    padding-top: 15px;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
+.btn-primary {
+    background-color: #000 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    padding: 0 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #333 !important;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0 !important;
+    color: #555 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 45px;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0 !important;
+}
+
+.btn-danger {
+    border-radius: 10px !important;
+    height: 45px;
+    font-weight: 600;
+}
+
+.table-container {
+    margin-top: 30px;
+}
+
+.table {
+    --bs-table-bg: transparent;
+}
+
+.table thead th {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    font-weight: 500;
+    padding: 15px;
+}
+
+.table thead th:first-child { border-top-left-radius: 10px; }
+.table thead th:last-child { border-top-right-radius: 10px; }
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #fafafa;
+}
+
+#tabela-membros .btn-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-sm {
+    height: 38px;
+    min-width: auto;
+    border-radius: 8px !important;
+    font-size: 0.85rem;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-outline-primary {
+    color: #000;
+    border-color: #000;
+    border-width: 1.5px;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+    border-width: 1.5px;
+    font-weight: 500;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: #000;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+#form-membro:not(.edit-mode) #campo-dtFim {
+    display: none;
+}

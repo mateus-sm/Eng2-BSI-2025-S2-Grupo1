@@ -12,11 +12,6 @@ import java.util.List;
 @Repository
 public class ConquistaDAO implements IDAO<Conquista> {
 
-//    CREATE TABLE IF NOT EXISTS conquista (
-//            id_conquista SERIAL PRIMARY KEY,
-//            descricao VARCHAR(50) NULL
-//    );
-
     private Conquista buildConquista(ResultSet rs) throws SQLException {
         Conquista c = new Conquista();
         c.setId(rs.getInt("id_conquista"));

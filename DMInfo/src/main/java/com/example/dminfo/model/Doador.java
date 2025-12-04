@@ -41,41 +41,28 @@ public class Doador {
         this.contato = contato;
     }
 
-    // Getters e Setters
     public int getId() {return id;}
     public void setId(int id) {this.id = id;}
-
     public String getNome() {return nome;}
     public void setNome(String nome) {this.nome = nome;}
-
     public String getDocumento() {return documento;}
     public void setDocumento(String documento) {this.documento = documento;}
-
     public String getRua() {return rua;}
     public void setRua(String rua) {this.rua = rua;}
-
     public String getBairro() {return bairro;}
     public void setBairro(String bairro) {this.bairro = bairro;}
-
     public String getCidade() {return cidade;}
     public void setCidade(String cidade) {this.cidade = cidade;}
-
     public String getUf() {return uf;}
     public void setUf(String uf) {this.uf = uf;}
-
     public String getCep() {return cep;}
     public void setCep(String cep) {this.cep = cep;}
-
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
-
     public String getTelefone() {return telefone;}
     public void setTelefone(String telefone) {this.telefone = telefone;}
-
     public String getContato() {return contato;}
     public void setContato(String contato) {this.contato = contato;}
-
-    // --- Métodos de Lógica (Pattern do Projeto) ---
 
     public List<Doador> listar(String filtro, Conexao conexao) {
         return dao.readAll(filtro, conexao);
@@ -85,28 +72,50 @@ public class Doador {
         return dao.getById(id, conexao);
     }
 
-    public Doador getByDocumento(String documento, Conexao conexao) {
-        return dao.getByDocumento(documento, conexao);
+    public Doador getByDocumento(Doador doador, Conexao conexao) {
+        return dao.read(doador, conexao);
     }
 
     public Doador salvar(Doador doador, Conexao conexao) {
-        if (doador == null) {
-            throw new RuntimeException("Doador nulo");
+        if (doador == null || doador.getNome() == null || doador.getNome().isBlank()) {
+            throw new RuntimeException("Dados do doador inválidos.");
         }
+
+        Doador existente = dao.read(doador, conexao);
+        if (existente != null) {
+            throw new RuntimeException("Já existe um doador com este documento.");
+        }
+
         return dao.create(doador, conexao);
     }
 
-    public Doador alterar(Doador doador, Conexao conexao) {
-        Doador d = dao.update(doador, conexao);
+    public Doador update(Integer id, Doador doadorDetalhes, Conexao conexao) {
+        Doador doadorBanco = dao.getById(id, conexao);
+        if (doadorBanco == null) {
+            throw new RuntimeException("Doador não encontrado para o ID: " + id);
+        }
+
+        doadorBanco.setNome(doadorDetalhes.getNome());
+        doadorBanco.setDocumento(doadorDetalhes.getDocumento());
+        doadorBanco.setRua(doadorDetalhes.getRua());
+        doadorBanco.setBairro(doadorDetalhes.getBairro());
+        doadorBanco.setCidade(doadorDetalhes.getCidade());
+        doadorBanco.setUf(doadorDetalhes.getUf());
+        doadorBanco.setCep(doadorDetalhes.getCep());
+        doadorBanco.setEmail(doadorDetalhes.getEmail());
+        doadorBanco.setTelefone(doadorDetalhes.getTelefone());
+        doadorBanco.setContato(doadorDetalhes.getContato());
+
+        Doador d = dao.update(doadorBanco, conexao);
         if (d != null) {
-            return doador;
+            return doadorBanco;
         }
         throw new RuntimeException("Erro ao atualizar doador.");
     }
 
     public boolean excluir(Integer id, Conexao conexao) {
-        Doador d = dao.getById(id, conexao);
-        if (d == null) {
+        Doador doador = dao.getById(id, conexao);
+        if (doador == null) {
             throw new RuntimeException("Doador não encontrado.");
         }
         return dao.delete(id, conexao);

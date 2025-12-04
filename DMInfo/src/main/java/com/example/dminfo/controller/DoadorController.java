@@ -27,47 +27,33 @@ public class DoadorController {
     }
 
     public Doador salvar(Doador doador) {
+        if (doador == null || doador.getNome() == null || doador.getNome().isEmpty()) {
+            throw new RuntimeException("Objeto Doador inconsistente.");
+        }
+
         Conexao conexao = SingletonDB.getConexao();
 
-        // Validação de Duplicidade
-        if (doadorModel.getByDocumento(doador.getDocumento(), conexao) != null)
+        Doador existente = doadorModel.getByDocumento(doador, conexao);
+        if (existente != null) {
             throw new RuntimeException("Já existe um doador com este documento.");
+        }
 
         return doadorModel.salvar(doador, conexao);
     }
 
-    public Doador atualizar(Integer id, Doador doadorDetalhes) {
-        Conexao conexao = SingletonDB.getConexao();
-
-        Doador doadorExistente = doadorModel.getById(id, conexao);
-        if (doadorExistente == null)
-            throw new RuntimeException("Doador não encontrado com id: " + id);
-
-        // Validação de Duplicidade na edição
-        Doador outroComMesmoDoc = doadorModel.getByDocumento(doadorDetalhes.getDocumento(), conexao);
-        if (outroComMesmoDoc != null && outroComMesmoDoc.getId() != id) {
-            throw new RuntimeException("O novo documento já pertence a outro doador.");
+    public boolean atualizar(Doador doador) {
+        if (doador == null || doador.getId() == 0) {
+            throw new RuntimeException("Objeto Doador inconsistente ou ID inválido.");
         }
 
-        // Atualiza os dados do objeto existente com os novos detalhes
-        doadorExistente.setNome(doadorDetalhes.getNome());
-        doadorExistente.setDocumento(doadorDetalhes.getDocumento());
-        doadorExistente.setRua(doadorDetalhes.getRua());
-        doadorExistente.setBairro(doadorDetalhes.getBairro());
-        doadorExistente.setCidade(doadorDetalhes.getCidade());
-        doadorExistente.setUf(doadorDetalhes.getUf());
-        doadorExistente.setCep(doadorDetalhes.getCep());
-        doadorExistente.setEmail(doadorDetalhes.getEmail());
-        doadorExistente.setTelefone(doadorDetalhes.getTelefone());
-        doadorExistente.setContato(doadorDetalhes.getContato());
-
-        return doadorModel.alterar(doadorExistente, conexao);
+        Doador d = doadorModel.update(doador.getId(), doador, SingletonDB.getConexao());
+        return d != null;
     }
 
-    public boolean excluir(Integer id){
-        if (id == null || id == 0) {
-            throw new RuntimeException("ID inválido.");
+    public void excluir(Integer id) {
+        if (id == null) {
+            throw new RuntimeException("ID inválido para exclusão.");
         }
-        return doadorModel.excluir(id, SingletonDB.getConexao());
+        doadorModel.excluir(id, SingletonDB.getConexao());
     }
 }

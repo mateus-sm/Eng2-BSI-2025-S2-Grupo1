@@ -1,6 +1,5 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.Doacao;
 import com.example.dminfo.model.Doador;
@@ -9,7 +8,6 @@ import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,7 +20,7 @@ public class DoacaoController {
     private Doador doadorModel;
 
     @Autowired
-    private AdministradorDAO adminDAO;
+    private Administrador administradorModel;
 
     public List<Doacao> listar() {
         return doacaoModel.listar("", SingletonDB.getConexao());
@@ -39,17 +37,22 @@ public class DoacaoController {
     public Doacao salvar(Doacao doacao) {
         Conexao conexao = SingletonDB.getConexao();
 
-        if (doacao == null || doacao.getId_doacao() != 0)
-            throw new RuntimeException("Doação inválida para criação.");
+        if (doacao == null || doacao.getId_doador() == null || doacao.getId_admin() == null) {
+            throw new RuntimeException("Dados da doação incompletos.");
+        }
 
-        validarDependencias(doacao, conexao);
+        Doador doador = doadorModel.getById(doacao.getId_doador().getId(), conexao);
+        if (doador == null) {
+            throw new RuntimeException("Doador informado não encontrado.");
+        }
 
-        // Define data atual
-        doacao.setData(LocalDate.now());
+        Administrador admin = administradorModel.buscarPorId(doacao.getId_admin().getId(), conexao);
+        if (admin == null) {
+            throw new RuntimeException("Administrador informado não encontrado.");
+        }
 
-        // Validação de negócio
-        if (doacao.getValor() <= 0)
-            throw new RuntimeException("O valor da doação deve ser positivo.");
+        doacao.setId_doador(doador);
+        doacao.setId_admin(admin);
 
         return doacaoModel.salvar(doacao, conexao);
     }
@@ -57,18 +60,28 @@ public class DoacaoController {
     public Doacao atualizar(Doacao doacao) {
         Conexao conexao = SingletonDB.getConexao();
 
-        if (doacao == null || doacao.getId_doacao() == 0)
+        if (doacao == null || doacao.getId_doacao() == 0) {
             throw new RuntimeException("Doação inválida para atualização.");
+        }
 
-        if (doacaoModel.getById(doacao.getId_doacao(), conexao) == null)
-            throw new RuntimeException("Doação não encontrada para atualização.");
+        if (doacaoModel.getById(doacao.getId_doacao(), conexao) == null) {
+            throw new RuntimeException("Doação não encontrada.");
+        }
 
-        validarDependencias(doacao, conexao);
+        if (doacao.getId_doador() != null && doacao.getId_doador().getId() != 0) {
+            Doador d = doadorModel.getById(doacao.getId_doador().getId(), conexao);
+            if (d == null) throw new RuntimeException("Novo Doador não encontrado.");
+            doacao.setId_doador(d);
+        }
 
-        if (doacao.getValor() <= 0)
-            throw new RuntimeException("O valor da doação deve ser positivo.");
+        if (doacao.getId_admin() != null && doacao.getId_admin().getId() != 0) {
+            Administrador a = administradorModel.buscarPorId(doacao.getId_admin().getId(), conexao);
+            if (a == null) throw new RuntimeException("Novo Administrador não encontrado.");
+            doacao.setId_admin(a);
+        }
 
-        doacaoModel.alterar(doacao, conexao);
+        doacaoModel.update(doacao.getId_doacao(), doacao, conexao);
+
         return doacao;
     }
 
@@ -77,30 +90,5 @@ public class DoacaoController {
             throw new RuntimeException("ID inválido para exclusão.");
         }
         return doacaoModel.excluir(id, SingletonDB.getConexao());
-    }
-
-    // Passamos a conexão para poder reutilizá-la nas consultas
-    private void validarDependencias(Doacao doacao, Conexao conexao) {
-        if (doacao.getId_doador() == null || doacao.getId_doador().getId() == 0)
-            throw new RuntimeException("O ID do Doador é obrigatório.");
-
-        if (doacao.getId_admin() == null || doacao.getId_admin().getId() == 0)
-            throw new RuntimeException("O ID do Administrador é obrigatório.");
-
-        // --- CORREÇÃO AQUI ---
-        // Usamos doadorModel.getById e passamos a conexão
-        Doador doador = doadorModel.getById(doacao.getId_doador().getId(), conexao);
-        if (doador == null)
-            throw new RuntimeException("Doador não encontrado.");
-
-        // Como AdminDAO ainda é o antigo (provavelmente), usamos o método antigo dele
-        // Se AdminDAO já foi refatorado, mude para adminModel.getById(id, conexao)
-        Administrador admin = adminDAO.get(doacao.getId_admin().getId(), conexao);
-        if (admin == null)
-            throw new RuntimeException("Administrador não encontrado.");
-
-        // Atualiza objetos completos para garantir consistência
-        doacao.setId_doador(doador);
-        doacao.setId_admin(admin);
     }
 }

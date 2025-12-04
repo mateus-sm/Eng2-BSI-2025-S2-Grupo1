@@ -40,7 +40,7 @@ public class DoacaoDAO {
         return doacao;
     }
 
-    public Doacao get(int id, Conexao conexao) {
+    public Doacao getById(int id, Conexao conexao) {
         String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
                 "FROM doacao d " +
                 "JOIN doador don ON d.id_doador = don.id_doador " +
@@ -60,7 +60,6 @@ public class DoacaoDAO {
 
     public List<Doacao> readAll(String filtro, Conexao conexao) {
         List<Doacao> doacoes = new ArrayList<>();
-        // O filtro pode ser adaptado conforme necessidade, aqui mantive vazio ou genérico
         String whereClause = (filtro != null && !filtro.isEmpty()) ? filtro : "";
 
         String sql = "SELECT d.*, don.nome AS doador_nome, a.id_usuario, u.nome AS usuario_nome " +
@@ -81,7 +80,7 @@ public class DoacaoDAO {
         return doacoes;
     }
 
-    public Doacao gravar(Doacao doacao, Conexao conexao) {
+    public Doacao create(Doacao doacao, Conexao conexao) {
         if (doacao == null) return null;
 
         String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
@@ -109,7 +108,7 @@ public class DoacaoDAO {
         return null;
     }
 
-    public Doacao atualizar(Doacao doacao, Conexao conexao) {
+    public Doacao update(Doacao doacao, Conexao conexao) {
         if (doacao == null) return null;
 
         String obsOriginal = doacao.getObservacao() != null ? doacao.getObservacao() : "";
@@ -133,7 +132,7 @@ public class DoacaoDAO {
         return doacao;
     }
 
-    public boolean excluir(int id, Conexao conexao) {
+    public boolean delete(int id, Conexao conexao) {
         String sql = String.format("DELETE FROM doacao WHERE id_doacao = %d", id);
         return conexao.manipular(sql);
     }

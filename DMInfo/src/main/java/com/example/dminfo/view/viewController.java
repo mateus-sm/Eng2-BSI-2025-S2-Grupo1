@@ -107,7 +107,7 @@ public class viewController {
         Administrador admin = getAdminLogado(session);
 
         if (admin == null) {
-            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Somente administradores podem acessar a gestão de doadores.");
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado! \nSomente administradores podem acessar a gestão de doadores.");
             return "redirect:/app/principal";
         }
 
@@ -120,7 +120,7 @@ public class viewController {
         Administrador admin = getAdminLogado(session);
 
         if (admin == null) {
-            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Somente administradores podem acessar a gestão de doações.");
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado! \nSomente administradores podem acessar a gestão de doações.");
             return "redirect:/app/principal";
         }
 
@@ -133,7 +133,7 @@ public class viewController {
         Administrador admin = getAdminLogado(session);
 
         if (admin == null) {
-            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Você precisa ser administrador para registrar doações.");
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado! \nVocê precisa ser administrador para registrar doações.");
             return "redirect:/app/principal";
         }
 

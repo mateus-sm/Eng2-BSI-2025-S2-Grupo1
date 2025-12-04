@@ -140,4 +140,9 @@ public class viewController {
         model.addAttribute("idAdminLogado", admin.getId());
         return "doacao-form";
     }
+
+    @GetMapping("/app/lancarmembroativo")
+    public String paginaLancarmembroativo() {
+        return "lancarmembroativo";
+    }
 }

@@ -1,11 +1,14 @@
 package com.example.dminfo.view;
 
 import com.example.dminfo.controller.ParametrosController;
+import com.example.dminfo.model.Administrador;
+import com.example.dminfo.util.SingletonDB;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class viewController {
@@ -13,7 +16,10 @@ public class viewController {
     @Autowired
     private ParametrosController parametrosController;
 
-    private static final String ADMIN_ID_SESSION_KEY = "ADMIN_ID_SESSION";
+    @Autowired
+    private Administrador adminModel;
+
+    private static final String USUARIO_SESSION_KEY = "idUsuarioLogado";
 
     @GetMapping("/login")
     public String paginaLogin(Model model) {
@@ -63,26 +69,6 @@ public class viewController {
         return "administradores";
     }
 
-    @GetMapping("/app/doador")
-    public String paginaGerenciarDoador(Model model, HttpSession session) {
-        Object adminId = session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (adminId == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("idAdminLogado", adminId);
-        return "doador";
-    }
-
-    @GetMapping("/app/doacao")
-    public String paginaGerenciarDoacao(Model model, HttpSession session) {
-        Object adminId = session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (adminId == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("idAdminLogado", adminId);
-        return "doacao";
-    }
-
     @GetMapping("/app/conquista")
     public String paginaGerenciarConquista() {
         return "conquista";
@@ -99,19 +85,59 @@ public class viewController {
     @GetMapping("/app/atribuirconquista")
     public String paginaAtribuirConquista() {return "atribuir-conquista";}
 
-    @GetMapping("/app/doacao-form")
-    public String paginaGerenciarDoacaoForm(Model model, HttpSession session) {
-        Object adminId = session.getAttribute(ADMIN_ID_SESSION_KEY);
-        if (adminId == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("idAdminLogado", adminId);
-
-        return "doacao-form";
-    }
-
     @GetMapping("/app/principal")
     public String paginaPrincipal() {
         return "principal";
+    }
+
+    private Administrador getAdminLogado(HttpSession session) {
+        Object idUsuarioObj = session.getAttribute(USUARIO_SESSION_KEY);
+
+        if (idUsuarioObj == null) {
+            return null;
+        }
+
+        Integer idUsuario = Integer.parseInt(idUsuarioObj.toString());
+
+        return adminModel.getByUsuario(idUsuario, SingletonDB.getConexao());
+    }
+
+    @GetMapping("/app/doador")
+    public String paginaGerenciarDoador(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Administrador admin = getAdminLogado(session);
+
+        if (admin == null) {
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Somente administradores podem acessar a gestão de doadores.");
+            return "redirect:/app/principal";
+        }
+
+        model.addAttribute("idAdminLogado", admin.getId());
+        return "doador";
+    }
+
+    @GetMapping("/app/doacao")
+    public String paginaGerenciarDoacao(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Administrador admin = getAdminLogado(session);
+
+        if (admin == null) {
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Somente administradores podem acessar a gestão de doações.");
+            return "redirect:/app/principal";
+        }
+
+        model.addAttribute("idAdminLogado", admin.getId());
+        return "doacao";
+    }
+
+    @GetMapping("/app/doacao-form")
+    public String paginaGerenciarDoacaoForm(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Administrador admin = getAdminLogado(session);
+
+        if (admin == null) {
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado: Você precisa ser administrador para registrar doações.");
+            return "redirect:/app/principal";
+        }
+
+        model.addAttribute("idAdminLogado", admin.getId());
+        return "doacao-form";
     }
 }

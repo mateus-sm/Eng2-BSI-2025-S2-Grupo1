@@ -22,9 +22,8 @@ public class LoginController {
     @Autowired
     private UsuarioDAO usuarioDAO;
 
-    private static final String ADMIN_ID_SESSION_KEY = "ADMIN_ID_SESSION";
+    private static final String USUARIO_SESSION_KEY = "idUsuarioLogado";
 
-    // === LOGIN ===
     @PostMapping("/login")
     public String processLogin(
             @RequestParam("usuario") String usuario,
@@ -37,8 +36,8 @@ public class LoginController {
 
         if (usuarioEncontrado != null && usuarioEncontrado.getSenha().equals(senha)) {
             // Login bem-sucedido
-            session.setAttribute(ADMIN_ID_SESSION_KEY, usuarioEncontrado.getId());
-            return "principal";
+            session.setAttribute(USUARIO_SESSION_KEY, usuarioEncontrado.getId());
+            return "redirect:/app/principal";
         } else {
             // Login falhou
             model.addAttribute("erro", "Usuário ou senha inválidos.");

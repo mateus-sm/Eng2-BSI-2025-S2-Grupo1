@@ -81,6 +81,37 @@
 
         </div>
 
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+            <div id="toastAlerta" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body d-flex align-items-center gap-2">
+                        <i class="fas fa-exclamation-circle"></i> <span id="toastMensagem">Mensagem de erro...</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', () => {
+                /* O Thymeleaf vai injetar o valor da variável 'erroPermissao' aqui.
+                   Se não tiver erro, a variável será null.
+                */
+                const msgErro = /*[[${erroPermissao}]]*/ null;
+
+                if (msgErro) {
+                    const toastEl = document.getElementById('toastAlerta');
+                    const toastMsg = document.getElementById('toastMensagem');
+
+                    if(toastEl && toastMsg) {
+                        toastMsg.textContent = msgErro;
+                        const toast = new bootstrap.Toast(toastEl, { delay: 5000 }); // 5 segundos
+                        toast.show();
+                    }
+                }
+            });
+        </script>
+
         <form th:action="@{/logout}" method="POST">
             <button type="submit" class="btn btn-danger logout-button">Sair</button>
         </form>

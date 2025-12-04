@@ -1,7 +1,9 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.model.Administrador;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,31 +11,45 @@ import java.util.List;
 @Service
 public class AdministradorController {
 
+    @Autowired
+    private Administrador adminModel;
+
     public Administrador buscar(int id) {
-        return Administrador.buscarPorId(id, SingletonDB.getConexao());
+        Administrador admin = adminModel.getById(id, SingletonDB.getConexao());
+        if (admin == null) {
+            throw new RuntimeException("Administrador não encontrado.");
+        }
+        return admin;
     }
 
     public List<Administrador> listar() {
-        return Administrador.listarTodos(SingletonDB.getConexao());
+        return adminModel.listarTodos(SingletonDB.getConexao());
     }
 
     public Administrador salvar(Administrador administrador) {
-        return administrador.salvar(SingletonDB.getConexao());
+        if (administrador == null || administrador.getUsuario() == null) {
+            throw new RuntimeException("Dados do administrador incompletos.");
+        }
+
+        adminModel.setUsuario(administrador.getUsuario());
+        adminModel.setDtIni(administrador.getDtIni());
+        adminModel.setDtFim(administrador.getDtFim());
+
+        return adminModel.salvar(SingletonDB.getConexao());
     }
 
     public Administrador update(int id, Administrador adminDetails) {
-        Administrador existente = Administrador.buscarPorId(id, SingletonDB.getConexao());
+        if (adminDetails == null) {
+            throw new RuntimeException("Dados inválidos para atualização.");
+        }
 
-        if (existente == null) return null;
-
-        existente.atualizarDtFim(adminDetails.getDtFim(),SingletonDB.getConexao());
-
-        return existente;
+        return adminModel.atualizarDtFim(id, adminDetails.getDtFim(), SingletonDB.getConexao());
     }
 
     public boolean excluir(int id) {
-        Administrador admin = new Administrador();
-        admin.setId(id);
-        return admin.excluir(SingletonDB.getConexao());
+        if (id <= 0) {
+            throw new RuntimeException("ID inválido.");
+        }
+        return adminModel.excluir(id, SingletonDB.getConexao());
     }
 }

@@ -14,11 +14,10 @@ public class ApiSessionInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) throws Exception {
 
-        HttpSession session = request.getSession(false);
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("ADMIN_ID_SESSION") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Acesso não autorizado.");
+        if (session == null || session.getAttribute("idUsuarioLogado") == null) {
+            response.sendRedirect("/login");
             return false;
         }
 

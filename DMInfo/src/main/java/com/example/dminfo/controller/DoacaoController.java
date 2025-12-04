@@ -46,7 +46,7 @@ public class DoacaoController {
             throw new RuntimeException("Doador informado não encontrado.");
         }
 
-        Administrador admin = administradorModel.buscarPorId(doacao.getId_admin().getId(), conexao);
+        Administrador admin = administradorModel.getById(doacao.getId_admin().getId(), conexao);
         if (admin == null) {
             throw new RuntimeException("Administrador informado não encontrado.");
         }
@@ -75,7 +75,7 @@ public class DoacaoController {
         }
 
         if (doacao.getId_admin() != null && doacao.getId_admin().getId() != 0) {
-            Administrador a = administradorModel.buscarPorId(doacao.getId_admin().getId(), conexao);
+            Administrador a = administradorModel.getById(doacao.getId_admin().getId(), conexao);
             if (a == null) throw new RuntimeException("Novo Administrador não encontrado.");
             doacao.setId_admin(a);
         }

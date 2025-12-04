@@ -3,7 +3,7 @@ package com.example.dminfo.model;
 import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.UsuarioDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Repository; // ou @Service
 import com.example.dminfo.util.Conexao;
 
 import java.time.LocalDate;
@@ -18,14 +18,12 @@ public class Administrador {
     private Usuario usuario;
 
     @Autowired
-    private AdministradorDAO dao = new AdministradorDAO();
+    private AdministradorDAO dao;
 
     @Autowired
-    private UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private UsuarioDAO usuarioDAO;
 
-    public Administrador() {
-
-    }
+    public Administrador() {}
 
     public Administrador(LocalDate dtIni, LocalDate dtFim, Usuario usuario) {
         this.dtIni = dtIni;
@@ -37,38 +35,48 @@ public class Administrador {
         if (usuarioDAO.get(this.usuario.getId()) == null) {
             throw new RuntimeException("Usuário não existente");
         }
-
         if (dao.getByUsuario(this.usuario.getId(), conexao) != null) {
             throw new RuntimeException("Usuário já é um Administrador");
         }
-
         return dao.gravar(this, conexao);
     }
 
-    public boolean atualizarDtFim(LocalDate novaDtFim, Conexao conexao) {
-        if (novaDtFim != null && novaDtFim.isBefore(this.dtIni)) {
+    public Administrador atualizarDtFim(int id, LocalDate novaDtFim, Conexao conexao) {
+        Administrador adminBanco = dao.get(id, conexao);
+        if (adminBanco == null) {
+            throw new RuntimeException("Administrador não encontrado.");
+        }
+
+        if (novaDtFim != null && adminBanco.getDtIni() != null && novaDtFim.isBefore(adminBanco.getDtIni())) {
             throw new RuntimeException("A data fim não pode ser menor que a data inicial.");
         }
 
-        this.dtFim = novaDtFim;
-        return dao.alterar(this, conexao);
-    }
+        adminBanco.setDtFim(novaDtFim);
 
-    public boolean excluir(Conexao conexao) {
-        int totalAdmins = dao.contar(conexao);
-
-        if (totalAdmins <= 1) {
-            throw new RuntimeException("Existe apenas um Administrador.");
+        if (dao.alterar(adminBanco, conexao)) {
+            return adminBanco;
         }
-        return dao.excluir(this.id, conexao);
+        throw new RuntimeException("Erro ao atualizar data fim.");
     }
 
-    public static Administrador buscarPorId(int id, Conexao conexao) {
-        return new AdministradorDAO().get(id, conexao);
+    public boolean excluir(int id, Conexao conexao) {
+        int totalAdmins = dao.contar(conexao);
+        if (totalAdmins <= 1) {
+            throw new RuntimeException("Existe apenas um Administrador. Não é possível excluir o último.");
+        }
+        return dao.excluir(id, conexao);
     }
 
-    public static List<Administrador> listarTodos(Conexao conexao) {
-        return new AdministradorDAO().get(conexao);
+    public Administrador getByUsuario(int idUsuario, Conexao conexao) {
+        return dao.getByUsuario(idUsuario, conexao);
+    }
+
+    public Administrador getById(int id, Conexao conexao) {
+        return dao.get(id, conexao);
+    }
+
+    public List<Administrador> listarTodos(Conexao conexao) {
+        return dao.get(conexao);
     }
 
     public int getId() {return id;}

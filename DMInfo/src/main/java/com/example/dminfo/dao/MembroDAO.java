@@ -2,7 +2,7 @@ package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.model.Usuario;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -27,23 +27,90 @@ public class MembroDAO {
 
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id_usuario"));
-        usuario.setNome(rs.getString("nome"));
+        try {
+            usuario.setNome(rs.getString("nome"));
+        } catch (SQLException ignore) {
 
+        }
         membro.setUsuario(usuario);
         return membro;
     }
 
-    public Membro gravar(Membro membro) {
-        String sql = String.format("INSERT INTO membro (dtini, dtfim, observacao, id_usuario) " +
-                        "VALUES ('%s', %s, '%s', %d) RETURNING id_membro",
+    public List<Membro> get(String termoBusca, Conexao conexao) {
+        List<Membro> membros = new ArrayList<>();
+        String filtroSQL = "";
+
+        if (termoBusca != null && !termoBusca.trim().isEmpty())
+            filtroSQL = " WHERE UPPER(u.nome) LIKE UPPER('%" + termoBusca.trim() + "%')";
+
+        String sql = """
+            SELECT 
+                m.id_membro, m.dtini, m.dtfim, m.observacao, m.id_usuario, u.nome
+            FROM membro m 
+            LEFT JOIN usuario u ON m.id_usuario = u.id_usuario
+        """ + filtroSQL + " ORDER BY u.nome";
+
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            if (rs != null)
+                while (rs.next())
+                    membros.add(buildMembro(rs));
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar Membros: " + e.getMessage());
+        }
+        return membros;
+    }
+
+    public Membro get(int id, Conexao conexao) {
+        String sql = """
+            SELECT 
+                m.id_membro, m.dtini, m.dtfim, m.observacao, m.id_usuario, u.nome
+            FROM membro m 
+            LEFT JOIN usuario u ON m.id_usuario = u.id_usuario
+            WHERE m.id_membro = """ + id;
+
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            if (rs != null && rs.next())
+                return buildMembro(rs);
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Membro por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Membro getByUsuario(int idUsuario, Conexao conexao) {
+        String sql = """
+            SELECT 
+                m.id_membro, m.dtini, m.dtfim, m.observacao, m.id_usuario, u.nome
+            FROM membro m 
+            LEFT JOIN usuario u ON m.id_usuario = u.id_usuario
+            WHERE m.id_usuario = """ + idUsuario;
+
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            if (rs != null && rs.next()) {
+                return buildMembro(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar Membro por Usuário: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Membro gravar(Membro membro, Conexao conexao) {
+        String dtFimVal = (membro.getDtFim() == null) ? "NULL" : "'" + membro.getDtFim().toString() + "'";
+
+        String sql = String.format(
+                "INSERT INTO membro (dtini, dtfim, observacao, id_usuario) VALUES ('%s', %s, '%s', %d) RETURNING id_membro",
                 membro.getDtIni().toString(),
-                membro.getDtFim() == null ? "NULL" : "'" + membro.getDtFim().toString() + "'",
+                dtFimVal,
                 membro.getObservacao(),
                 membro.getUsuario().getId()
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
         try {
+            ResultSet rs = conexao.consultar(sql);
             if (rs != null && rs.next()) {
                 membro.setId(rs.getInt("id_membro"));
                 return membro;
@@ -54,96 +121,20 @@ public class MembroDAO {
         return null;
     }
 
-    public boolean alterar(Membro membro) {
-        String sql = String.format("UPDATE membro SET observacao = '%s', dtfim = %s " +
-                        "WHERE id_membro = %d",
+    public boolean alterar(Membro membro, Conexao conexao) {
+        String dtFimVal = (membro.getDtFim() == null) ? "NULL" : "'" + membro.getDtFim().toString() + "'";
+
+        String sql = String.format(
+                "UPDATE membro SET observacao = '%s', dtfim = %s WHERE id_membro = %d",
                 membro.getObservacao(),
-                membro.getDtFim() == null ? "NULL" : "'" + membro.getDtFim().toString() + "'",
+                dtFimVal,
                 membro.getId()
         );
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public boolean excluir(int id) {
+    public boolean excluir(int id, Conexao conexao) {
         String sql = "DELETE FROM membro WHERE id_membro = " + id;
-        return SingletonDB.getConexao().manipular(sql);
-    }
-
-    public List<Membro> get(String termoBusca) {
-        List<Membro> membros = new ArrayList<>();
-        String filtroSQL = "";
-
-        if (termoBusca != null && !termoBusca.trim().isEmpty())
-            filtroSQL = " WHERE UPPER(u.nome) LIKE UPPER('%" + termoBusca.trim() + "%')";
-
-        String sql = "SELECT " +
-                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
-                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
-                "    u.nome AS nome " +
-                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " + filtroSQL;
-
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null) {
-                while (rs.next()) {
-                    membros.add(buildMembro(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("### ERRO AO LISTAR MEMBROS (DAO) ###");
-            e.printStackTrace();
-        }
-        return membros;
-    }
-
-    public Membro get(int id) {
-        String sql = "SELECT " +
-                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
-                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
-                "    u.nome AS nome " +
-                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " +
-                "WHERE m.id_membro = " + id;
-
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildMembro(rs);
-            }
-        } catch (SQLException e) {
-            System.err.println("### ERRO AO BUSCAR MEMBRO POR ID (DAO) ###");
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public boolean existsByUsuarioId(int usuarioId) {
-        String sql = "SELECT 1 FROM membro WHERE id_usuario = " + usuarioId;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return true;
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao verificar existência de Membro por Usuário: " + e.getMessage());
-        }
-        return false;
-    }
-
-    public Membro getPorUsuario(int idUsuario) {
-        String sql = "SELECT " +
-                "    m.id_membro AS id_membro, m.dtini AS dtini, " +
-                "    m.dtfim AS dtfim, m.observacao AS observacao, m.id_usuario AS id_usuario, " +
-                "    u.nome AS nome " +
-                "FROM membro m LEFT JOIN usuario u ON m.id_usuario = u.id_usuario " +
-                "WHERE m.id_usuario = " + idUsuario;
-
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next())
-                return buildMembro(rs);
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar Membro por Usuário: " + e.getMessage());
-        }
-        return null;
+        return conexao.manipular(sql);
     }
 }

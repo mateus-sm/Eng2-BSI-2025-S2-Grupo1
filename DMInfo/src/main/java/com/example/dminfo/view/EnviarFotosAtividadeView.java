@@ -62,7 +62,10 @@ public class EnviarFotosAtividadeView {
 
             EnviarFotosAtividade fotoSalva = controller.salvar(file, idUsuario, idAtividade);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", fotoSalva.getId(), "foto", fotoSalva.getFoto(), "mensagem", "Sucesso"));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("id", fotoSalva.getId(),
+                            "foto", fotoSalva.getFoto(),
+                            "mensagem", "Sucesso"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(new MembroErro(e.getMessage()));

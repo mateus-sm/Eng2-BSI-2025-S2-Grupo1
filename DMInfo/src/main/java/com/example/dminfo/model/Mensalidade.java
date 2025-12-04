@@ -50,7 +50,7 @@ public class Mensalidade {
             throw new RuntimeException("Data da mensalidade inválida");
         }
 
-        if (membroDAO.get(this.id_membro) == null) {
+        if (membroDAO.get(this.id_membro, conexao) == null) {
             throw new RuntimeException("Membro não encontrado no banco");
         }
 

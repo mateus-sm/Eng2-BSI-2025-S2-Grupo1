@@ -128,7 +128,7 @@ public class viewController {
         return "doacao";
     }
 
-    @GetMapping("/app/doacao-form")
+    @GetMapping("/app/doacaoForm")
     public String paginaGerenciarDoacaoForm(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         Administrador admin = getAdminLogado(session);
 
@@ -138,11 +138,21 @@ public class viewController {
         }
 
         model.addAttribute("idAdminLogado", admin.getId());
-        return "doacao-form";
+        return "doacaoForm";
     }
 
     @GetMapping("/app/lancarmembroativo")
     public String paginaLancarmembroativo() {
         return "lancarmembroativo";
+    }
+
+    @GetMapping("/app/evento")
+    public String paginaEvento() {
+        return "evento";
+    }
+
+    @GetMapping("/app/frequenciaAtividade")
+    public String paginaFrequenciaAtividade() {
+        return "frequenciaAtividade";
     }
 }

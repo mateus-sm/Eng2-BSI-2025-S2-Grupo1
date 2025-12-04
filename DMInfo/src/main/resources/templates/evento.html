@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <title>Gerenciamento de Eventos</title>
-    <link rel="stylesheet" href="styles/evento.css" />
+    <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
+    <link rel="stylesheet" th:href="@{/styles/evento.css}" />
 </head>
 <body>
 
@@ -50,6 +51,6 @@
     <tbody id="eventosTable"></tbody>
 </table>
 
-<script src="js/evento.js"></script>
+<script th:src="@{/js/evento.js}" defer></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Lançamento de Frequência em Atividades</title>
-    <link rel="stylesheet" href="/styles/frequencia_atividade.css">
+    <link rel="stylesheet" th:href="@{/styles/frequencia_atividade.css}">
 </head>
 <body>
 
@@ -58,6 +58,6 @@
     </div>
 </div>
 
-<script src="/js/frequencia_atividade.js"></script>
+<script th:src="@{/js/frequencia_atividade.js}" defer></script>
 </body>
 </html>

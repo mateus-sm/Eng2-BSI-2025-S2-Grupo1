@@ -5,18 +5,15 @@ let idParaExcluir = null;
 let modoEdicao = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Inicializa os Modais do Bootstrap
     const modalEl = document.getElementById("administradorModal");
     if (modalEl) administradorModal = new bootstrap.Modal(modalEl);
 
     const deleteEl = document.getElementById("deleteModal");
     if (deleteEl) deleteModal = new bootstrap.Modal(deleteEl);
 
-    // Carrega dados iniciais
     carregarAdministradores();
     carregarUsuariosSelect();
 
-    // Event Listeners dos Botões
     const btnNovo = document.getElementById("btn-novo-administrador");
     if (btnNovo) btnNovo.addEventListener("click", abrirModalAdicionar);
 
@@ -26,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
     if (btnSalvarEdicao) btnSalvarEdicao.addEventListener("click", salvarEdicaoAdmin);
 
-    // Registra comportamentos de interface
     registrarEventosRadio();
     registrarMascaras();
 });
@@ -52,9 +48,7 @@ function registrarEventosRadio() {
     }
 }
 
-// --- MÁSCARAS (IDÊNTICAS AO REGISTER.HTML) ---
 function registrarMascaras() {
-    // Máscara de CPF
     const cpfInput = document.getElementById("novo_cpf");
     if (cpfInput) {
         cpfInput.addEventListener("input", (e) => {
@@ -67,7 +61,6 @@ function registrarMascaras() {
         });
     }
 
-    // Máscara de Telefone
     const telInput = document.getElementById("novo_telefone");
     if (telInput) {
         telInput.addEventListener("input", (e) => {
@@ -79,7 +72,6 @@ function registrarMascaras() {
         });
     }
 
-    // Máscara de Data
     const dateInput = document.getElementById("novo_dtnasc");
     if (dateInput) {
         dateInput.addEventListener("input", (e) => {
@@ -91,14 +83,12 @@ function registrarMascaras() {
         });
     }
 
-    // Busca de CEP (ViaCEP)
     const cepInput = document.getElementById("novo_cep");
     if (cepInput) {
         cepInput.addEventListener("blur", () => {
             const cep = cepInput.value.replace(/\D/g, "");
             if (cep.length !== 8) return;
 
-            // Feedback visual de carregamento
             document.getElementById("novo_rua").value = "...";
 
             fetch(`https://viacep.com.br/ws/${cep}/json/`)
@@ -121,7 +111,6 @@ function registrarMascaras() {
     }
 }
 
-// --- FORMATAÇÃO E UTILITÁRIOS ---
 
 function formatarData(dt) {
     if (!dt) return "-";
@@ -129,12 +118,11 @@ function formatarData(dt) {
     return `${dia}/${mes}/${ano}`;
 }
 
-// Converte dd/mm/aaaa para aaaa-mm-dd (para o banco)
 function formatarDataParaBanco(data) {
     if (!data) return null;
-    // Se já estiver certo
+
     if (data.match(/^\d{4}-\d{2}-\d{2}$/)) return data;
-    // Se tiver barra
+
     if (data.includes("/")) {
         const partes = data.split("/");
         if (partes.length === 3) {
@@ -144,7 +132,65 @@ function formatarDataParaBanco(data) {
     return null;
 }
 
-// --- CARREGAMENTO DE DADOS ---
+async function carregarAdministradoresComFiltro() {
+    const nome = document.getElementById("filtroNome").value.trim();
+    const dataIni = document.getElementById("filtroDataInicial").value;
+    const dataFim = document.getElementById("filtroDataFinal").value;
+
+    let url = API_URL;
+
+    const params = [];
+
+    if (nome !== "") params.push(`nome=${encodeURIComponent(nome)}`);
+    if (dataIni !== "") params.push(`dataIni=${dataIni}`);
+    if (dataFim !== "") params.push(`dataFim=${dataFim}`);
+
+    if (params.length > 0)
+        url = `${API_URL}/filtrar?${params.join("&")}`;
+
+    try {
+        const resposta = await fetch(url);
+        if (!resposta.ok) {
+            const erroTxt = await resposta.text();
+            throw new Error(erroTxt || "Erro ao buscar dados");
+        }
+
+        administradores = await resposta.json();
+
+        const tabela = document.getElementById("tabela-administradores");
+        tabela.innerHTML = "";
+
+        if (!administradores || administradores.length === 0) {
+            tabela.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum administrador encontrado.</td></tr>`;
+            return;
+        }
+
+        administradores.forEach(admin => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${admin.id}</td>
+                    <td>${admin.usuario?.nome ?? "N/A"}</td>
+                    <td>${formatarData(admin.dtIni)}</td>
+                    <td>${formatarData(admin.dtFim)}</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="abrirModalEdicaoById(${admin.id})">
+                                <i class="bi bi-pencil-fill"></i> Editar
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="abrirModalDelete(${admin.id})">
+                                <i class="bi bi-trash-fill"></i> Excluir
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+    } catch (e) {
+        console.error(e);
+        mostrarErroModal(e.message || "Erro ao filtrar administradores.");
+    }
+}
 
 async function carregarAdministradores() {
     try {
@@ -167,17 +213,27 @@ async function carregarAdministradores() {
                     <td>${admin.usuario?.nome ?? "N/A"}</td>
                     <td>${formatarData(admin.dtIni)}</td>
                     <td>${formatarData(admin.dtFim)}</td>
-                    <td class="text-center btn-group">
-                        <button class="btn btn-warning btn-sm" onclick="abrirModalEdicaoById(${admin.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="abrirModalDelete(${admin.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="abrirModalEdicaoById(${admin.id})" margin-right: 6px;>
+                                <i class="bi bi-pencil-fill"></i> Editar
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="abrirModalDelete(${admin.id})">
+                                <i class="bi bi-trash-fill"></i> Excluir
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
         });
+
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
+        });
+        document.querySelectorAll('.btn-excluir').forEach(btn => {
+            btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
+        });
+
     } catch (e) {
         console.error(e);
         mostrarErroGlobal("Erro ao carregar administradores. Verifique se o backend está rodando.");
@@ -190,7 +246,6 @@ async function carregarUsuariosSelect() {
 
     select.innerHTML = "<option value=''>Selecione um usuário...</option>";
     try {
-        // Envia parametro vazio para garantir que o backend aceite
         const resp = await fetch("/apis/usuario?nome=");
         if (!resp.ok) return;
 
@@ -203,7 +258,6 @@ async function carregarUsuariosSelect() {
     }
 }
 
-// --- LÓGICA DE MODAIS ---
 
 async function abrirModalAdicionar() {
     modoEdicao = false;
@@ -211,11 +265,10 @@ async function abrirModalAdicionar() {
     document.getElementById("administradorId").value = "";
     hideErrorModal();
 
-    // Reseta para a aba de usuário existente
     const rbExistente = document.getElementById("radioUsuarioExistente");
     if (rbExistente) {
         rbExistente.checked = true;
-        rbExistente.dispatchEvent(new Event('change')); // Força atualização visual
+        rbExistente.dispatchEvent(new Event('change'));
     }
 
     document.getElementById("administradorModalLabel").textContent = "Adicionar Administrador";
@@ -240,15 +293,12 @@ function abrirModalEdicaoById(id) {
     modal.show();
 }
 
-// --- SALVAR (CRIAÇÃO) ---
-
 function salvarAdministrador(event) {
     event.preventDefault();
     hideErrorModal();
 
     const rbExistente = document.getElementById("radioUsuarioExistente");
 
-    // LÓGICA 1: USUÁRIO JÁ EXISTE NO BANCO
     if (rbExistente && rbExistente.checked) {
         const idUsuario = document.getElementById("usuarioId").value;
         if (!idUsuario) {
@@ -258,19 +308,15 @@ function salvarAdministrador(event) {
         return criarAdministradorComUsuarioExistente(idUsuario);
     }
 
-    // LÓGICA 2: CRIAR NOVO USUÁRIO (Formulário completo)
     if (!validarFormularioNovoUsuario()) {
-        return; // Para se a validação falhar
+        return;
     }
 
     let dados = coletarDadosNovoUsuario();
-    // Limpamos apenas o que o Java não gosta (ex: parenteses do telefone),
-    // mas mantemos o formato do CPF se o Java regex exigir.
     return criarNovoUsuarioEAdministrador(dados);
 }
 
 function validarFormularioNovoUsuario() {
-    // Validação simples de campos obrigatórios no front
     const camposObrigatorios = [
         { id: "novo_nome", msg: "Nome é obrigatório." },
         { id: "novo_usuario", msg: "Login é obrigatório." },
@@ -289,7 +335,6 @@ function validarFormularioNovoUsuario() {
         }
     }
 
-    // Valida tamanho do CPF
     const cpf = document.getElementById("novo_cpf").value;
     if (cpf.length < 14) {
         mostrarErroModal("CPF incompleto.");
@@ -302,12 +347,12 @@ function validarFormularioNovoUsuario() {
 function coletarDadosNovoUsuario() {
     return {
         nome: document.getElementById("novo_nome").value.trim(),
-        usuario: document.getElementById("novo_usuario").value.trim(), // Login
+        usuario: document.getElementById("novo_usuario").value.trim(),
         senha: document.getElementById("novo_senha").value.trim(),
-        telefone: document.getElementById("novo_telefone").value, // Vamos limpar depois
+        telefone: document.getElementById("novo_telefone").value,
         email: document.getElementById("novo_email").value.trim(),
-        cpf: document.getElementById("novo_cpf").value, // Mantemos formato
-        dtnasc: document.getElementById("novo_dtnasc").value, // Vamos converter
+        cpf: document.getElementById("novo_cpf").value,
+        dtnasc: document.getElementById("novo_dtnasc").value,
         rua: document.getElementById("novo_rua").value.trim(),
         cep: document.getElementById("novo_cep").value,
         bairro: document.getElementById("novo_bairro").value.trim(),
@@ -318,22 +363,14 @@ function coletarDadosNovoUsuario() {
 
 async function criarNovoUsuarioEAdministrador(dados) {
     try {
-        // PREPARAÇÃO DOS DADOS PARA O BACKEND
         const payloadUsuario = {
             ...dados,
-            // Login no Model Java chama 'login', no Register chama 'usuario'.
-            // Seu UsuarioController mapeia 'usuario' da request?
-            // O ideal é enviar o nome que o Java espera. Se for Usuario.java:
             login: dados.usuario,
 
-            // Limpa telefone (Java geralmente salva limpo ou aceita tudo,
-            // mas no Register.html ele limpa).
             telefone: dados.telefone.replace(/\D/g, ""),
 
-            // Converte data dd/mm/aaaa -> aaaa-mm-dd
             dtnasc: formatarDataParaBanco(dados.dtnasc),
 
-            // O CPF vai formatado mesmo, pois o regex do Java exige pontos e traço
             cpf: dados.cpf
         };
 
@@ -346,7 +383,6 @@ async function criarNovoUsuarioEAdministrador(dados) {
         const text = await respUsuario.text();
 
         if (!respUsuario.ok) {
-            // Tenta ler o JSON de erro do backend (MembroErro)
             try {
                 const j = JSON.parse(text);
                 mostrarErroModal(j.mensagem || j.erro || "Erro ao criar usuário.");
@@ -356,7 +392,6 @@ async function criarNovoUsuarioEAdministrador(dados) {
             return;
         }
 
-        // Se criou o usuário, pega o ID e cria o Administrador
         const usuarioCriado = JSON.parse(text);
         await criarAdministradorComUsuarioExistente(usuarioCriado.id);
 
@@ -367,7 +402,6 @@ async function criarNovoUsuarioEAdministrador(dados) {
 }
 
 async function criarAdministradorComUsuarioExistente(idUsuario) {
-    // Data de hoje para o início
     const dtIni = new Date().toISOString().split("T")[0];
 
     const payloadAdmin = {
@@ -393,7 +427,6 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
             return;
         }
 
-        // Sucesso total
         if (administradorModal) administradorModal.hide();
         carregarAdministradores();
 
@@ -402,8 +435,6 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
         mostrarErroModal("Erro ao salvar administrador.");
     }
 }
-
-// --- EDICÃO E EXCLUSÃO ---
 
 async function salvarEdicaoAdmin() {
     const idAdmin = this.getAttribute("data-id");
@@ -439,15 +470,17 @@ async function excluirAdministrador() {
     try {
         const resp = await fetch(`${API_URL}/${idParaExcluir}`, { method: "DELETE" });
         if (!resp.ok) {
-            const j = await resp.json().catch(() => ({ mensagem: "Erro ao excluir" }));
-            alert(j.mensagem || "Erro ao excluir."); // Usa alert pois o modal de erro fica dentro do outro modal
+            const j = await resp.json().catch(() => ({}));
+            const msg = j.erro || j.mensagem || "Erro desconhecido ao excluir.";
+
+            alert(msg);
             return;
         }
         deleteModal.hide();
         idParaExcluir = null;
         carregarAdministradores();
     } catch (e) {
-        alert("Erro inesperado.");
+        alert("Erro inesperado de conexão.");
     }
 }
 
@@ -455,8 +488,6 @@ function abrirModalDelete(id) {
     idParaExcluir = id;
     if (deleteModal) deleteModal.show();
 }
-
-// --- MENSAGENS DE ERRO ---
 
 function mostrarErroModal(msg) {
     const errorDiv = document.getElementById("modal-error-message");
@@ -477,6 +508,5 @@ function hideErrorModal() {
 }
 
 function mostrarErroGlobal(msg) {
-    // Pode exibir em um toast ou alert
     console.warn(msg);
 }

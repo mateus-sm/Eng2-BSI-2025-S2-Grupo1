@@ -86,11 +86,24 @@ async function carregarMensalidades(filtro = "") {
                     <td>R$ ${item.valor.toFixed(2)}</td>
                     <td>${item.dataPagamento || "--"}</td>
                     <td class="text-center">
-                        <button class="btn btn-warning btn-sm me-1" onclick="editarMensalidade(${item.id_mensalidade})">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="excluirMensalidade(${item.id_mensalidade})">Excluir</button>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="excluirMensalidade(${item.id_mensalidade})" >
+                                <i class="bi bi-pencil-fill"></i> Editar
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="excluirMensalidade(${item.id_mensalidade})" >
+                                <i class="bi bi-trash-fill"></i> Excluir
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
+        });
+
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
+        });
+        document.querySelectorAll('.btn-excluir').forEach(btn => {
+            btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
         });
 
         total.textContent = lista.length;
@@ -197,14 +210,17 @@ async function salvarMensalidade(event) {
             body: JSON.stringify(dados)
         });
 
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const erroMsg = await res.text();
+            throw new Error(erroMsg);
+        }
 
         mostrarAlerta("success", id ? "Alterado com sucesso!" : "Cadastrado com sucesso!");
         document.getElementById("formMensalidade").reset();
         carregarMensalidades();
 
     } catch (e) {
-        mostrarAlerta("danger", "Erro ao salvar mensalidade.");
+        mostrarAlerta("danger", e.message || "Erro ao salvar mensalidade.");
     }
 }
 
@@ -233,13 +249,17 @@ async function excluirMensalidade(id) {
 
     try {
         const res = await fetch(`${API}/apis/mensalidade/excluir/${id}`, { method: "DELETE" });
-        if (!res.ok) throw new Error();
+
+        if (!res.ok) {
+            const erroMsg = await res.text();
+            throw new Error(erroMsg);
+        }
 
         mostrarAlerta("success", "Excluído com sucesso!");
         carregarMensalidades();
 
     } catch (e) {
-        mostrarAlerta("danger", "Erro ao excluir registro.");
+        mostrarAlerta("danger", e.message || "Erro ao excluir registro.");
     }
 }
 

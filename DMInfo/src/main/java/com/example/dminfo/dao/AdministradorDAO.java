@@ -35,6 +35,45 @@ public class AdministradorDAO {
         return admin;
     }
 
+    public List<Administrador> filtrar(String nome, String dtIni, String dtFim, Conexao conexao) {
+        List<Administrador> lista = new ArrayList<>();
+
+        String sql = """
+            SELECT 
+                a.id_admin,
+                a.dtini,
+                a.dtfim,
+                a.id_usuario,
+                u.nome AS usuario_nome
+            FROM administrador a
+            JOIN usuario u ON a.id_usuario = u.id_usuario
+            WHERE 1=1
+        """;
+
+        if (nome != null && !nome.trim().isEmpty()) {
+            sql += " AND u.nome ILIKE '%" + nome + "%'";
+        }
+        if (dtIni != null && !dtIni.trim().isEmpty()) {
+            sql += " AND a.dtini >= '" + dtIni + "'";
+        }
+        if (dtFim != null && !dtFim.trim().isEmpty()) {
+            sql += " AND a.dtfim <= '" + dtFim + "'";
+        }
+        sql += " ORDER BY u.nome";
+
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(buildAdministrador(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao filtrar administradores: " + e.getMessage());
+        }
+        return lista;
+    }
+
     public int contar(Conexao conexao) {
         String sql = "SELECT COUNT(*) AS total FROM administrador";
         int total = 0;

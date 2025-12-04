@@ -2,6 +2,7 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.UsuarioDAO;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository; // ou @Service
 import com.example.dminfo.util.Conexao;
@@ -41,17 +42,21 @@ public class Administrador {
         return dao.gravar(this, conexao);
     }
 
-    public Administrador atualizarDtFim(int id, LocalDate novaDtFim, Conexao conexao) {
+    public Administrador atualizarDtFim(int id, Administrador adminDetails, Conexao conexao) {
         Administrador adminBanco = dao.get(id, conexao);
         if (adminBanco == null) {
             throw new RuntimeException("Administrador não encontrado.");
         }
 
-        if (novaDtFim != null && adminBanco.getDtIni() != null && novaDtFim.isBefore(adminBanco.getDtIni())) {
+        if (adminDetails == null) {
+            throw new RuntimeException("Dados inválidos para atualização.");
+        }
+
+        if (adminDetails.getDtFim() != null && adminBanco.getDtIni() != null && adminDetails.getDtFim().isBefore(adminBanco.getDtIni())) {
             throw new RuntimeException("A data fim não pode ser menor que a data inicial.");
         }
 
-        adminBanco.setDtFim(novaDtFim);
+        adminBanco.setDtFim(adminDetails.getDtFim());
 
         if (dao.alterar(adminBanco, conexao)) {
             return adminBanco;
@@ -60,11 +65,17 @@ public class Administrador {
     }
 
     public boolean excluir(int id, Conexao conexao) {
-        int totalAdmins = dao.contar(conexao);
-        if (totalAdmins <= 1) {
-            throw new RuntimeException("Existe apenas um Administrador. Não é possível excluir o último.");
+        if (id <= 0) {
+            throw new RuntimeException("ID inválido.");
+        }
+        if (dao.contar(SingletonDB.getConexao()) == 1) {
+            throw new RuntimeException("Não pode deixar de existir Administrador.");
         }
         return dao.excluir(id, conexao);
+    }
+
+    public int contar(Conexao conexao) {
+        return dao.contar(conexao);
     }
 
     public Administrador getByUsuario(int idUsuario, Conexao conexao) {
@@ -72,7 +83,14 @@ public class Administrador {
     }
 
     public Administrador getById(int id, Conexao conexao) {
+        if (id == 0) {
+            throw new RuntimeException("Administrador inválido.");
+        }
         return dao.get(id, conexao);
+    }
+
+    public List<Administrador> filtrar(String nome, String dtIni, String dtFim, Conexao conexao) {
+        return dao.filtrar(nome, dtIni, dtFim, conexao);
     }
 
     public List<Administrador> listarTodos(Conexao conexao) {

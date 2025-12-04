@@ -81,4 +81,19 @@ public class AdministradorView {
                     .body(new MembroErro(e.getMessage()));
         }
     }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<Object> filtrar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String dataIni,
+            @RequestParam(required = false) String dataFim) {
+
+        try {
+            return ResponseEntity.ok(controller.filtrar(nome, dataIni, dataFim));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MembroErro("Erro ao filtrar: " + e.getMessage()));
+        }
+    }
 }

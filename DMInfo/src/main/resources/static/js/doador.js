@@ -49,6 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.show();
     }
 
+    // --- [NOVO] FUNÇÃO PARA ABRIR O MODAL DE EXCLUSÃO ---
+    function confirmarExclusao(id, nome, callbackExclusao) {
+        const modalEl = document.getElementById('modalConfirmacao');
+        if (!modalEl) return;
+
+        const modal = new bootstrap.Modal(modalEl);
+        const btnConfirmar = document.getElementById('btnConfirmarAcao');
+        const modalTexto = document.getElementById('modalTexto');
+
+        // Atualiza o texto com o nome do doador
+        modalTexto.innerHTML = `Tem certeza que deseja excluir o doador <strong>${nome}</strong>?<br>Esta ação será irreversível.`;
+
+        // Clona o botão para remover eventos de cliques anteriores
+        const novoBtn = btnConfirmar.cloneNode(true);
+        btnConfirmar.parentNode.replaceChild(novoBtn, btnConfirmar);
+
+        // Adiciona o evento de clique ao novo botão
+        novoBtn.addEventListener('click', () => {
+            callbackExclusao();
+            modal.hide();
+        });
+
+        modal.show();
+    }
+
     // --- MÁSCARAS (IMASK) ---
     if (typeof IMask !== 'undefined') {
         if(inputDocumento) {
@@ -231,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         lista.forEach(doador => {
             const tr = document.createElement('tr');
+            // [ALTERAÇÃO] Adicionado data-nome="${doador.nome}" para usar no Modal
             tr.innerHTML = `
                 <td>${doador.id}</td>
                 <td>${doador.nome}</td>
@@ -242,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn btn-sm btn-outline-primary btn-editar" data-id="${doador.id}" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${doador.id}" title="Excluir">
+                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${doador.id}" data-nome="${doador.nome}" title="Excluir">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -359,11 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(doador),
             });
 
-            // --- AQUI ESTAVA O PROBLEMA: LER O ERRO DO BACKEND ---
             if(!response.ok) {
                 // Tenta ler o JSON de erro do backend
                 const errorData = await response.json().catch(() => ({}));
-                // Pega a mensagem ou usa uma genérica
                 const errorMsg = errorData.erro || errorData.message || 'Erro ao salvar doador.';
                 throw new Error(errorMsg);
             }
@@ -374,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }catch(error){
             console.error('Falha ao salvar:', error);
-            // Mostra o erro exato (ex: "CPF duplicado") no Toast
             mostrarNotificacao(error.message, true);
 
             if(btnSalvar) {
@@ -384,14 +407,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- [ALTERAÇÃO] CLICK DO BOTÃO EXCLUIR CHAMA O MODAL ---
     tabelaBody.addEventListener('click', (e) => {
         const target = e.target.closest('button');
         if (!target) return;
         const id = target.getAttribute('data-id');
 
         if(target.classList.contains('btn-editar')) preencherFormularioParaEdicao(id);
+
         if(target.classList.contains('btn-excluir')) {
-            if (confirm('Tem certeza que deseja excluir?')) excluirDoador(id);
+            const nomeDoador = target.getAttribute('data-nome') || 'Selecionado';
+            // Chama a nova função confirmarExclusao
+            confirmarExclusao(id, nomeDoador, () => excluirDoador(id));
         }
     });
 
@@ -402,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.erro || errorData.message || 'Erro ao excluir');
             }
-            mostrarNotificacao('Excluído com sucesso!', false);
+            mostrarNotificacao('Doador excluído com sucesso!', false);
             carregarDoadores();
         }catch(error){
             mostrarNotificacao(error.message, true);

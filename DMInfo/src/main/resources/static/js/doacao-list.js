@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalTexto = document.getElementById('modalTexto');
 
         modalTitulo.textContent = 'Excluir Doação';
-        modalTexto.textContent = `Tem certeza que deseja excluir a doação ID ${id}? Esta ação é irreversível.`;
+        modalTexto.textContent = `Tem certeza que deseja excluir a doação ID ${id}? Esta ação será irreversível.`;
         btnConfirmar.className = 'btn btn-danger px-4';
-        btnConfirmar.textContent = 'Sim, Excluir';
+        btnConfirmar.textContent = 'Excluir';
 
         // Clone para remover listeners anteriores
         const novoBtn = btnConfirmar.cloneNode(true);

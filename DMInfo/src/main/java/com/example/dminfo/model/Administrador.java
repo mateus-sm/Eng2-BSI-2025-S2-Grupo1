@@ -4,7 +4,7 @@ import com.example.dminfo.dao.AdministradorDAO;
 import com.example.dminfo.dao.UsuarioDAO;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository; // ou @Service
+import org.springframework.stereotype.Repository;
 import com.example.dminfo.util.Conexao;
 
 import java.time.LocalDate;

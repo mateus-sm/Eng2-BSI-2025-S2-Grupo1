@@ -5,10 +5,8 @@ let listaMembrosOriginal = [];
 document.addEventListener('DOMContentLoaded', () => {
     statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
 
-    // Carrega dados iniciais
     carregarMembros();
 
-    // Listeners de filtros
     document.getElementById('termoBusca').addEventListener('keyup', aplicarFiltros);
     document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
 });
@@ -20,7 +18,6 @@ async function carregarMembros() {
 
         listaMembrosOriginal = await response.json();
 
-        // Ordena por ID decrescente (mais novos primeiro)
         listaMembrosOriginal.sort((a, b) => b.id - a.id);
 
         aplicarFiltros();
@@ -33,20 +30,17 @@ async function carregarMembros() {
 
 function aplicarFiltros() {
     const termo = document.getElementById('termoBusca').value.toLowerCase();
-    const filtroStatus = document.getElementById('filtroStatus').value; // todos, ativos, inativos
+    const filtroStatus = document.getElementById('filtroStatus').value;
 
-    const hoje = new Date().toISOString().split('T')[0]; // Data de hoje YYYY-MM-DD
+    const hoje = new Date().toISOString().split('T')[0];
 
     const tabelaBody = document.getElementById('tabela-membros');
     tabelaBody.innerHTML = '';
 
-    // Filtra a lista
     const membrosFiltrados = listaMembrosOriginal.filter(membro => {
-        // 1. Filtro de Texto (Nome)
         const nomeUsuario = membro.usuario ? membro.usuario.nome.toLowerCase() : '';
         if (!nomeUsuario.includes(termo)) return false;
 
-        // 2. Filtro de Status
         const isAtivo = verificarSeAtivo(membro.dtFim, hoje);
 
         if (filtroStatus === 'ativos' && !isAtivo) return false;
@@ -55,7 +49,6 @@ function aplicarFiltros() {
         return true;
     });
 
-    // Atualiza contador
     document.getElementById('total-registros').textContent = membrosFiltrados.length;
 
     if (membrosFiltrados.length === 0) {
@@ -63,7 +56,6 @@ function aplicarFiltros() {
         return;
     }
 
-    // Renderiza
     membrosFiltrados.forEach(membro => {
         const isAtivo = verificarSeAtivo(membro.dtFim, hoje);
 
@@ -88,10 +80,9 @@ function aplicarFiltros() {
     });
 }
 
-// Lógica central: Ativo se DataFim for Nula OU DataFim >= Hoje
 function verificarSeAtivo(dtFim, hoje) {
-    if (!dtFim) return true; // Sem data fim = Ativo
-    return dtFim >= hoje;    // Data fim no futuro ou hoje = Ativo
+    if (!dtFim) return true;
+    return dtFim >= hoje;
 }
 
 function abrirModalStatus(id) {
@@ -101,31 +92,28 @@ function abrirModalStatus(id) {
     document.getElementById('membroId').value = membro.id;
     document.getElementById('nomeMembroDisplay').value = membro.usuario ? membro.usuario.nome : 'N/A';
     document.getElementById('dtFim').value = membro.dtFim || '';
-    document.getElementById('observacaoOriginal').value = membro.observacao || ''; // Guarda a obs para não perder no update
+    document.getElementById('observacaoOriginal').value = membro.observacao || '';
 
-    // Esconde erro anterior
     const erroDiv = document.getElementById('msg-erro-modal');
     erroDiv.classList.add('d-none');
 
     statusModal.show();
 }
 
-// Botões de atalho no modal
 function definirData(acao) {
     const inputDtFim = document.getElementById('dtFim');
     if (acao === 'limpar') {
-        inputDtFim.value = ''; // Torna ativo
+        inputDtFim.value = '';
     } else if (acao === 'hoje') {
-        inputDtFim.value = new Date().toISOString().split('T')[0]; // Encerra hoje
+        inputDtFim.value = new Date().toISOString().split('T')[0];
     }
 }
 
 async function salvarStatus() {
     const id = document.getElementById('membroId').value;
     const dtFim = document.getElementById('dtFim').value || null;
-    const observacao = document.getElementById('observacaoOriginal').value; // Mantém a observação antiga
+    const observacao = document.getElementById('observacaoOriginal').value;
 
-    // Monta objeto para o PUT
     const payload = {
         observacao: observacao,
         dtFim: dtFim
@@ -145,7 +133,6 @@ async function salvarStatus() {
 
         statusModal.hide();
 
-        // Recarrega a lista para atualizar a tela
         await carregarMembros();
 
         alert('Status atualizado com sucesso!');

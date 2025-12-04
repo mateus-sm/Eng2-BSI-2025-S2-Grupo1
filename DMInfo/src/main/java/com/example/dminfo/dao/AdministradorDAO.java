@@ -3,7 +3,6 @@ package com.example.dminfo.dao;
 import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.Usuario;
 import com.example.dminfo.util.Conexao;
-import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;

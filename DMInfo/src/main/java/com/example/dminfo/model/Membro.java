@@ -1,7 +1,6 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.MembroDAO;
-import com.example.dminfo.dao.UsuarioDAO;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -19,9 +18,6 @@ public class Membro {
 
     @Autowired
     private MembroDAO dao;
-
-    @Autowired
-    private UsuarioDAO usuarioDAO;
 
     public Membro() {}
 

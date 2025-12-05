@@ -62,54 +62,10 @@ async function carregarMensalidades(filtro = "") {
         const resposta = await fetch(url);
         const lista = await resposta.json();
 
-        const tabela = document.getElementById("tabelaMensalidades");
-        const msgVazia = document.getElementById("mensagemVazia");
-        const total = document.getElementById("totalMensalidades");
-
-        tabela.innerHTML = "";
-
-        if (!lista || lista.length === 0) {
-            msgVazia.classList.remove("d-none");
-            total.textContent = "0";
-            return;
-        }
-
-        msgVazia.classList.add("d-none");
-
-        lista.forEach(item => {
-            tabela.innerHTML += `
-                <tr>
-                    <td class="text-center">${item.id_mensalidade}</td>
-                    <td>${item.id_membro} - ${item.nome_membro || "Sem nome"}</td>
-                    <td>${item.mes}</td>
-                    <td>${item.ano}</td>
-                    <td>R$ ${item.valor.toFixed(2)}</td>
-                    <td>${item.dataPagamento || "--"}</td>
-                    <td class="text-center">
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="excluirMensalidade(${item.id_mensalidade})" >
-                                <i class="bi bi-pencil-fill"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="excluirMensalidade(${item.id_mensalidade})" >
-                                <i class="bi bi-trash-fill"></i> Excluir
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-
-        document.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
-        });
-        document.querySelectorAll('.btn-excluir').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
-        });
-
-        total.textContent = lista.length;
+        preencherTabela(lista);
 
     } catch (e) {
-        mostrarAlerta("danger", "Erro ao carregar mensalidades.");
+        mostrarAlerta("danger", "Erro ao filtrar mensalidades.");
     }
 }
 
@@ -165,11 +121,24 @@ function preencherTabela(lista) {
                 <td>R$ ${item.valor.toFixed(2)}</td>
                 <td>${item.dataPagamento || "--"}</td>
                 <td class="text-center">
-                    <button class="btn btn-warning btn-sm me-1" onclick="editarMensalidade(${item.id_mensalidade})">Editar</button>
-                    <button class="btn btn-danger btn-sm" onclick="excluirMensalidade(${item.id_mensalidade})">Excluir</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="excluirMensalidade(${item.id_mensalidade})" >
+                            <i class="bi bi-pencil-fill"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="excluirMensalidade(${item.id_mensalidade})" >
+                            <i class="bi bi-trash-fill"></i> Excluir
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
+    });
+
+    document.querySelectorAll('.btn-editar').forEach(btn => {
+        btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
+    });
+    document.querySelectorAll('.btn-excluir').forEach(btn => {
+        btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
     });
 
     total.textContent = lista.length;

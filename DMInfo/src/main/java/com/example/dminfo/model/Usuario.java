@@ -1,6 +1,7 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.UsuarioDAO;
+import com.example.dminfo.util.ValidaCPF;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
@@ -25,7 +26,8 @@ public class Usuario {
     private String foto;
     private LocalDate dtfim;
 
-    // --- IMPORTANTE: Instância da DAO com @JsonIgnore para evitar erro 500 ---
+    ValidaCPF Validador;
+
     @JsonIgnore
     private UsuarioDAO dao = new UsuarioDAO();
 
@@ -51,16 +53,13 @@ public class Usuario {
         this.dtfim = dtfim;
     }
 
-    // --- MÉTODO DE NEGÓCIO (VALIDAÇÃO E SALVAMENTO) ---
     public Usuario salvar() {
-        validar(); // Executa as verificações
+        validar();
 
-        // Define data de início se não tiver
         if (this.dtini == null) {
             this.dtini = LocalDate.now();
         }
 
-        // Chama a DAO para gravar
         return dao.gravar(this);
     }
 
@@ -77,6 +76,12 @@ public class Usuario {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
             throw new RuntimeException("Formato de CPF inválido (esperado: 000.000.000-00).");
         }
+
+
+        if (!Validador.isCPF(this.cpf)) {
+            throw new RuntimeException("CPF inválido. Verifique os números digitados.");
+        }
+
         if (dao.getUsuarioByCpf(this.cpf) != null) {
             throw new RuntimeException("Este CPF já está em uso.");
         }

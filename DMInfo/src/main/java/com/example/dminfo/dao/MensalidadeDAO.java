@@ -2,32 +2,16 @@ package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Mensalidade;
 import com.example.dminfo.util.Conexao;
-import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class MensalidadeDAO {
 
-    private Mensalidade buildObject(ResultSet rs) throws Exception {
-        Mensalidade m = new Mensalidade();
-
-        m.setId_mensalidade(rs.getInt("id_mensalidade"));
-        m.setId_membro(rs.getInt("id_membro"));
-        m.setMes(rs.getInt("mes"));
-        m.setAno(rs.getInt("ano"));
-        m.setValor(rs.getDouble("valor"));
-        m.setDataPagamento(rs.getObject("datapagamento", LocalDate.class));
-        m.setNome_membro(rs.getString("nome_membro"));
-
-        return m;
-    }
+    // O método buildObject FOI REMOVIDO daqui e foi para o Model.
 
     public Mensalidade gravar(Mensalidade m, Conexao conexao){
         String sql = "INSERT INTO mensalidade (id_membro, mes, ano, valor, datapagamento) " +
@@ -82,9 +66,9 @@ public class MensalidadeDAO {
         return conexao.manipular(sql);
     }
 
-    public List<Mensalidade> listar(String filtroNome, Conexao conexao) {
-        List<Mensalidade> lista = new ArrayList<>();
+    // --- MÉTODOS DE BUSCA (AGORA RETORNAM RESULTSET) ---
 
+    public ResultSet listar(String filtroNome, Conexao conexao) {
         String sql = """
         SELECT m.*, u.nome AS nome_membro
         FROM mensalidade m
@@ -98,18 +82,10 @@ public class MensalidadeDAO {
 
         sql += " ORDER BY m.datapagamento DESC";
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            while (rs != null && rs.next()) {
-                lista.add(buildObject(rs));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public Mensalidade buscarPorId(Integer id, Conexao conexao) {
+    public ResultSet buscarPorId(Integer id, Conexao conexao) {
         String sql = """
         SELECT m.*, u.nome AS nome_membro
         FROM mensalidade m
@@ -118,69 +94,43 @@ public class MensalidadeDAO {
         WHERE m.id_mensalidade = %d
         """.formatted(id);
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            if (rs != null && rs.next()) {
-                return buildObject(rs);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return conexao.consultar(sql);
     }
 
-    public List<Mensalidade> listarMesAno(int mes, int ano, Conexao conexao) {
-        List<Mensalidade> lista = new ArrayList<>();
-
+    public ResultSet listarMesAno(int mes, int ano, Conexao conexao) {
         String sql = """
-                SELECT m.*
+                SELECT m.*, u.nome AS nome_membro
                 FROM mensalidade m
+                JOIN membro mem ON m.id_membro = mem.id_membro
+                JOIN usuario u ON mem.id_usuario = u.id_usuario
                 WHERE m.mes = %d AND m.ano = %d
                 ORDER BY m.datapagamento DESC
                 """.formatted(mes, ano);
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            while (rs != null && rs.next()) {
-                lista.add(buildObject(rs));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public List<Mensalidade> listarMembro(int idMembro, Conexao conexao) {
-        List<Mensalidade> lista = new ArrayList<>();
-
+    public ResultSet listarMembro(int idMembro, Conexao conexao) {
         String sql = """
-                SELECT m.*
+                SELECT m.*, u.nome AS nome_membro
                 FROM mensalidade m
+                JOIN membro mem ON m.id_membro = mem.id_membro
+                JOIN usuario u ON mem.id_usuario = u.id_usuario
                 WHERE m.id_membro = %d
                 ORDER BY m.datapagamento DESC
                 """.formatted(idMembro);
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            while (rs != null && rs.next()) {
-                lista.add(buildObject(rs));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public List<Mensalidade> filtrar(String nome, String dataIni, String dataFim,Conexao conexao) {
-        List<Mensalidade> lista = new ArrayList<>();
-
+    public ResultSet filtrar(String nome, String dataIni, String dataFim, Conexao conexao) {
         String sql = """
         SELECT m.*, u.nome AS nome_membro
         FROM mensalidade m
         JOIN membro mem ON m.id_membro = mem.id_membro
         JOIN usuario u ON mem.id_usuario = u.id_usuario
         WHERE 1=1
-    """;
+        """;
 
         if (nome != null && !nome.isEmpty()) {
             sql += " AND u.nome ILIKE '%" + nome + "%'";
@@ -196,18 +146,10 @@ public class MensalidadeDAO {
 
         sql += " ORDER BY m.datapagamento DESC";
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            while (rs != null && rs.next()) {
-                lista.add(buildObject(rs));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public Mensalidade buscarPorMembroMesAno(int idMembro, int mes, int ano, Conexao conexao) {
+    public ResultSet buscarPorMembroMesAno(int idMembro, int mes, int ano, Conexao conexao) {
         String sql = String.format("""
             SELECT m.*, u.nome AS nome_membro
             FROM mensalidade m
@@ -216,14 +158,6 @@ public class MensalidadeDAO {
             WHERE m.id_membro = %d AND m.mes = %d AND m.ano = %d
             """, idMembro, mes, ano);
 
-        try (ResultSet rs = conexao.consultar(sql)) {
-            if (rs != null && rs.next()) {
-                return buildObject(rs);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return conexao.consultar(sql);
     }
-
 }

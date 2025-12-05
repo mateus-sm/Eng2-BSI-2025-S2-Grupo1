@@ -1,4 +1,4 @@
-const API_URL = '/apis/membro';
+const API_URL = "/apis/lancarmembroativo";
 let statusModal;
 let listaMembrosOriginal = [];
 
@@ -17,28 +17,27 @@ async function carregarMembros() {
         if (!response.ok) throw new Error('Falha ao carregar membros.');
 
         listaMembrosOriginal = await response.json();
-
-        listaMembrosOriginal.sort((a, b) => b.id - a.id);
+        console.log("Dados recebidos:", listaMembrosOriginal);
 
         aplicarFiltros();
 
     } catch (error) {
-        console.error('Erro:', error);
-        alert("Erro ao carregar dados do servidor.");
+        console.error(error);
+        alert("Erro ao conectar com o servidor.");
     }
 }
 
 function aplicarFiltros() {
     const termo = document.getElementById('termoBusca').value.toLowerCase();
     const filtroStatus = document.getElementById('filtroStatus').value;
-
     const hoje = new Date().toISOString().split('T')[0];
 
     const tabelaBody = document.getElementById('tabela-membros');
     tabelaBody.innerHTML = '';
 
     const membrosFiltrados = listaMembrosOriginal.filter(membro => {
-        const nomeUsuario = membro.usuario ? membro.usuario.nome.toLowerCase() : '';
+        const nomeUsuario = (membro.usuario && membro.usuario.nome) ? membro.usuario.nome.toLowerCase() : '';
+
         if (!nomeUsuario.includes(termo)) return false;
 
         const isAtivo = verificarSeAtivo(membro.dtFim, hoje);
@@ -52,7 +51,7 @@ function aplicarFiltros() {
     document.getElementById('total-registros').textContent = membrosFiltrados.length;
 
     if (membrosFiltrados.length === 0) {
-        tabelaBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhum membro encontrado com estes filtros.</td></tr>';
+        tabelaBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhum membro encontrado.</td></tr>';
         return;
     }
 
@@ -60,13 +59,13 @@ function aplicarFiltros() {
         const isAtivo = verificarSeAtivo(membro.dtFim, hoje);
 
         const badge = isAtivo
-            ? `<span class="badge bg-success"><i class="bi bi-check-circle"></i> Ativo</span>`
-            : `<span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Inativo</span>`;
+            ? `<span class="badge bg-success fs-6 px-3"><i class="bi bi-check-circle"></i> Ativo</span>`
+            : `<span class="badge bg-secondary fs-6 px-3"><i class="bi bi-x-circle"></i> Inativo</span>`;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${membro.id}</td>
-            <td class="fw-bold">${membro.usuario ? membro.usuario.nome : 'N/A'}</td>
+            <td class="fw-bold">${membro.usuario ? (membro.usuario.nome || 'Sem Nome') : 'Usuário N/A'}</td>
             <td>${formatarData(membro.dtIni)}</td>
             <td class="${isAtivo ? 'text-muted' : 'text-danger'}">${formatarData(membro.dtFim) || '<em>Indefinido</em>'}</td>
             <td class="text-center">${badge}</td>
@@ -82,7 +81,7 @@ function aplicarFiltros() {
 
 function verificarSeAtivo(dtFim, hoje) {
     if (!dtFim) return true;
-    return dtFim >= hoje;
+    return dtFim > hoje;
 }
 
 function abrirModalStatus(id) {
@@ -95,7 +94,7 @@ function abrirModalStatus(id) {
     document.getElementById('observacaoOriginal').value = membro.observacao || '';
 
     const erroDiv = document.getElementById('msg-erro-modal');
-    erroDiv.classList.add('d-none');
+    if(erroDiv) erroDiv.classList.add('d-none');
 
     statusModal.show();
 }
@@ -132,15 +131,11 @@ async function salvarStatus() {
         }
 
         statusModal.hide();
-
         await carregarMembros();
-
         alert('Status atualizado com sucesso!');
 
     } catch (error) {
-        const erroDiv = document.getElementById('msg-erro-modal');
-        erroDiv.innerText = error.message;
-        erroDiv.classList.remove('d-none');
+        alert(error.message); // Simplificado para alert se o modal der erro
     }
 }
 

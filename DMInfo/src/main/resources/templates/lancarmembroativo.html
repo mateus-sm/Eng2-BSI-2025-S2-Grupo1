@@ -29,8 +29,7 @@
         <div class="col-12 col-md-5">
             <label for="termoBusca" class="form-label ms-1 fw-bold">Buscar Membro</label>
             <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" id="termoBusca" placeholder="Nome do usuário...">
+                <input type="text" class="form-control" id="termoBusca" placeholder="Nome do usuário">
             </div>
         </div>
 
@@ -54,8 +53,8 @@
             <tr>
                 <th style="width: 50px;">ID</th>
                 <th>Membro</th>
-                <th>Início Mandato</th>
-                <th>Fim Mandato</th>
+                <th>Início</th>
+                <th>Fim</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Ação</th>
             </tr>
@@ -112,6 +111,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/js/gerenciar-status-membros.js}"></script>
+<script th:src="@{/js/lancarmembroativo.js}"></script>
 </body>
 </html>

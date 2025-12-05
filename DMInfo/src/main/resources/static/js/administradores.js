@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     registrarMascaras();
 });
 
+
 function registrarEventosRadio() {
     const rbExistente = document.getElementById("radioUsuarioExistente");
     const rbNovo = document.getElementById("radioNovoUsuario");
@@ -72,19 +73,27 @@ function registrarMascaras() {
         });
     }
 
-    const dateInput = document.getElementById("novo_dtnasc");
-    if (dateInput) {
-        dateInput.addEventListener("input", (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{2})(\d)/, '$1/$2');
-            value = value.replace(/(\d{2})(\d{1,4})$/, '$1/$2');
-            if (value.length > 10) value = value.substring(0, 10);
-            e.target.value = value;
-        });
-    }
+    // // Máscara de Data
+    // const dateInput = document.getElementById("novo_dtnasc");
+    // if (dateInput) {
+    //     dateInput.addEventListener("input", (e) => {
+    //         let value = e.target.value.replace(/\D/g, '');
+    //         value = value.replace(/(\d{2})(\d)/, '$1/$2');
+    //         value = value.replace(/(\d{2})(\d{1,4})$/, '$1/$2');
+    //         if (value.length > 10) value = value.substring(0, 10);
+    //         e.target.value = value;
+    //     });
+    // }
 
     const cepInput = document.getElementById("novo_cep");
     if (cepInput) {
+        cepInput.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, "");
+            value = value.replace(/^(\d{5})(\d)/, "$1-$2");
+            if (value.length > 9) value = value.substring(0, 9);
+            e.target.value = value;
+        });
+
         cepInput.addEventListener("blur", () => {
             const cep = cepInput.value.replace(/\D/g, "");
             if (cep.length !== 8) return;
@@ -93,12 +102,12 @@ function registrarMascaras() {
 
             fetch(`https://viacep.com.br/ws/${cep}/json/`)
                 .then(r => r.json())
-                .then(d => {
-                    if (!d.erro) {
-                        document.getElementById('novo_rua').value = d.logradouro || "";
-                        document.getElementById('novo_bairro').value = d.bairro || "";
-                        document.getElementById('novo_cidade').value = d.localidade || "";
-                        document.getElementById('novo_uf').value = d.uf || "";
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('novo_rua').value = data.logradouro || "";
+                        document.getElementById('novo_bairro').value = data.bairro || "";
+                        document.getElementById('novo_cidade').value = data.localidade || "";
+                        document.getElementById('novo_uf').value = data.uf || "";
                     } else {
                         document.getElementById("novo_rua").value = "";
                         alert("CEP não encontrado.");
@@ -111,31 +120,44 @@ function registrarMascaras() {
     }
 }
 
-
 function formatarData(dt) {
     if (!dt) return "-";
     const [ano, mes, dia] = dt.split("-");
     return `${dia}/${mes}/${ano}`;
 }
+function validarDataReal(dataString) {
+    if (!dataString) return false;
 
-function formatarDataParaBanco(data) {
-    if (!data) return null;
+    const partes = dataString.split("-");
+    if (partes.length !== 3) return false;
 
-    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) return data;
+    const ano = parseInt(partes[0]);
+    const mes = parseInt(partes[1]) - 1;
+    const dia = parseInt(partes[2]);
 
-    if (data.includes("/")) {
-        const partes = data.split("/");
-        if (partes.length === 3) {
-            return `${partes[2]}-${partes[1]}-${partes[0]}`;
-        }
+    const dataObj = new Date(ano, mes, dia);
+
+    if (dataObj.getFullYear() !== ano ||
+        dataObj.getMonth() !== mes ||
+        dataObj.getDate() !== dia) {
+        return false;
     }
-    return null;
-}
 
+    return true;
+}
 async function carregarAdministradoresComFiltro() {
     const nome = document.getElementById("filtroNome").value.trim();
     const dataIni = document.getElementById("filtroDataInicial").value;
     const dataFim = document.getElementById("filtroDataFinal").value;
+
+    if (dataIni && !validarDataReal(dataIni)) {
+        alert("Data Inicial inválida (ex: 30 de fevereiro). Verifique o filtro.");
+        return;
+    }
+    if (dataFim && !validarDataReal(dataFim)) {
+        alert("Data Final inválida (ex: 30 de fevereiro). Verifique o filtro.");
+        return;
+    }
 
     let url = API_URL;
 
@@ -215,7 +237,7 @@ async function carregarAdministradores() {
                     <td>${formatarData(admin.dtFim)}</td>
                     <td class="text-center">
                         <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="abrirModalEdicaoById(${admin.id})" margin-right: 6px;>
+                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" onclick="abrirModalEdicaoById(${admin.id})">
                                 <i class="bi bi-pencil-fill"></i> Editar
                             </button>
                             <button class="btn btn-sm btn-outline-danger btn-excluir" onclick="abrirModalDelete(${admin.id})">
@@ -225,13 +247,6 @@ async function carregarAdministradores() {
                     </td>
                 </tr>
             `;
-        });
-
-        document.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalEditar(e.currentTarget.dataset.id));
-        });
-        document.querySelectorAll('.btn-excluir').forEach(btn => {
-            btn.addEventListener('click', (e) => abrirModalExcluir(e.currentTarget.dataset.id));
         });
 
     } catch (e) {
@@ -257,7 +272,6 @@ async function carregarUsuariosSelect() {
         console.error("Erro ao carregar usuários.", e);
     }
 }
-
 
 async function abrirModalAdicionar() {
     modoEdicao = false;
@@ -366,12 +380,9 @@ async function criarNovoUsuarioEAdministrador(dados) {
         const payloadUsuario = {
             ...dados,
             login: dados.usuario,
-
             telefone: dados.telefone.replace(/\D/g, ""),
-
-            dtnasc: formatarDataParaBanco(dados.dtnasc),
-
-            cpf: dados.cpf
+            cpf: dados.cpf.replace(/\D/g, ""),
+            cep: dados.cep.replace(/\D/g, ""),
         };
 
         const respUsuario = await fetch("/apis/usuario", {
@@ -439,6 +450,11 @@ async function criarAdministradorComUsuarioExistente(idUsuario) {
 async function salvarEdicaoAdmin() {
     const idAdmin = this.getAttribute("data-id");
     const dtFimVal = document.getElementById("editDtFim").value;
+
+    if (dtFimVal && !validarDataReal(dtFimVal)) {
+        alert("Data Fim inválida (ex: 30 de fevereiro). Verifique a data informada.");
+        return;
+    }
 
     const body = {
         id: parseInt(idAdmin),

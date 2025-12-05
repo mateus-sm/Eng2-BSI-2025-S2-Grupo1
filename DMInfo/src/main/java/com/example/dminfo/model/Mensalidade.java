@@ -6,12 +6,15 @@ import com.example.dminfo.util.Conexao;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component; // Usamos Component para o Spring gerenciar, similar ao Repository do seu amigo
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+@Component
 public class Mensalidade {
 
     private int id_mensalidade;
@@ -25,9 +28,11 @@ public class Mensalidade {
     private String nome_membro;
 
     @Autowired
+    @JsonIgnore
     private MensalidadeDAO dao = new MensalidadeDAO();
 
     @Autowired
+    @JsonIgnore
     private MembroDAO membroDAO = new MembroDAO();
 
     public Mensalidade() {}
@@ -39,6 +44,20 @@ public class Mensalidade {
         this.ano = ano;
         this.valor = valor;
         this.dataPagamento = dataPagamento;
+    }
+
+    private Mensalidade montarMensalidade(ResultSet rs) throws SQLException {
+        Mensalidade m = new Mensalidade();
+        m.setId_mensalidade(rs.getInt("id_mensalidade"));
+        m.setId_membro(rs.getInt("id_membro"));
+        m.setMes(rs.getInt("mes"));
+        m.setAno(rs.getInt("ano"));
+        m.setValor(rs.getDouble("valor"));
+        m.setDataPagamento(rs.getObject("datapagamento", LocalDate.class));
+        try {
+            m.setNome_membro(rs.getString("nome_membro"));
+        } catch (SQLException ignore) {}
+        return m;
     }
 
     public Mensalidade salvar(Conexao conexao) {
@@ -54,25 +73,35 @@ public class Mensalidade {
             throw new RuntimeException("Membro não encontrado no banco");
         }
 
-        if (this.dataPagamento.isAfter(LocalDate.now()) ) {
+        if (this.dataPagamento.isAfter(LocalDate.now())) {
             throw new RuntimeException("Data do pagamento não pode ser no futuro");
         }
 
-        Mensalidade duplicada = dao.buscarPorMembroMesAno(this.id_membro, this.mes, this.ano,conexao);
+        try {
+            ResultSet rsDup = dao.buscarPorMembroMesAno(this.id_membro, this.mes, this.ano, conexao);
+            if (rsDup != null && rsDup.next()) {
+                Mensalidade duplicada = montarMensalidade(rsDup);
+                if (this.id_mensalidade == 0 || this.id_mensalidade != duplicada.getId_mensalidade()) {
+                    throw new RuntimeException("Este membro já possui uma mensalidade registrada para o Mês " + this.mes + "/" + this.ano);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar duplicidade: " + e.getMessage());
+        }
 
-        if (duplicada != null) {
-
-            if (this.id_mensalidade == 0 || this.id_mensalidade != duplicada.getId_mensalidade()) {
-                throw new RuntimeException("Este membro já possui uma mensalidade registrada para o Mês " + this.mes + "/" + this.ano);
+        boolean existe = false;
+        if (this.id_mensalidade > 0) {
+            try {
+                ResultSet rsExist = dao.buscarPorId(this.id_mensalidade, conexao);
+                if (rsExist != null && rsExist.next()) {
+                    existe = true;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
 
-        Mensalidade existente = null;
-        if (this.id_mensalidade > 0) {
-            existente = dao.buscarPorId(this.id_mensalidade, conexao);
-        }
-
-        if (existente != null) {
+        if (existe) {
             boolean ok = dao.alterar(this, conexao);
             if (!ok) throw new RuntimeException("Erro ao atualizar mensalidade");
             return this;
@@ -82,30 +111,84 @@ public class Mensalidade {
     }
 
     public boolean excluir(Conexao conexao) {
-        return dao.excluir(this.id_mensalidade,conexao);
+        return dao.excluir(this.id_mensalidade, conexao);
     }
 
+    // --- MÉTODOS DE BUSCA (PROCESSAM O RESULTSET DA DAO) ---
+
     public Mensalidade buscarPorId(Integer id, Conexao conexao) {
-        return new MensalidadeDAO().buscarPorId(id, conexao);
+        ResultSet rs = dao.buscarPorId(id, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarMensalidade(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar mensalidade por ID: " + e.getMessage());
+        }
+        return null;
     }
 
     public List<Mensalidade> listarTodos(String filtroNome, Conexao conexao) {
-        return new MensalidadeDAO().listar(filtroNome, conexao);
+        List<Mensalidade> lista = new ArrayList<>();
+        ResultSet rs = dao.listar(filtroNome, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarMensalidade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar mensalidades: " + e.getMessage());
+        }
+        return lista;
     }
 
     public List<Mensalidade> listarPorMesAno(int mes, int ano, Conexao conexao) {
-        return new MensalidadeDAO().listarMesAno(mes, ano, conexao);
+        List<Mensalidade> lista = new ArrayList<>();
+        ResultSet rs = dao.listarMesAno(mes, ano, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarMensalidade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar mensalidades por Mês/Ano: " + e.getMessage());
+        }
+        return lista;
     }
 
     public List<Mensalidade> listarPorMembro(Integer idMembro, Conexao conexao) {
-        return new MensalidadeDAO().listarMembro(idMembro, conexao);
+        List<Mensalidade> lista = new ArrayList<>();
+        ResultSet rs = dao.listarMembro(idMembro, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarMensalidade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar mensalidades por membro: " + e.getMessage());
+        }
+        return lista;
     }
 
     public List<Mensalidade> filtrarAvancado(String nome, String dataIni, String dataFim, Conexao conexao) {
-        return new MensalidadeDAO().filtrar(nome, dataIni, dataFim, conexao);
+        List<Mensalidade> lista = new ArrayList<>();
+        ResultSet rs = dao.filtrar(nome, dataIni, dataFim, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarMensalidade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao filtrar mensalidades: " + e.getMessage());
+        }
+        return lista;
     }
 
-
+    // Getters e Setters
     public int getId_mensalidade() { return id_mensalidade; }
     public void setId_mensalidade(int id_mensalidade) { this.id_mensalidade = id_mensalidade; }
     public int getId_membro() { return id_membro; }

@@ -112,4 +112,28 @@ public class MembroDAO {
         String sql = "DELETE FROM membro WHERE id_membro = " + id;
         return conexao.manipular(sql);
     }
+
+    public ResultSet listarTodosResultSet(Conexao conexao) {
+        String sql = """
+            SELECT 
+                m.id_membro, m.dtini, m.dtfim, m.observacao, m.id_usuario,
+                u.nome AS nome
+            FROM membro m
+            LEFT JOIN usuario u ON m.id_usuario = u.id_usuario
+            ORDER BY m.id_membro DESC
+            """;
+        return conexao.consultar(sql);
+    }
+
+    public ResultSet getByIdResultSet(int id, Conexao conexao) {
+        String sql = String.format("""
+            SELECT 
+                m.id_membro, m.dtini, m.dtfim, m.observacao, m.id_usuario,
+                u.nome AS nome
+            FROM membro m
+            LEFT JOIN usuario u ON m.id_usuario = u.id_usuario
+            WHERE m.id_membro = %d
+            """, id);
+        return conexao.consultar(sql);
+    }
 }

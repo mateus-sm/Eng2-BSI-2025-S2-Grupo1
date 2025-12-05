@@ -18,6 +18,9 @@ public class EventoDAO {
     @Autowired
     private AdministradorDAO adminDAO;
 
+    @Autowired
+    private Administrador administradorModel;
+
     private String escapeString(String input) {
         if (input == null)
             return "NULL";
@@ -26,7 +29,7 @@ public class EventoDAO {
 
     private Evento buildEvento(ResultSet rs) throws SQLException {
         int adminId = rs.getInt("id_admin");
-        Administrador admin = adminDAO.get(adminId, SingletonDB.getConexao());
+        Administrador admin = administradorModel.getById(adminId, SingletonDB.getConexao());
 
         // se nao tiver admin com o id, usa o mock
         if (admin == null) {

@@ -3,6 +3,7 @@ package com.example.dminfo.model;
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.dao.MembroAtividadeDAO;
 import com.example.dminfo.util.Conexao;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

@@ -38,7 +38,7 @@ public class AdministradorController {
     }
 
     public Administrador update(int id, Administrador adminDetails) {
-        return adminModel.atualizarDtFim(id, adminDetails, SingletonDB.getConexao());
+        return adminModel.atualizarDtFim(id, adminDetails.getDtFim(), SingletonDB.getConexao());
     }
 
     public boolean excluir(int id) {

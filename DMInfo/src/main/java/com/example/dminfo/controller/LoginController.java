@@ -1,7 +1,9 @@
 package com.example.dminfo.controller;
 
+import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.model.Usuario;
 import com.example.dminfo.dao.UsuarioDAO;
+import com.example.dminfo.util.SingletonDB;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,6 +24,9 @@ public class LoginController {
     @Autowired
     private UsuarioDAO usuarioDAO;
 
+    @Autowired
+    MembroDAO administradorDAO;
+
     private static final String USUARIO_SESSION_KEY = "idUsuarioLogado";
 
     @PostMapping("/login")
@@ -31,15 +36,18 @@ public class LoginController {
             HttpSession session,
             Model model) {
 
-        // Busca usuário no banco
         Usuario usuarioEncontrado = usuarioDAO.getUsuario(usuario);
 
         if (usuarioEncontrado != null && usuarioEncontrado.getSenha().equals(senha)) {
-            // Login bem-sucedido
-            session.setAttribute(USUARIO_SESSION_KEY, usuarioEncontrado.getId());
+            session.setAttribute("idUsuarioLogado", usuarioEncontrado.getId());
+            session.setAttribute("nomeUsuario", usuarioEncontrado.getNome());
+
+            boolean isAdm = administradorDAO.getByUsuario(usuarioEncontrado.getId(), SingletonDB.getConexao()) != null;
+
+            session.setAttribute("isAdm", isAdm);
+
             return "redirect:/app/principal";
         } else {
-            // Login falhou
             model.addAttribute("erro", "Usuário ou senha inválidos.");
             return "login";
         }

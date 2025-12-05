@@ -1,7 +1,6 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Membro;
-import com.example.dminfo.model.Usuario;
 import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
@@ -12,29 +11,6 @@ import java.util.List;
 
 @Repository
 public class MembroDAO {
-
-    private Membro buildMembro(ResultSet rs) throws SQLException {
-        Membro membro = new Membro();
-        membro.setId(rs.getInt("id_membro"));
-
-        if (rs.getDate("dtini") != null)
-            membro.setDtIni(rs.getDate("dtini").toLocalDate());
-
-        if (rs.getDate("dtfim") != null)
-            membro.setDtFim(rs.getDate("dtfim").toLocalDate());
-
-        membro.setObservacao(rs.getString("observacao"));
-
-        Usuario usuario = new Usuario();
-        usuario.setId(rs.getInt("id_usuario"));
-        try {
-            usuario.setNome(rs.getString("nome"));
-        } catch (SQLException ignore) {
-
-        }
-        membro.setUsuario(usuario);
-        return membro;
-    }
 
     public List<Membro> get(String termoBusca, Conexao conexao) {
         List<Membro> membros = new ArrayList<>();
@@ -54,7 +30,7 @@ public class MembroDAO {
             ResultSet rs = conexao.consultar(sql);
             if (rs != null)
                 while (rs.next())
-                    membros.add(buildMembro(rs));
+                    membros.add(new Membro(rs));
         } catch (SQLException e) {
             System.out.println("Erro ao listar Membros: " + e.getMessage());
         }
@@ -72,7 +48,7 @@ public class MembroDAO {
         try {
             ResultSet rs = conexao.consultar(sql);
             if (rs != null && rs.next())
-                return buildMembro(rs);
+                return new Membro(rs);
         } catch (SQLException e) {
             System.out.println("Erro ao buscar Membro por ID: " + e.getMessage());
         }
@@ -89,9 +65,8 @@ public class MembroDAO {
 
         try {
             ResultSet rs = conexao.consultar(sql);
-            if (rs != null && rs.next()) {
-                return buildMembro(rs);
-            }
+            if (rs != null && rs.next())
+                return new Membro(rs);
         } catch (SQLException e) {
             System.out.println("Erro ao buscar Membro por Usuário: " + e.getMessage());
         }

@@ -1,10 +1,13 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.MembroDAO;
+import com.example.dminfo.dao.MembroAtividadeDAO;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +22,30 @@ public class Membro {
     @Autowired
     private MembroDAO dao;
 
+    @Autowired(required = false)
+    private MembroAtividadeDAO membroAtividadeDAO;
+
     public Membro() {}
+
+    public Membro(ResultSet rs) throws SQLException {
+        this.id = rs.getInt("id_membro");
+
+        if (rs.getDate("dtini") != null)
+            this.dtIni = rs.getDate("dtini").toLocalDate();
+
+        if (rs.getDate("dtfim") != null)
+            this.dtFim = rs.getDate("dtfim").toLocalDate();
+
+        this.observacao = rs.getString("observacao");
+
+        this.usuario = new Usuario();
+        this.usuario.setId(rs.getInt("id_usuario"));
+        try {
+            this.usuario.setNome(rs.getString("nome"));
+        } catch (SQLException e) {
+
+        }
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -40,6 +66,10 @@ public class Membro {
         if (id == null || id == 0)
             throw new RuntimeException("ID inválido.");
         return dao.get(id, conexao);
+    }
+
+    public Membro getByUsuario(int idUsuario, Conexao conexao) {
+        return dao.getByUsuario(idUsuario, conexao);
     }
 
     public Membro salvar(Conexao conexao) {
@@ -78,5 +108,23 @@ public class Membro {
         if (id == null || id <= 0)
             throw new RuntimeException("ID inválido.");
         return dao.excluir(id, conexao);
+    }
+
+    public List<Integer> listarMembrosPorAtividade(int idCriacao) {
+        if (membroAtividadeDAO != null)
+            return membroAtividadeDAO.listarMembrosPorAtividade(idCriacao);
+        return List.of();
+    }
+
+    public boolean adicionarMembroAtividade(int idCriacao, int idMembro) {
+        if (membroAtividadeDAO != null)
+            return membroAtividadeDAO.adicionarMembroAtividade(idCriacao, idMembro);
+        return false;
+    }
+
+    public boolean removerMembroAtividade(int idCriacao, int idMembro) {
+        if (membroAtividadeDAO != null)
+            return membroAtividadeDAO.removerMembroAtividade(idCriacao, idMembro);
+        return false;
     }
 }

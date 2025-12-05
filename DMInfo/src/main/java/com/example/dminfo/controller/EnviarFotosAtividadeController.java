@@ -1,7 +1,5 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.EventoDAO;
-import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.EnviarFotosAtividade;
 import com.example.dminfo.model.Evento;
@@ -28,16 +26,16 @@ public class EnviarFotosAtividadeController {
     private EnviarFotosAtividade fotoModel;
 
     @Autowired
-    private MembroDAO membroDAO;
+    private Membro membroModel;
 
     @Autowired
     private Atividade atividadeModel;
 
     @Autowired
-    private EventoDAO eventoDAO;
+    private Evento eventoModel;
 
     public List<Evento> listarTodosEventos() {
-        return eventoDAO.getTodos();
+        return eventoModel.getTodos(SingletonDB.getConexao());
     }
 
     public List<Atividade> listarAtividadesPorEvento(int idEvento) {
@@ -56,7 +54,7 @@ public class EnviarFotosAtividadeController {
     }
 
     public EnviarFotosAtividade salvar(MultipartFile arquivo, int idUsuario, int idAtividade) {
-        Membro m = membroDAO.getByUsuario(idUsuario, SingletonDB.getConexao());
+        Membro m = membroModel.getByUsuario(idUsuario, SingletonDB.getConexao());
         if (m == null)
             throw new RuntimeException("Membro não encontrado para o usuário logado (ID Usuário: " + idUsuario + ")");
 
@@ -95,7 +93,7 @@ public class EnviarFotosAtividadeController {
                 try {
                     Files.deleteIfExists(Paths.get(UPLOAD_DIRECTORY + nomeArquivo));
                 } catch (IOException ignore) {
-
+                    // Ignora erro ao deletar se falhar
                 }
             }
             throw new RuntimeException("Falha ao inserir a foto no banco: " + e.getMessage());

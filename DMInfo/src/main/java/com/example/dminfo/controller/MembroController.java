@@ -1,6 +1,5 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.MembroAtividadeDAO;
 import com.example.dminfo.model.Membro;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,6 @@ public class MembroController {
 
     @Autowired
     private Membro membroModel;
-
-    @Autowired(required = false)
-    private MembroAtividadeDAO membroAtividadeDAO;
 
     public List<Membro> listar(String filtro) {
         return membroModel.listar(filtro, SingletonDB.getConexao());
@@ -49,20 +45,14 @@ public class MembroController {
     }
 
     public List<Integer> listarMembrosPorAtividade(int idCriacao) {
-        if (membroAtividadeDAO != null)
-            return membroAtividadeDAO.listarMembrosPorAtividade(idCriacao);
-        return List.of();
+        return membroModel.listarMembrosPorAtividade(idCriacao);
     }
 
     public boolean adicionarMembroAtividade(int idCriacao, int idMembro) {
-        if (membroAtividadeDAO != null)
-            return membroAtividadeDAO.adicionarMembroAtividade(idCriacao, idMembro);
-        return false;
+        return membroModel.adicionarMembroAtividade(idCriacao, idMembro);
     }
 
     public boolean removerMembroAtividade(int idCriacao, int idMembro) {
-        if (membroAtividadeDAO != null)
-            return membroAtividadeDAO.removerMembroAtividade(idCriacao, idMembro);
-        return false;
+        return membroModel.removerMembroAtividade(idCriacao, idMembro);
     }
 }

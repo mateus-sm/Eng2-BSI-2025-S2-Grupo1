@@ -1,6 +1,7 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.EventoDAO;
+import com.example.dminfo.util.Conexao; // Import necessário
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -33,8 +34,11 @@ public class Evento {
     }
 
     public List<Evento> listar(String termoDescricao, String ordenarPor) {
-        // A EventoDAO deve ter o método `buscarEventos`
         return dao.buscarEventos(termoDescricao, ordenarPor);
+    }
+
+    public List<Evento> getTodos(Conexao conexao) {
+        return dao.getTodos();
     }
 
     public Evento getById(Integer id) {
@@ -65,33 +69,15 @@ public class Evento {
         Evento existente = dao.getById(id);
         if (existente == null)
             return false;
-
         return dao.excluir(id);
     }
 
-
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public Administrador getAdmin() {
-        return admin;
-    }
-    public void setAdmin(Administrador admin) {
-        this.admin = admin;
-    }
-    public String getTitulo() {
-        return titulo;
-    }
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-    public String getDescricao() {
-        return descricao;
-    }
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public Administrador getAdmin() { return admin; }
+    public void setAdmin(Administrador admin) { this.admin = admin; }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 }

@@ -1,9 +1,6 @@
 package com.example.dminfo.dao;
 
-import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.EnviarFotosAtividade;
-import com.example.dminfo.model.Membro;
-import com.example.dminfo.model.Usuario;
 import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
@@ -14,39 +11,6 @@ import java.util.List;
 
 @Repository
 public class EnviarFotosAtividadeDAO {
-
-    private EnviarFotosAtividade buildFoto(ResultSet rs) throws SQLException {
-        EnviarFotosAtividade foto = new EnviarFotosAtividade();
-        foto.setId(rs.getInt("id_foto"));
-        foto.setFoto(rs.getString("foto"));
-        if (rs.getDate("data") != null)
-            foto.setData(rs.getDate("data").toLocalDate());
-
-        Membro membro = new Membro();
-        membro.setId(rs.getInt("id_membro"));
-
-        Usuario usuario = new Usuario();
-        usuario.setId(rs.getInt("id_usuario"));
-        try {
-            usuario.setNome(rs.getString("usuario_nome"));
-        } catch (SQLException ignore) {
-
-        }
-        membro.setUsuario(usuario);
-
-        foto.setMembro(membro);
-
-        Atividade atv = new Atividade();
-        atv.setId(rs.getInt("id_atividade"));
-        try {
-            atv.setDescricao(rs.getString("atividade_descricao"));
-        } catch (SQLException ignore) {
-
-        }
-        foto.setAtividade(atv);
-
-        return foto;
-    }
 
     public List<EnviarFotosAtividade> getPorAtividade(int idAtividade, Conexao conexao) {
         List<EnviarFotosAtividade> fotos = new ArrayList<>();
@@ -64,7 +28,7 @@ public class EnviarFotosAtividadeDAO {
             ResultSet rs = conexao.consultar(sql);
             if (rs != null)
                 while (rs.next())
-                    fotos.add(buildFoto(rs));
+                    fotos.add(new EnviarFotosAtividade(rs));
         } catch (SQLException e) {
             System.out.println("Erro ao listar Fotos de Atividade: " + e.getMessage());
         }
@@ -85,7 +49,7 @@ public class EnviarFotosAtividadeDAO {
         try {
             ResultSet rs = conexao.consultar(sql);
             if (rs != null && rs.next())
-                return buildFoto(rs);
+                return new EnviarFotosAtividade(rs);
         } catch (SQLException e) {
             System.out.println("Erro ao buscar Foto: " + e.getMessage());
         }

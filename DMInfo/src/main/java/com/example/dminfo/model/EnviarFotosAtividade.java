@@ -7,6 +7,8 @@ import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,6 +31,32 @@ public class EnviarFotosAtividade {
     private AtividadeDAO atividadeDAO;
 
     public EnviarFotosAtividade(){}
+
+    public EnviarFotosAtividade(ResultSet rs) throws SQLException {
+        this.id = rs.getInt("id_foto");
+        this.foto = rs.getString("foto");
+
+        if (rs.getDate("data") != null)
+            this.data = rs.getDate("data").toLocalDate();
+
+        this.membro = new Membro();
+        this.membro.setId(rs.getInt("id_membro"));
+
+        Usuario usuario = new Usuario();
+        usuario.setId(rs.getInt("id_usuario"));
+        try {
+            usuario.setNome(rs.getString("usuario_nome"));
+        } catch (SQLException ignore) {
+        }
+        this.membro.setUsuario(usuario);
+
+        this.atividade = new Atividade();
+        this.atividade.setId(rs.getInt("id_atividade"));
+        try {
+            this.atividade.setDescricao(rs.getString("atividade_descricao"));
+        } catch (SQLException ignore) {
+        }
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

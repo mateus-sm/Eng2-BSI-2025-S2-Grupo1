@@ -6,27 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class DoadorDAO {
-
-    private Doador buildDoador(ResultSet rs) throws SQLException {
-        return new Doador(
-                rs.getInt("id_doador"),
-                rs.getString("nome"),
-                rs.getString("documento"),
-                rs.getString("rua"),
-                rs.getString("bairro"),
-                rs.getString("cidade"),
-                rs.getString("uf"),
-                rs.getString("cep"),
-                rs.getString("email"),
-                rs.getString("telefone"),
-                rs.getString("contato")
-        );
-    }
 
     public Doador create(Doador doador, Conexao conexao) {
         if (doador == null) return null;
@@ -53,20 +35,6 @@ public class DoadorDAO {
             }
         } catch (SQLException e) {
             System.out.println("Erro ao gravar Doador: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public Doador read(Doador d, Conexao conexao) {
-        String documento = d.getDocumento().replace("'", "''");
-        String sql = String.format("SELECT * FROM doador WHERE documento = '%s'", documento);
-
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next())
-                return buildDoador(rs);
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar Doador por Documento: " + e.getMessage());
         }
         return null;
     }
@@ -100,8 +68,13 @@ public class DoadorDAO {
         return conexao.manipular(sql);
     }
 
-    public List<Doador> readAll(String filtro, Conexao conexao) {
-        List<Doador> doadores = new ArrayList<>();
+    public ResultSet read(Doador d, Conexao conexao) {
+        String documento = d.getDocumento().replace("'", "''");
+        String sql = String.format("SELECT * FROM doador WHERE documento = '%s'", documento);
+        return conexao.consultar(sql);
+    }
+
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM doador";
 
         if (filtro != null && !filtro.isBlank()) {
@@ -109,27 +82,11 @@ public class DoadorDAO {
         }
 
         sql += " ORDER BY id_doador";
-
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null)
-                while (rs.next())
-                    doadores.add(buildDoador(rs));
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar Doadores: " + e.getMessage());
-        }
-        return doadores;
+        return conexao.consultar(sql);
     }
 
-    public Doador getById(int id, Conexao conexao) {
+    public ResultSet getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM doador WHERE id_doador = " + id;
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next())
-                return buildDoador(rs);
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar Doador por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 }

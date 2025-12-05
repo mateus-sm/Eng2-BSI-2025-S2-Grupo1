@@ -5,6 +5,9 @@ import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -41,39 +44,60 @@ public class Doador {
         this.contato = contato;
     }
 
-    public int getId() {return id;}
-    public void setId(int id) {this.id = id;}
-    public String getNome() {return nome;}
-    public void setNome(String nome) {this.nome = nome;}
-    public String getDocumento() {return documento;}
-    public void setDocumento(String documento) {this.documento = documento;}
-    public String getRua() {return rua;}
-    public void setRua(String rua) {this.rua = rua;}
-    public String getBairro() {return bairro;}
-    public void setBairro(String bairro) {this.bairro = bairro;}
-    public String getCidade() {return cidade;}
-    public void setCidade(String cidade) {this.cidade = cidade;}
-    public String getUf() {return uf;}
-    public void setUf(String uf) {this.uf = uf;}
-    public String getCep() {return cep;}
-    public void setCep(String cep) {this.cep = cep;}
-    public String getEmail() {return email;}
-    public void setEmail(String email) {this.email = email;}
-    public String getTelefone() {return telefone;}
-    public void setTelefone(String telefone) {this.telefone = telefone;}
-    public String getContato() {return contato;}
-    public void setContato(String contato) {this.contato = contato;}
+    private Doador montarDoador(ResultSet rs) throws SQLException {
+        return new Doador(
+                rs.getInt("id_doador"),
+                rs.getString("nome"),
+                rs.getString("documento"),
+                rs.getString("rua"),
+                rs.getString("bairro"),
+                rs.getString("cidade"),
+                rs.getString("uf"),
+                rs.getString("cep"),
+                rs.getString("email"),
+                rs.getString("telefone"),
+                rs.getString("contato")
+        );
+    }
 
     public List<Doador> listar(String filtro, Conexao conexao) {
-        return dao.readAll(filtro, conexao);
+        List<Doador> lista = new ArrayList<>();
+        ResultSet rs = dao.readAll(filtro, conexao);
+
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarDoador(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar doadores: " + e.getMessage());
+        }
+        return lista;
     }
 
     public Doador getById(Integer id, Conexao conexao) {
-        return dao.getById(id, conexao);
+        ResultSet rs = dao.getById(id, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarDoador(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar doador por ID: " + e.getMessage());
+        }
+        return null;
     }
 
     public Doador getByDocumento(Doador doador, Conexao conexao) {
-        return dao.read(doador, conexao);
+        ResultSet rs = dao.read(doador, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarDoador(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar doador por documento: " + e.getMessage());
+        }
+        return null;
     }
 
     public Doador salvar(Doador doador, Conexao conexao) {
@@ -81,7 +105,7 @@ public class Doador {
             throw new RuntimeException("Dados do doador inválidos.");
         }
 
-        Doador existente = dao.read(doador, conexao);
+        Doador existente = this.getByDocumento(doador, conexao);
         if (existente != null) {
             throw new RuntimeException("Já existe um doador com este documento.");
         }
@@ -90,7 +114,8 @@ public class Doador {
     }
 
     public Doador update(Integer id, Doador doadorDetalhes, Conexao conexao) {
-        Doador doadorBanco = dao.getById(id, conexao);
+        Doador doadorBanco = this.getById(id, conexao);
+
         if (doadorBanco == null) {
             throw new RuntimeException("Doador não encontrado para o ID: " + id);
         }
@@ -114,10 +139,32 @@ public class Doador {
     }
 
     public boolean excluir(Integer id, Conexao conexao) {
-        Doador doador = dao.getById(id, conexao);
-        if (doador == null) {
+        if (this.getById(id, conexao) == null) {
             throw new RuntimeException("Doador não encontrado.");
         }
         return dao.delete(id, conexao);
     }
+
+    public int getId() {return id;}
+    public void setId(int id) {this.id = id;}
+    public String getNome() {return nome;}
+    public void setNome(String nome) {this.nome = nome;}
+    public String getDocumento() {return documento;}
+    public void setDocumento(String documento) {this.documento = documento;}
+    public String getRua() {return rua;}
+    public void setRua(String rua) {this.rua = rua;}
+    public String getBairro() {return bairro;}
+    public void setBairro(String bairro) {this.bairro = bairro;}
+    public String getCidade() {return cidade;}
+    public void setCidade(String cidade) {this.cidade = cidade;}
+    public String getUf() {return uf;}
+    public void setUf(String uf) {this.uf = uf;}
+    public String getCep() {return cep;}
+    public void setCep(String cep) {this.cep = cep;}
+    public String getEmail() {return email;}
+    public void setEmail(String email) {this.email = email;}
+    public String getTelefone() {return telefone;}
+    public void setTelefone(String telefone) {this.telefone = telefone;}
+    public String getContato() {return contato;}
+    public void setContato(String contato) {this.contato = contato;}
 }

@@ -155,4 +155,9 @@ public class viewController {
     public String paginaFrequenciaAtividade() {
         return "frequenciaAtividade";
     }
+
+    @GetMapping("/app/realizacaoAtividades")
+    public String paginaRealizacaoAtividades() {
+        return "realizacaoAtividades";
+    }
 }

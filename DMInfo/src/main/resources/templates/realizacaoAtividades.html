@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Gerenciamento de Realização de Atividades</title>
-    <link rel="stylesheet" href="styles/realizacao_atividades.css" />
+    <link rel="stylesheet" th:href="@{/styles/realizacao_atividades.css}" />
 </head>
 <body>
 
@@ -87,6 +87,6 @@
     <tbody id="atividadesTable"></tbody>
 </table>
 
-<script src="js/realizacao_atividades.js"></script>
+<script th:src="@{/js/realizacao_atividades.js}" defer></script>
 </body>
 </html>

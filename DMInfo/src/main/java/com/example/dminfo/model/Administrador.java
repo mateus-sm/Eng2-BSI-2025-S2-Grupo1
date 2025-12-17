@@ -119,7 +119,6 @@ public class Administrador {
             throw new RuntimeException("Usuário não existente");
         }
 
-        // Reutiliza o método getByUsuario que agora processa o ResultSet internamente
         if (this.getByUsuario(this.usuario.getId(), conexao) != null) {
             throw new RuntimeException("Usuário já é um Administrador");
         }
@@ -128,7 +127,6 @@ public class Administrador {
     }
 
     public Administrador atualizarDtFim(int id, LocalDate novaDtFim, Conexao conexao) {
-        // Busca usando o método do Model
         Administrador adminBanco = this.getById(id, conexao);
 
         if (adminBanco == null) {
@@ -151,7 +149,7 @@ public class Administrador {
         if (id <= 0) {
             throw new RuntimeException("ID inválido.");
         }
-        if (dao.contar(conexao) <= 1) { // Lógica ajustada: se tiver 1 ou menos, não pode apagar o último
+        if (dao.contar(conexao) <= 1) {
             throw new RuntimeException("Não pode deixar de existir Administrador.");
         }
         return dao.excluir(id, conexao);
@@ -161,7 +159,6 @@ public class Administrador {
         return dao.contar(conexao);
     }
 
-    // Getters e Setters normais
     public int getId() {return id;}
     public void setId(int id) {this.id = id;}
     public LocalDate getDtIni() {return dtIni;}

@@ -73,10 +73,9 @@ public class Usuario {
             throw new RuntimeException("A data de nascimento não pode ser maior que a data atual.");
         }
 
-        if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
-            throw new RuntimeException("Formato de CPF inválido (esperado: 000.000.000-00).");
+        if (cpf == null || !cpf.matches("\\d{11}")) {
+            throw new RuntimeException("O CPF deve conter apenas 11 números (enviado: " + cpf + ").");
         }
-
 
         if (!Validador.isCPF(this.cpf)) {
             throw new RuntimeException("CPF inválido. Verifique os números digitados.");

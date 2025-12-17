@@ -32,6 +32,21 @@
     </div>
 </nav>
 
+<div class="container mt-4">
+
+    <div th:if="${sistemaSemAdmin}" class="alert alert-warning d-flex align-items-center justify-content-between shadow-sm" role="alert">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+            <strong>Atenção:</strong> Este sistema ainda não possui um Administrador.
+        </div>
+        <form th:action="@{/app/setup-inicial-admin}" method="post" class="m-0">
+            <button type="submit" class="btn btn-warning fw-bold border-dark">
+                <i class="bi bi-shield-lock-fill"></i> Tornar-me Administrador
+            </button>
+        </form>
+    </div>
+</div>
+
 <div class="container my-5">
 
     <h6 class="text-uppercase fw-bold mb-3 small tracking-wide">Gestão & Secretaria</h6>

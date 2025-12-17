@@ -39,12 +39,12 @@
                     <form id="formMensalidade" class="needs-validation" novalidate onsubmit="salvarMensalidade(event)">
 
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="selectMembro" class="form-label asterisco">Membro:</label>
-                                <select id="selectMembro" class="form-control form-select" required>
-                                    <option value="">-- Selecione um membro --</option>
-                                </select>
-                                <div class="invalid-feedback">Selecione um membro.</div>
+                            <div class="col-md-6 position-relative">
+                                <label for="buscaMembro" class="form-label asterisco">Membro:</label>
+                                <input type="text" id="buscaMembro" class="form-control" placeholder="Digite o nome do membro..." autocomplete="off" required>
+                                <input type="hidden" id="selectMembro">
+                                <div id="listaSugestoes" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></div>
+                                <div class="invalid-feedback">Selecione um membro da lista.</div>
                             </div>
 
                             <div class="col-md-3">

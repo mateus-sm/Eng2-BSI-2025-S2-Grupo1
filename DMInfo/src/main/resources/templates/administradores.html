@@ -103,11 +103,12 @@
                     </div>
 
                     <div id="blocoUsuarioExistente">
-                        <div class="mb-3">
-                            <label class="form-label">Selecione um Usuário *</label>
-                            <select class="form-select" id="usuarioId">
-                                <option value="">Carregando usuários...</option>
-                            </select>
+                        <div class="mb-3 position-relative">
+                            <label for="buscaUsuario" class="form-label">Pesquisar Usuário</label>
+                            <input type="text" class="form-control" id="buscaUsuario" placeholder="Digite o nome do usuário..." autocomplete="off">
+                            <input type="hidden" id="usuarioId">
+                            <div id="listaSugestoes" class="list-group position-absolute w-100 shadow" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></div>
+                            <div class="form-text text-muted">Selecione um usuário da lista para torná-lo administrador.</div>
                         </div>
                     </div>
 
@@ -148,7 +149,7 @@
 
                             <div class="col-6 mb-3">
                                 <label class="form-label">Data de Nascimento *</label>
-                                <input type="date" id="novo_dtnasc" placeholder="(dd/mm/aaaa)" class="form-control">
+                                <input type="text" class="form-control" id="novo_dtnasc" placeholder="dd/mm/aaaa" maxlength="10">
                             </div>
 
                             <h6 class="mt-3 mb-2 fw-bold">Endereço</h6>

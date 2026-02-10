@@ -22,6 +22,16 @@ let itensFiltrados = []
 const recursos = {}
 const distribuicoes = {}
 
+//Tratativa de data
+document.addEventListener('DOMContentLoaded', () => {
+    const inputData = document.getElementById('dataDistribuicao');
+    const data = new Date();
+    // Formata para o padrão YYYY-MM-DD
+    const hoje = data.toISOString().split('T')[0];
+    inputData.value = hoje;
+    inputData.max = hoje;
+});
+
 function mostrarAlerta(mensagem, tipo = "success") {
     const alertId = `alerta-${Date.now()}`
     const alertHtml = `

@@ -14,8 +14,10 @@ public class RecursoHasDistribuicaoDeRecursosController {
 
     @Autowired
     private RecursoHasDistribuicaoDeRecursosDAO itemDistribuicaoDAO;
+
     @Autowired
     private RecursoController recursoController;
+
     @Autowired
     private DistribuicaoDeRecursosController distribuicaoController;
 
@@ -36,7 +38,6 @@ public class RecursoHasDistribuicaoDeRecursosController {
         }
 
         RecursoHasDistribuicaoDeRecursos item = itemDistribuicaoDAO.getById(idRecurso, idDistribuicao);
-
         if (item == null) {
             throw new RuntimeException("Associação não encontrada.");
         }
@@ -51,37 +52,49 @@ public class RecursoHasDistribuicaoDeRecursosController {
             throw new RuntimeException("Quantidade deve ser maior que zero.");
         }
 
-        try {
-            Recurso r = recursoController.getById(item.getRecurso());
-            DistribuicaoDeRecursos d = distribuicaoController.getById(item.getDistribuicao());
-        } catch (RuntimeException e) {
+        DistribuicaoDeRecursos d = distribuicaoController.getById(item.getDistribuicao());
+        Recurso r = recursoController.getById(item.getRecurso());
 
-            throw new RuntimeException("Falha ao salvar: " + e.getMessage());
+        if (r.getQuantidade() < item.getQuantidade()) {
+            throw new RuntimeException("Estoque insuficiente para adicionar este item à distribuição.");
         }
+
+        r.setQuantidade(r.getQuantidade() - item.getQuantidade());
+        recursoController.atualizar(r);
 
         return itemDistribuicaoDAO.gravar(item);
     }
 
     public boolean atualizar(RecursoHasDistribuicaoDeRecursos item) {
-        if (item == null || item.getRecurso() <= 0 || item.getDistribuicao() <= 0) {
-            throw new RuntimeException("Objeto de associação inconsistente. IDs de Recurso e Distribuição são obrigatórios.");
+        if (item == null || item.getRecurso() <= 0 || item.getDistribuicao() <= 0 || item.getQuantidade() <= 0) {
+            throw new RuntimeException("Dados inválidos para atualização.");
         }
-        if (item.getQuantidade() <= 0) {
-            throw new RuntimeException("Quantidade deve ser maior que zero.");
+
+        RecursoHasDistribuicaoDeRecursos existente = this.getById(item.getRecurso(), item.getDistribuicao());
+        Recurso r = recursoController.getById(item.getRecurso());
+
+        int diferenca = item.getQuantidade() - existente.getQuantidade();
+
+        if (diferenca > 0 && r.getQuantidade() < diferenca) {
+            throw new RuntimeException("Estoque insuficiente para o acréscimo solicitado.");
         }
+
+        r.setQuantidade(r.getQuantidade() - diferenca);
+        recursoController.atualizar(r);
 
         return itemDistribuicaoDAO.alterar(item);
     }
 
     public void excluir(Integer idRecurso, Integer idDistribuicao) {
         if (idRecurso == null || idRecurso <= 0 || idDistribuicao == null || idDistribuicao <= 0) {
-            throw new RuntimeException("IDs inválidos para a exclusão (Recurso e Distribuição).");
+            throw new RuntimeException("IDs inválidos para a exclusão.");
         }
 
-        RecursoHasDistribuicaoDeRecursos existente = itemDistribuicaoDAO.getById(idRecurso, idDistribuicao);
-        if (existente == null) {
-            throw new RuntimeException("Associação não encontrada, exclusão falhou.");
-        }
+        RecursoHasDistribuicaoDeRecursos existente = this.getById(idRecurso, idDistribuicao);
+
+        Recurso r = recursoController.getById(idRecurso);
+        r.setQuantidade(r.getQuantidade() + existente.getQuantidade());
+        recursoController.atualizar(r);
 
         itemDistribuicaoDAO.excluir(idRecurso, idDistribuicao);
     }

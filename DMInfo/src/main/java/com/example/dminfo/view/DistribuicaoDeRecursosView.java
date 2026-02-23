@@ -1,6 +1,7 @@
 package com.example.dminfo.view;
 
 import com.example.dminfo.controller.DistribuicaoDeRecursosController;
+import com.example.dminfo.dto.DistribuicaoDeRecursosDTO;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,17 @@ public class DistribuicaoDeRecursosView {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao excluir distribuição: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/carrinho")
+    @ResponseBody
+    public ResponseEntity<Object> criarComItens(@RequestBody DistribuicaoDeRecursosDTO dto) {
+        try {
+            distribuicaoController.salvarComItens(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Distribuição e itens salvos com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao salvar distribuição: " + e.getMessage());
         }
     }
 }

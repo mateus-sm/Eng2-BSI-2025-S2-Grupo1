@@ -98,13 +98,19 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  background-color: transparent;
   transition: all 0.2s ease;
 }
 
-.btn-sm:hover {
+.btn-icone {
+  background-color: transparent;
+  color: var(--danger-color);
+  border: none;
+}
+
+.btn-icone:hover {
   transform: scale(1.1);
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #a71d2a;
 }
 
 /* Tabela */

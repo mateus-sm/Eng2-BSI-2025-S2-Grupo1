@@ -1,293 +1,342 @@
-const API_ITENS = "http://localhost:8080/apis/distribuicao-itens"
 const API_RECURSOS = "http://localhost:8080/apis/recurso"
 const API_DISTRIBUICOES = "http://localhost:8080/apis/distribuicao-recursos"
 
 // DOM Elements
-const form = document.getElementById("formDistribuicao")
-const selectRecurso = document.getElementById("selectRecurso")
-const selectDistribuicao = document.getElementById("selectDistribuicao")
-const quantidadeInput = document.getElementById("quantidade")
-const idRecursoOriginal = document.getElementById("idRecursoOriginal")
-const idDistribuicaoOriginal = document.getElementById("idDistribuicaoOriginal")
-const tabela = document.getElementById("tabelaItens")
-const alertaContainer = document.getElementById("alertaContainer")
-const totalItens = document.getElementById("totalItens")
-const mensagemVazia = document.getElementById("mensagemVazia")
-const filtroDistribuicao = document.getElementById("filtroDistribuicao")
-const filtroRecurso = document.getElementById("filtroRecurso")
+const formDistribuicao = document.getElementById("formDistribuicao");
+const alertaContainer = document.getElementById("alertaContainer");
+const tabelaCarrinho = document.getElementById("tabelaCarrinho");
+const corpoCarrinho = document.getElementById("corpoCarrinho");
+const btnAdicionar = document.getElementById("btnAdicionar");
 
-// Estado global
-let todosOsItens = []
-let itensFiltrados = []
-const recursos = {}
-const distribuicoes = {}
+// Estado Global
+let carrinho = [];
+const mapRecursos = {};
+let todasDistribuicoes = [];
 
-//Tratativa de data
+// Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    const inputData = document.getElementById('dataDistribuicao');
-    const data = new Date();
-    // Formata para o padrão YYYY-MM-DD
-    const hoje = data.toISOString().split('T')[0];
-    inputData.value = hoje;
-    inputData.max = hoje;
+    configurarDataAtual();
+    carregarDadosIniciais();
 });
 
-function mostrarAlerta(mensagem, tipo = "success") {
-    const alertId = `alerta-${Date.now()}`
-    const alertHtml = `
-        <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-            ${mensagem}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `
-    alertaContainer.insertAdjacentHTML("beforeend", alertHtml)
+function configurarDataAtual() {
+    const inputData = document.getElementById('dataDistribuicao');
+    const hoje = new Date().toISOString().split('T')[0];
+    inputData.value = hoje;
 }
 
-function validarCampo(campo) {
-    if (campo.value.trim() !== "" && campo.checkValidity()) {
-        campo.classList.remove("is-invalid")
-        campo.classList.add("is-valid")
-    } else if (campo.value.trim() === "" || !campo.checkValidity()) {
-        campo.classList.remove("is-valid")
-        campo.classList.add("is-invalid")
+// ==========================================
+// LÓGICA DO CARRINHO
+// ==========================================
+btnAdicionar.addEventListener('click', () => {
+    const selectRecurso = document.getElementById('selectRecurso');
+    const inputQuantidade = document.getElementById('quantidade');
+
+    const idRecurso = parseInt(selectRecurso.value);
+    const nomeRecurso = selectRecurso.options[selectRecurso.selectedIndex]?.text;
+    const quantidade = parseInt(inputQuantidade.value);
+
+    if (!idRecurso || isNaN(quantidade) || quantidade < 1) {
+        mostrarAlerta("Selecione um recurso e informe uma quantidade válida.", "warning");
+        return;
     }
+
+    // Verifica se o item já está no carrinho
+    const itemExistente = carrinho.find(item => item.idRecurso === idRecurso);
+    if (itemExistente) {
+        itemExistente.quantidade += quantidade;
+    } else {
+        carrinho.push({ idRecurso, nomeRecurso, quantidade });
+    }
+
+    // Limpa os inputs após adicionar
+    selectRecurso.value = "";
+    inputQuantidade.value = "";
+    
+    renderizarCarrinho();
+});
+
+function removerItem(idRecurso) {
+    carrinho = carrinho.filter(item => item.idRecurso !== idRecurso);
+    renderizarCarrinho();
 }
 
-// Validação em tempo real
-selectRecurso.addEventListener("change", () => validarCampo(selectRecurso))
-selectDistribuicao.addEventListener("change", () => validarCampo(selectDistribuicao))
-quantidadeInput.addEventListener("input", () => validarCampo(quantidadeInput))
+function renderizarCarrinho() {
+    corpoCarrinho.innerHTML = "";
+    
+    if (carrinho.length === 0) {
+        tabelaCarrinho.classList.add('d-none');
+        return;
+    }
 
-// Listeners de filtro
-filtroDistribuicao.addEventListener("change", aplicarFiltros)
-filtroRecurso.addEventListener("change", aplicarFiltros)
+    tabelaCarrinho.classList.remove('d-none');
 
+    carrinho.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="align-middle">${item.nomeRecurso}</td>
+            <td class="text-center align-middle">${item.quantidade}</td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-icone" title="Remover Item" onclick="removerItem(${item.idRecurso})">
+                    <i class="bi bi-trash-fill fs-5"></i>
+                </button>
+            </td>
+        `;
+        corpoCarrinho.appendChild(tr);
+    });
+}
+
+// ==========================================
+// SALVAR DISTRIBUIÇÃO (POST PARA O BACK-END)
+// ==========================================
+formDistribuicao.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const valor = parseFloat(document.getElementById('valor').value) || 0;
+
+    // Deve ter dinheiro ou item
+    if (valor <= 0 && carrinho.length === 0) {
+        mostrarAlerta("A distribuição deve conter pelo menos um item no carrinho ou um valor monetário!", "danger");
+        return;
+    }
+
+    // Montando o DTO
+    const payload = {
+        idAdmin: 1, // Alterar para pegar dinamicamente
+        data: document.getElementById('dataDistribuicao').value,
+        descricao: document.getElementById('descricaoDist').value,
+        instituicaoReceptora: document.getElementById('instituicao').value,
+        valor: valor,
+        itens: carrinho.map(item => ({
+            idRecurso: item.idRecurso,
+            quantidade: item.quantidade
+        }))
+    };
+
+    try {
+        const resposta = await fetch(`${API_DISTRIBUICOES}/carrinho`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (resposta.ok) {
+            mostrarAlerta("Distribuição registrada com sucesso!", "success");
+
+            formDistribuicao.reset();
+            configurarDataAtual();
+            carrinho = [];
+            renderizarCarrinho();
+
+            carregarDadosIniciais();
+        } else {
+            const erroTexto = await resposta.text();
+            mostrarAlerta(erroTexto || "Erro ao salvar distribuição.", "danger");
+        }
+    } catch (erro) {
+        console.error(erro);
+        mostrarAlerta("Erro de conexão com o servidor.", "danger");
+    }
+});
+
+// ==========================================
+// CARREGAR DADOS DAS APIS
+// ==========================================
 async function carregarDadosIniciais() {
     try {
-        // Carregar recursos
-        const respRecursos = await fetch(API_RECURSOS)
-        if (!respRecursos.ok) throw new Error("Erro ao carregar recursos")
-        const recursosData = await respRecursos.json()
-        recursosData.forEach((r) => {
-            recursos[r.id] = {
-                descricao: r.descricao || "Sem descrição",
-                tipo: r.tipo || "Sem tipo",
-                quantidade: r.quantidade || 0
-            }
-            const option = document.createElement("option")
-            option.value = r.id
-            option.textContent = `${r.tipo || "Sem tipo"} - ${r.descricao || "Sem descrição"} (Qtd: ${r.quantidade || 0})`
-            selectRecurso.appendChild(option)
+        const respRecursos = await fetch(API_RECURSOS);
+        if (respRecursos.ok) {
+            const listaRecursos = await respRecursos.json();
+            const selectRecurso = document.getElementById('selectRecurso');
+            selectRecurso.innerHTML = '<option value="">Selecione um recurso...</option>';
+            
+            listaRecursos.forEach(r => {
+                mapRecursos[r.id] = r.descricao; 
 
-            const optionFiltro = document.createElement("option")
-            optionFiltro.value = r.id
-            optionFiltro.textContent = `${r.tipo || "Sem tipo"} - ${r.descricao || "Sem descrição"}`
-            filtroRecurso.appendChild(optionFiltro)
-        })
+                const option = document.createElement("option");
+                option.value = r.id;
+                option.textContent = `${r.descricao} (Estoque: ${r.quantidade})`;
+                selectRecurso.appendChild(option);
+            });
+        }
 
-        // Carregar distribuições
-        const respDistribuicoes = await fetch(API_DISTRIBUICOES)
-        if (!respDistribuicoes.ok) throw new Error("Erro ao carregar distribuições")
-        const distribuicoesData = await respDistribuicoes.json()
-        distribuicoesData.forEach((d) => {
-            const dataFormatada = d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "Sem data"
-            distribuicoes[d.id] = {
-                descricao: d.descricao || "Sem descrição",
-                instituicao: d.instituicaoReceptora || "Sem instituição",
-                data: d.data || null,
-                valor: d.valor || 0
-            }
-            const option = document.createElement("option")
-            option.value = d.id
-            option.textContent = `${d.instituicaoReceptora || "Sem instituição"} - ${dataFormatada}`
-            selectDistribuicao.appendChild(option)
-
-            const optionFiltro = document.createElement("option")
-            optionFiltro.value = d.id
-            optionFiltro.textContent = `${d.instituicaoReceptora || "Sem instituição"} - ${dataFormatada}`
-            filtroDistribuicao.appendChild(optionFiltro)
-        })
-
-        await listarItens()
+        const respDistribuicoes = await fetch(API_DISTRIBUICOES);
+        if (respDistribuicoes.ok) {
+            todasDistribuicoes = await respDistribuicoes.json(); // Salva na global
+            renderizarTabelaDistribuicoes(todasDistribuicoes);   // Desenha a tabela
+        }
     } catch (erro) {
-        console.error(erro)
-        mostrarAlerta("Erro ao carregar dados iniciais: " + erro.message, "danger")
+        console.error(erro);
+        mostrarAlerta("Erro ao comunicar com o servidor.", "danger");
     }
 }
 
-async function listarItens() {
-    try {
-        const resp = await fetch(API_ITENS)
-        if (!resp.ok) throw new Error("Erro ao buscar itens de distribuição")
-
-        todosOsItens = await resp.json()
-        aplicarFiltros()
-    } catch (erro) {
-        console.error(erro)
-        mostrarAlerta("Erro ao carregar itens: " + erro.message, "danger")
+// ==========================================
+// RENDERIZAR TABELA PRINCIPAL
+// ==========================================
+function renderizarTabelaDistribuicoes(lista) {
+    const tabelaListagem = document.getElementById("tabelaListagem");
+    tabelaListagem.innerHTML = "";
+    
+    if (lista.length === 0) {
+        tabelaListagem.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma distribuição encontrada com estes filtros.</td></tr>`;
+        return;
     }
+
+    lista.forEach(d => {
+        const dataFormatada = d.data ? d.data.split('-').reverse().join('/') : "-";
+        const valorFormatado = d.valor ? parseFloat(d.valor).toFixed(2) : "0.00";
+        
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="text-center fw-bold align-middle">${d.id}</td>
+            <td class="align-middle">${d.instituicaoReceptora || "-"}</td>
+            <td class="align-middle">${dataFormatada}</td>
+            <td class="align-middle">${d.descricao || "-"}</td>
+            <td class="text-end align-middle">R$ ${valorFormatado}</td>
+            <td class="text-center align-middle">
+                <button type="button" class="btn btn-sm btn-icone" title="Ver Detalhes" onclick="abrirModalDetalhes(${d.id})">
+                    <i class="bi bi-eye-fill fs-5 text-info"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-icone" title="Excluir Distribuição" onclick="excluirDistribuicao(${d.id})">
+                    <i class="bi bi-trash-fill fs-5 text-danger"></i>
+                </button>
+            </td>
+        `;
+        tabelaListagem.appendChild(tr);
+    });
 }
+
+// ==========================================
+// LÓGICA DE FILTROS
+// ==========================================
+const inputFiltroInstituicao = document.getElementById("filtroInstituicao");
+const inputFiltroData = document.getElementById("filtroData");
 
 function aplicarFiltros() {
-    const filtroDistId = filtroDistribuicao.value
-    const filtroRecId = filtroRecurso.value
+    const textoInstituicao = inputFiltroInstituicao.value.toLowerCase().trim();
+    const dataFiltro = inputFiltroData.value;
 
-    itensFiltrados = todosOsItens.filter((item) => {
-        const matchDistribuicao = !filtroDistId || item.distribuicao == filtroDistId
-        const matchRecurso = !filtroRecId || item.recurso == filtroRecId
-        return matchDistribuicao && matchRecurso
-    })
-
-    renderizarTabela()
+    const listaFiltrada = todasDistribuicoes.filter(d => {
+        const nomeOng = d.instituicaoReceptora ? d.instituicaoReceptora.toLowerCase() : "";
+        const passouFiltroInstituicao = textoInstituicao === "" || nomeOng.includes(textoInstituicao);
+        const passouFiltroData = dataFiltro === "" || d.data === dataFiltro;
+        
+        // Só retorna a linha se ela passar nos dois filtros ao mesmo tempo
+        return passouFiltroInstituicao && passouFiltroData;
+    });
+    renderizarTabelaDistribuicoes(listaFiltrada);
 }
 
 function limparFiltros() {
-    filtroDistribuicao.value = ""
-    filtroRecurso.value = ""
-    aplicarFiltros()
+    inputFiltroInstituicao.value = "";
+    inputFiltroData.value = "";
+    renderizarTabelaDistribuicoes(todasDistribuicoes);
 }
 
-function renderizarTabela() {
-    tabela.innerHTML = ""
-    totalItens.textContent = itensFiltrados.length
+inputFiltroInstituicao.addEventListener("input", aplicarFiltros);
+inputFiltroData.addEventListener("change", aplicarFiltros);
 
-    if (itensFiltrados.length === 0) {
-        mensagemVazia.classList.remove("d-none")
-        return
-    }
-
-    mensagemVazia.classList.add("d-none")
-
-    itensFiltrados.forEach((item) => {
-        const tr = document.createElement("tr")
-        const recurso = recursos[item.recurso] || { tipo: "Desconhecido", descricao: "Desconhecido" }
-        const distribuicao = distribuicoes[item.distribuicao] || { instituicao: "Desconhecida", data: null }
-
-        tr.innerHTML = `
-          <td>${recurso.descricao}</td>
-          <td>${distribuicao.instituicao}</td>
-          <td><strong>${item.quantidade || 0}</strong></td>
-          <td class="text-center">
-            <button class="btn btn-sm" onclick="editarItem(${item.recurso}, ${item.distribuicao}, ${item.quantidade})" title="Editar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ffc94c" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-              </svg>
-            </button>
-            <button class="btn btn-sm" onclick="excluirItem(${item.recurso}, ${item.distribuicao})" title="Excluir">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-trash3" viewBox="0 0 16 16">
-                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l-.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
-              </svg>
-            </button>
-          </td>
-        `
-        tabela.appendChild(tr)
-    })
-}
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault()
-
-    validarCampo(selectRecurso)
-    validarCampo(selectDistribuicao)
-    validarCampo(quantidadeInput)
-
-    if (!form.checkValidity()) {
-        e.stopPropagation()
-        form.classList.add("was-validated")
-        return
-    }
-
-    const idRecurso = Number(selectRecurso.value)
-    const idDistribuicao = Number(selectDistribuicao.value)
-    const quantidade = Number(quantidadeInput.value)
-    const isEdicao = idRecursoOriginal.value && idDistribuicaoOriginal.value
-
-    const item = {
-        recurso: idRecurso,
-        distribuicao: idDistribuicao,
-        quantidade: quantidade,
-    }
-
+// ==========================================
+// VISUALIZAR DETALHES (MODAL)
+// ==========================================
+async function abrirModalDetalhes(idDistribuicao) {
     try {
-        let resp
+        const resposta = await fetch(`${API_DISTRIBUICOES}/${idDistribuicao}`);
+        if (!resposta.ok) throw new Error("Erro ao buscar detalhes da distribuição.");
+        
+        const d = await resposta.json();
 
-        if (isEdicao) {
-            const idRecursoAntigo = Number(idRecursoOriginal.value)
-            const idDistribuicaoAntiga = Number(idDistribuicaoOriginal.value)
+        document.getElementById('detalheId').textContent = d.id;
+        document.getElementById('detalheInstituicao').textContent = d.instituicaoReceptora;
+        document.getElementById('detalheData').textContent = d.data ? d.data.split('-').reverse().join('/') : "-";
+        document.getElementById('detalheDescricao').textContent = d.descricao;
+        document.getElementById('detalheValor').textContent = `R$ ${d.valor ? parseFloat(d.valor).toFixed(2) : "0.00"}`;
 
-            if (idRecurso !== idRecursoAntigo || idDistribuicao !== idDistribuicaoAntiga) {
-                await fetch(`${API_ITENS}?idRecurso=${idRecursoAntigo}&idDistribuicao=${idDistribuicaoAntiga}`, {
-                    method: "DELETE",
-                })
+        // Prepara tabela
+        const tbodyItens = document.getElementById('detalheItensBody');
+        const avisoSemItens = document.getElementById('detalheSemItens');
+        tbodyItens.innerHTML = `<tr><td colspan="2" class="text-center text-muted">Buscando itens no servidor...</td></tr>`;
+        avisoSemItens.classList.add('d-none');
 
-                resp = await fetch(API_ITENS, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(item),
-                })
-            } else {
-                resp = await fetch(API_ITENS, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(item),
-                })
-            }
-        } else {
-            resp = await fetch(API_ITENS, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(item),
-            })
+        // Abre o Modal na tela
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+        modal.show();
+
+        const respItens = await fetch(`http://localhost:8080/apis/distribuicao-itens/por-distribuicao/${idDistribuicao}`);
+        
+        if (!respItens.ok) {
+            tbodyItens.innerHTML = `<tr><td colspan="2" class="text-center text-danger">Erro ao carregar os itens.</td></tr>`;
+            return;
         }
 
-        if (!resp.ok) throw new Error("Erro ao salvar item")
+        const itens = await respItens.json();
 
-        mostrarAlerta(isEdicao ? "Item atualizado com sucesso!" : "Item criado com sucesso!", "success")
+        tbodyItens.innerHTML = "";
 
-        form.reset()
-        form.classList.remove("was-validated")
-        selectRecurso.classList.remove("is-valid", "is-invalid")
-        selectDistribuicao.classList.remove("is-valid", "is-invalid")
-        quantidadeInput.classList.remove("is-valid", "is-invalid")
-        idRecursoOriginal.value = ""
-        idDistribuicaoOriginal.value = ""
-        await listarItens()
+        // Renderiza os itens ou mostra a mensagem de "Sem Itens"
+        if (itens.length === 0) {
+            avisoSemItens.classList.remove('d-none');
+        } else {
+            itens.forEach(item => {
+                const nomeDoRecurso = mapRecursos[item.recurso] || `Recurso ID #${item.recurso}`;
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="align-middle">${nomeDoRecurso}</td>
+                    <td class="text-center align-middle">${item.quantidade}</td>
+                `;
+                tbodyItens.appendChild(tr);
+            });
+        }
+
     } catch (erro) {
-        mostrarAlerta("Erro: " + erro.message, "danger")
+        console.error(erro);
+        mostrarAlerta("Não foi possível carregar os detalhes.", "danger");
     }
-})
+}
 
-async function excluirItem(idRecurso, idDistribuicao) {
-    if (!confirm("Deseja realmente excluir este item de distribuição?")) return
+// ==========================================
+// EXCLUIR DISTRIBUIÇÃO
+// ==========================================
+async function excluirDistribuicao(idDistribuicao) {
+    const confirmacao = confirm(`Atenção: Tem certeza que deseja excluir a distribuição #${idDistribuicao}?\n\nOs itens físicos (se houverem) retornarão automaticamente para o estoque.`);
+    
+    if (!confirmacao) {
+        return;
+    }
 
     try {
-        const resp = await fetch(`${API_ITENS}?idRecurso=${idRecurso}&idDistribuicao=${idDistribuicao}`, {
-            method: "DELETE",
-        })
+        const resposta = await fetch(`${API_DISTRIBUICOES}/${idDistribuicao}`, {
+            method: 'DELETE'
+        });
 
-        if (!resp.ok) throw new Error("Erro ao excluir item")
-
-        mostrarAlerta("Item excluído com sucesso!", "success")
-        listarItens()
+        if (resposta.ok) {
+            mostrarAlerta("Distribuição excluída e estoque restaurado com sucesso!", "success");
+            carregarDadosIniciais(); 
+        } else {
+            const erroTexto = await resposta.text();
+            mostrarAlerta(erroTexto || "Erro ao excluir a distribuição.", "danger");
+        }
     } catch (erro) {
-        mostrarAlerta("Erro: " + erro.message, "danger")
+        console.error(erro);
+        mostrarAlerta("Erro de conexão ao tentar excluir.", "danger");
     }
 }
 
-function editarItem(idRecurso, idDistribuicao, quantidade) {
-    idRecursoOriginal.value = idRecurso
-    idDistribuicaoOriginal.value = idDistribuicao
-    selectRecurso.value = idRecurso
-    selectDistribuicao.value = idDistribuicao
-    quantidadeInput.value = quantidade
+// Função Utilitária para Alertas
+function mostrarAlerta(mensagem, tipo = "success") {
+    const alertId = `alerta-${Date.now()}`;
+    const alertHtml = `
+        <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show shadow-sm" role="alert">
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertaContainer.innerHTML = alertHtml; // Substitui o alerta anterior para não acumular
 
-    validarCampo(selectRecurso)
-    validarCampo(selectDistribuicao)
-    validarCampo(quantidadeInput)
-
-    form.classList.remove("was-validated")
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    setTimeout(() => {
+        const alertaElemento = document.getElementById(alertId);
+        if (alertaElemento) alertaElemento.remove();
+    }, 5000);
 }
-
-carregarDadosIniciais()

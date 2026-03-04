@@ -102,7 +102,7 @@ formDistribuicao.addEventListener('submit', async (event) => {
 
     // Montando o DTO
     const payload = {
-        idAdmin: 1, // Alterar para pegar dinamicamente
+        admin: 1, // Alterar para pegar dinamicamente
         data: document.getElementById('dataDistribuicao').value,
         descricao: document.getElementById('descricaoDist').value,
         instituicaoReceptora: document.getElementById('instituicao').value,

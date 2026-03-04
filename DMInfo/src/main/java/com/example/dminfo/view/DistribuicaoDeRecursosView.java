@@ -1,7 +1,6 @@
 package com.example.dminfo.view;
 
 import com.example.dminfo.controller.DistribuicaoDeRecursosController;
-import com.example.dminfo.dto.DistribuicaoDeRecursosDTO;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,9 +71,9 @@ public class DistribuicaoDeRecursosView {
 
     @PostMapping("/carrinho")
     @ResponseBody
-    public ResponseEntity<Object> criarComItens(@RequestBody DistribuicaoDeRecursosDTO dto) {
+    public ResponseEntity<Object> criarComItens(@RequestBody DistribuicaoDeRecursos distRec) {
         try {
-            distribuicaoController.salvarComItens(dto);
+            distribuicaoController.salvarComItens(distRec);
             return ResponseEntity.status(HttpStatus.CREATED).body("Distribuição e itens salvos com sucesso!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao salvar distribuição: " + e.getMessage());

@@ -3,8 +3,7 @@ package com.example.dminfo.controller;
 import com.example.dminfo.dao.DistribuicaoDeRecursosDAO;
 import com.example.dminfo.dao.RecursoDAO;
 import com.example.dminfo.dao.RecursoHasDistribuicaoDeRecursosDAO;
-import com.example.dminfo.dto.DistribuicaoDeRecursosDTO;
-import com.example.dminfo.dto.ItemDistribuicaoDTO;
+import com.example.dminfo.model.ItemDistribuido;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import com.example.dminfo.model.Recurso;
 import com.example.dminfo.model.RecursoHasDistribuicaoDeRecursos;
@@ -106,56 +105,47 @@ public class DistribuicaoDeRecursosController {
         distribuicaoDAO.excluir(id);
     }
 
-    public void salvarComItens(DistribuicaoDeRecursosDTO dto) {
-        // 1. Cria e valida o cabeçalho da Distribuição
-        DistribuicaoDeRecursos novaDistribuicao = new DistribuicaoDeRecursos();
-        novaDistribuicao.setDescricao(dto.getDescricao());
-        novaDistribuicao.setInstituicaoReceptora(dto.getInstituicaoReceptora());
-        novaDistribuicao.setData(dto.getData());
-        novaDistribuicao.setAdmin(dto.getIdAdmin());
-        novaDistribuicao.setValor(dto.getValor());
-
+    public void salvarComItens(DistribuicaoDeRecursos novaDistribuicao) {
+        // 1. valida o cabeçalho da Distribuição
         if (novaDistribuicao.getDescricao() == null || novaDistribuicao.getDescricao().isEmpty()) {
             throw new RuntimeException("Descrição inválida.");
         }
 
-        boolean temItens = dto.getItens() != null && !dto.getItens().isEmpty();
+        boolean temItens = novaDistribuicao.getItens() != null && !novaDistribuicao.getItens().isEmpty();
         boolean temValor = novaDistribuicao.getValor() > 0;
 
         if (!temItens && !temValor) {
             throw new RuntimeException("A distribuição deve conter pelo menos um recurso físico ou um valor monetário.");
         }
 
-        // Salva a distribuição pai no banco (isso gera o ID dela)
+        // Salva a distribuição pai no banco
         novaDistribuicao = distribuicaoDAO.gravar(novaDistribuicao);
 
         // 2. Processa cada item do carrinho
         if (temItens) {
-            for (ItemDistribuicaoDTO itemDTO : dto.getItens()) {
+            for (ItemDistribuido itemDist : novaDistribuicao.getItens()) {
 
                 // Busca o recurso para checar o estoque
-                Recurso recurso = recursoDAO.getById(itemDTO.getIdRecurso());
+                Recurso recurso = recursoDAO.getById(itemDist.getIdRecurso());
                 if (recurso == null) {
-                    throw new RuntimeException("Recurso ID " + itemDTO.getIdRecurso() + " não encontrado.");
+                    throw new RuntimeException("Recurso ID " + itemDist.getIdRecurso() + " não encontrado.");
                 }
 
-                if (recurso.getQuantidade() < itemDTO.getQuantidade()) {
+                if (recurso.getQuantidade() < itemDist.getQuantidade()) {
                     throw new RuntimeException("Estoque insuficiente para: " + recurso.getDescricao());
                 }
 
                 // 3. Atualiza o estoque do Recurso
-                recurso.setQuantidade(recurso.getQuantidade() - itemDTO.getQuantidade());
-                recursoDAO.alterar(recurso); // Grava o novo saldo
+                recurso.setQuantidade(recurso.getQuantidade() - itemDist.getQuantidade());
+                recursoDAO.alterar(recurso);
 
                 // 4. Cria o vínculo na tabela intermediária com os SETs corrigidos
                 RecursoHasDistribuicaoDeRecursos vinculo = new RecursoHasDistribuicaoDeRecursos();
 
-                // Passamos os IDs (inteiros) ao invés dos objetos
                 vinculo.setDistribuicao(novaDistribuicao.getId());
                 vinculo.setRecurso(recurso.getId());
-                vinculo.setQuantidade(itemDTO.getQuantidade());
+                vinculo.setQuantidade(itemDist.getQuantidade());
 
-                // Salva o vínculo usando o DAO específico
                 recursoHasDistribuicaoDeRecursosDAO.gravar(vinculo);
             }
         }

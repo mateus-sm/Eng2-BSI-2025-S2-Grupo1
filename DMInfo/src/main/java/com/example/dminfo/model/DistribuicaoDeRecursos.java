@@ -3,6 +3,7 @@ package com.example.dminfo.model;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public class DistribuicaoDeRecursos {
@@ -12,6 +13,8 @@ public class DistribuicaoDeRecursos {
     private String descricao;
     private String instituicaoReceptora;
     private double valor;
+
+    private List<ItemDistribuido> itens;
 
     public DistribuicaoDeRecursos() { }
 
@@ -70,5 +73,13 @@ public class DistribuicaoDeRecursos {
 
     public void setValor(double valor) {
         this.valor = valor;
+    }
+
+    public List<ItemDistribuido> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<ItemDistribuido> itens) {
+        this.itens = itens;
     }
 }

@@ -6,7 +6,10 @@ let listaMensalidadesGlobal = [];
 document.addEventListener("DOMContentLoaded", () => {
     carregarMembros();
     carregarMensalidades();
+    carregarMeses();
+    carregarAnos();
 
+    // Filtros
     const inputFiltro = document.getElementById("filtroNome");
     if(inputFiltro) {
         inputFiltro.addEventListener("keyup", filtrarTabela);
@@ -16,6 +19,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputDtFim = document.getElementById("filtroDataFinal");
     if(inputDtIni) inputDtIni.addEventListener("change", filtrarTabela);
     if(inputDtFim) inputDtFim.addEventListener("change", filtrarTabela);
+
+    // --- MÁSCARA DE DATA ---
+    const dateInput = document.getElementById("dataPagamento");
+    if (dateInput) {
+        dateInput.addEventListener("input", (e) => {
+            let value = e.target.value.replace(/\D/g, "");
+
+            if (value.length > 8) value = value.substring(0, 8); // Limita a 8 números
+
+            if (value.length > 4) {
+                value = value.replace(/^(\d{2})(\d{2})(\d)/, "$1/$2/$3");
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d)/, "$1/$2");
+            }
+
+            e.target.value = value;
+        });
+    }
 });
 
 async function carregarMensalidades() {
@@ -28,7 +49,6 @@ async function carregarMensalidades() {
         }
 
         listaMensalidadesGlobal = await resposta.json();
-
         filtrarTabela();
 
     } catch (e) {
@@ -92,10 +112,9 @@ function carregarMensalidadesComFiltro() {
     filtrarTabela();
 }
 
-
 async function carregarMembros() {
     try {
-        const resposta = await fetch(`/apis/membro`); // Ajuste a rota se necessário
+        const resposta = await fetch(`/apis/membro`);
         if (!resposta.ok) throw new Error();
         membrosCache = await resposta.json();
         configurarAutocomplete();
@@ -152,14 +171,29 @@ function configurarAutocomplete() {
 }
 
 function mostrarRegistro() {
-    document.getElementById("areaRegistro").classList.remove("d-none");
+    const area = document.getElementById("areaRegistro");
+    if (area) {
+        area.classList.remove("d-none");
+    }
 }
 
 function fecharRegistro() {
-    document.getElementById("formMensalidade").reset();
-    document.getElementById("areaRegistro").classList.add("d-none");
+    const form = document.getElementById("formMensalidade");
+    if (form) form.reset();
+
+    const area = document.getElementById("areaRegistro");
+    if (area) {
+        area.classList.add("d-none");
+    }
+
     const busca = document.getElementById("buscaMembro");
     if(busca) busca.value = "";
+
+    const hiddenId = document.getElementById("selectMembro");
+    if(hiddenId) hiddenId.value = "";
+
+    const lista = document.getElementById("listaSugestoes");
+    if(lista) lista.style.display = "none";
 }
 
 async function salvarMensalidade(event) {
@@ -170,11 +204,30 @@ async function salvarMensalidade(event) {
     const mes = document.getElementById("selectMes").value;
     const ano = document.getElementById("selectAno").value;
     const valor = document.getElementById("valor").value;
-    const dataPagamento = document.getElementById("dataPagamento").value;
 
-    if (!validarDataReal(dataPagamento)) {
+    // Pega o valor visual (DD/MM/AAAA)
+    const dataVisual = document.getElementById("dataPagamento").value;
+
+    // CONVERTE PARA FORMATO DE BANCO (AAAA-MM-DD)
+    const dataPagamentoISO = converterDataParaISO(dataVisual);
+
+    if (!validarDataReal(dataPagamentoISO)) {
         mostrarAlerta("danger", "Data inválida! Verifique o calendário.");
         return;
+    }
+
+    // --- NOVA VALIDAÇÃO: Diferença de 12 meses ---
+    if (mes && ano && dataPagamentoISO) {
+        const [pAno, pMes] = dataPagamentoISO.split("-").map(Number); // Pega ano e mês do pagamento
+        const refAno = Number(ano);
+        const refMes = Number(mes);
+
+        const diffMeses = (pAno - refAno) * 12 + (pMes - refMes);
+
+        if (Math.abs(diffMeses) > 12) {
+            mostrarAlerta("danger", "A data de pagamento não pode ter mais de 1 ano de diferença (antes ou depois) do mês de referência.");
+            return;
+        }
     }
 
     const dados = {
@@ -183,7 +236,7 @@ async function salvarMensalidade(event) {
         mes: Number(mes),
         ano: Number(ano),
         valor: Number(valor),
-        dataPagamento
+        dataPagamento: dataPagamentoISO
     };
 
     try {
@@ -210,7 +263,6 @@ async function salvarMensalidade(event) {
 async function editarMensalidade(id) {
     try {
         const res = await fetch(`${API}/buscar/${id}`);
-
         if(!res.ok) throw new Error("Erro ao buscar dados");
 
         const m = await res.json();
@@ -225,7 +277,8 @@ async function editarMensalidade(id) {
         document.getElementById("selectMes").value = m.mes;
         document.getElementById("selectAno").value = m.ano;
         document.getElementById("valor").value = m.valor;
-        document.getElementById("dataPagamento").value = m.dataPagamento;
+
+        document.getElementById("dataPagamento").value = formatarData(m.dataPagamento);
 
     } catch (e) {
         mostrarAlerta("danger", "Erro ao carregar edição.");
@@ -250,10 +303,23 @@ async function excluirMensalidade(id) {
     }
 }
 
+// Converte YYYY-MM-DD para DD/MM/AAAA
 function formatarData(dt) {
     if (!dt) return "-";
     const [ano, mes, dia] = dt.split("-");
     return `${dia}/${mes}/${ano}`;
+}
+
+// Converte DD/MM/AAAA para YYYY-MM-DD
+function converterDataParaISO(data) {
+    if (!data) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data;
+
+    const partes = data.split("/");
+    if (partes.length === 3) {
+        return `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+    return null;
 }
 
 function validarDataReal(dataString) {
@@ -306,8 +372,3 @@ function carregarAnos() {
         }
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    carregarMeses();
-    carregarAnos();
-});

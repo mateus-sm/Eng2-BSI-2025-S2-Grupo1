@@ -88,7 +88,12 @@ public class ParametrosDAO implements IDAO<Parametros> {
     }
 
     @Override
-    public List<Parametros> readAll(String filtro, Conexao conexao) {
+    public ResultSet readAll(String filtro, Conexao conexao) {
+        return null;
+    }
+
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         return null;
     }
 }

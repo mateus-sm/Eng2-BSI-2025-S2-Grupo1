@@ -1,25 +1,13 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.Evento;
-import com.example.dminfo.model.Administrador;
-import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class EventoDAO {
-
-    @Autowired
-    private AdministradorDAO adminDAO;
-
-    @Autowired
-    private Administrador administradorModel;
 
     private String escapeString(String input) {
         if (input == null)
@@ -27,28 +15,7 @@ public class EventoDAO {
         return "'" + input.replace("'", "''") + "'";
     }
 
-    private Evento buildEvento(ResultSet rs) throws SQLException {
-        int adminId = rs.getInt("id_admin");
-        Administrador admin = administradorModel.getById(adminId, SingletonDB.getConexao());
-
-        // se nao tiver admin com o id, usa o mock
-        if (admin == null) {
-            Administrador adminMock = new Administrador();
-            adminMock.setId(adminId);
-            admin = adminMock;
-        }
-
-        return new Evento(
-                rs.getInt("id_evento"),
-                admin,
-                rs.getString("titulo"),
-                rs.getString("descricao")
-        );
-    }
-
-    public List<Evento> buscarEventos(String termoDescricao, String ordenarPor) {
-        List<Evento> eventos = new ArrayList<>();
-
+    public ResultSet buscarEventos(String termoDescricao, String ordenarPor) {
         String whereClause = "";
         if (termoDescricao != null && !termoDescricao.trim().isEmpty()) {
             String termo = termoDescricao.trim().replace("'", "''");
@@ -64,37 +31,22 @@ public class EventoDAO {
 
         String sql = "SELECT id_evento, id_admin, titulo, descricao FROM evento" + whereClause + orderByClause;
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null)
-                while (rs.next())
-                    eventos.add(buildEvento(rs));
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar Eventos com filtros: " + e.getMessage());
-        }
-        return eventos;
+        return SingletonDB.getConexao().consultar(sql);
     }
 
     @Deprecated
-    public List<Evento> getAll() {
+    public ResultSet getAll() {
         return buscarEventos(null, "tituloAsc"); // Chama o novo método sem filtros
     }
 
     @Deprecated
-    public List<Evento> getTodos() {
+    public ResultSet getTodos() {
         return buscarEventos(null, "tituloAsc"); // Chama o novo método sem filtros
     }
 
-    public Evento getById(Integer id) {
+    public ResultSet getById(Integer id) {
         String sql = "SELECT id_evento, id_admin, titulo, descricao FROM evento WHERE id_evento = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next())
-                return buildEvento(rs);
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar evento por ID: " + e.getMessage());
-        }
-        return null;
+        return SingletonDB.getConexao().consultar(sql);
     }
 
     public Evento gravar(Evento evento) {
@@ -105,7 +57,6 @@ public class EventoDAO {
                 escapeString(evento.getDescricao())
         );
 
-        //debug
         System.out.println("SQL de Inserção: " + sql);
 
         boolean executou = SingletonDB.getConexao().manipular(sql);

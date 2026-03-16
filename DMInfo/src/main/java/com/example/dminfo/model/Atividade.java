@@ -5,6 +5,9 @@ import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -29,12 +32,42 @@ public class Atividade {
         this.descricao = descricao;
     }
 
+    private Atividade montarAtividade(ResultSet rs) throws SQLException {
+        Evento eventoMock = new Evento();
+        eventoMock.setId(rs.getInt("id_evento"));
+
+        return new Atividade(
+                rs.getInt("id_atividade"),
+                eventoMock,
+                rs.getString("descricao")
+        );
+    }
+
     public Atividade getById(int id, Conexao conexao) {
-        return dao.get(id, conexao);
+        ResultSet rs = dao.get(id, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarAtividade(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar atividade por ID: " + e.getMessage());
+        }
+        return null;
     }
 
     public List<Atividade> listarPorEvento(int idEvento, Conexao conexao) {
-        return dao.getPorEvento(idEvento, conexao);
+        List<Atividade> lista = new ArrayList<>();
+        ResultSet rs = dao.getPorEvento(idEvento, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarAtividade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar Atividades por Evento: " + e.getMessage());
+        }
+        return lista;
     }
 
     public int getId() { return id; }

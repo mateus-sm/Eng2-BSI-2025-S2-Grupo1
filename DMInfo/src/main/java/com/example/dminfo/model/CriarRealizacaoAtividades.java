@@ -4,9 +4,11 @@ import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -43,52 +45,138 @@ public class CriarRealizacaoAtividades {
         this.status = status;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    private CriarRealizacaoAtividades montarAtividade(ResultSet rs) throws SQLException {
+        Administrador admin = new Administrador();
+        admin.setId(rs.getInt("id_admin"));
 
-    public Administrador getAdmin() { return admin; }
-    public void setAdmin(Administrador admin) { this.admin = admin; }
+        try {
+            Usuario usuarioAdmin = new Usuario();
+            usuarioAdmin.setLogin(rs.getString("admin_usuario"));
+            admin.setUsuario(usuarioAdmin);
+        } catch (SQLException ignored) {}
 
-    public Atividade getAtv() { return atv; }
-    public void setAtv(Atividade atv) { this.atv = atv; }
+        Atividade atividade = new Atividade();
+        atividade.setId(rs.getInt("id_atividade"));
+        try {
+            atividade.setDescricao(rs.getString("atividade_descricao"));
+        } catch (SQLException ignored) {}
 
-    public Time getHorario() { return horario; }
-    public void setHorario(Time horario) { this.horario = horario; }
+        CriarRealizacaoAtividades cra = new CriarRealizacaoAtividades();
+        cra.setId(rs.getInt("id_criacao"));
+        cra.setAdmin(admin);
+        cra.setAtv(atividade);
+        cra.setHorario(rs.getTime("horario"));
+        cra.setLocal(rs.getString("local"));
+        cra.setObservacoes(rs.getString("observacoes"));
 
-    public String getLocal() { return local; }
-    public void setLocal(String local) { this.local = local; }
+        if (rs.getDate("dtini") != null) cra.setDtIni(rs.getDate("dtini").toLocalDate());
+        if (rs.getDate("dtfim") != null) cra.setDtFim(rs.getDate("dtfim").toLocalDate());
 
-    public String getObservacoes() { return observacoes; }
-    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+        cra.setCustoprevisto(rs.getDouble("custoprevisto"));
+        cra.setCustoreal(rs.getDouble("custoreal"));
+        cra.setStatus(rs.getBoolean("status"));
 
-    public LocalDate getDtIni() { return dtIni; }
-    public void setDtIni(LocalDate dtIni) { this.dtIni = dtIni; }
-
-    public LocalDate getDtFim() { return dtFim; }
-    public void setDtFim(LocalDate dtFim) { this.dtFim = dtFim; }
-
-    public double getCustoprevisto() { return custoprevisto; }
-    public void setCustoprevisto(double custoprevisto) { this.custoprevisto = custoprevisto; }
-
-    public double getCustoreal() { return custoreal; }
-    public void setCustoreal(double custoreal) { this.custoreal = custoreal; }
-
-    public Boolean getStatus() { return status; }
-    public void setStatus(Boolean status) { this.status = status; }
+        return cra;
+    }
 
     public List<CriarRealizacaoAtividades> listarTodas(Conexao conexao) {
-        return dao.listarTodas(conexao);
+        List<CriarRealizacaoAtividades> lista = new ArrayList<>();
+        ResultSet rs = dao.listarTodas(conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarAtividade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar atividades: " + e.getMessage());
+        }
+        return lista;
     }
 
     public CriarRealizacaoAtividades buscarPorId(Integer id, Conexao conexao) {
-        return dao.getById(id, conexao);
+        ResultSet rs = dao.getById(id, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarAtividade(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar atividade: " + e.getMessage());
+        }
+        return null;
     }
 
     public boolean finalizar(CriarRealizacaoAtividades atividadeAtualizada, Conexao conexao) {
         if (atividadeAtualizada.getId() <= 0) {
             throw new RuntimeException("ID inválido.");
         }
-
         return dao.finalizarAtividade(atividadeAtualizada, conexao);
+    }
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+    public Administrador getAdmin() {
+        return admin;
+    }
+    public void setAdmin(Administrador admin) {
+        this.admin = admin;
+    }
+    public Atividade getAtv() {
+        return atv;
+    }
+    public void setAtv(Atividade atv) {
+        this.atv = atv;
+    }
+    public Time getHorario() {
+        return horario;
+    }
+    public void setHorario(Time horario) {
+        this.horario = horario;
+    }
+    public String getLocal() {
+        return local;
+    }
+    public void setLocal(String local) {
+        this.local = local;
+    }
+    public String getObservacoes() {
+        return observacoes;
+    }
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
+    }
+    public LocalDate getDtIni() {
+        return dtIni;
+    }
+    public void setDtIni(LocalDate dtIni) {
+        this.dtIni = dtIni;
+    }
+    public LocalDate getDtFim() {
+        return dtFim;
+    }
+    public void setDtFim(LocalDate dtFim) {
+        this.dtFim = dtFim;
+    }
+    public double getCustoprevisto() {
+        return custoprevisto;
+    }
+    public void setCustoprevisto(double custoprevisto) {
+        this.custoprevisto = custoprevisto;
+    }
+    public double getCustoreal() {
+        return custoreal;
+    }
+    public void setCustoreal(double custoreal) {
+        this.custoreal = custoreal;
+    }
+    public Boolean getStatus() {
+        return status;
+    }
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 }

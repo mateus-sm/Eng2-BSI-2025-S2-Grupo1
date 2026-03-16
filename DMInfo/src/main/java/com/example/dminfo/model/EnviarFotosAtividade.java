@@ -1,8 +1,6 @@
 package com.example.dminfo.model;
 
-import com.example.dminfo.dao.AtividadeDAO;
 import com.example.dminfo.dao.EnviarFotosAtividadeDAO;
-import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -24,11 +22,12 @@ public class EnviarFotosAtividade {
     @Autowired
     private EnviarFotosAtividadeDAO dao;
 
+    // Trocamos os DAOs pelos Models
     @Autowired
-    private MembroDAO membroDAO;
+    private Membro membroModel;
 
     @Autowired
-    private AtividadeDAO atividadeDAO;
+    private Atividade atividadeModel;
 
     public EnviarFotosAtividade(){}
 
@@ -70,12 +69,13 @@ public class EnviarFotosAtividade {
     public void setData(LocalDate data) { this.data = data; }
 
     public EnviarFotosAtividade gravar(EnviarFotosAtividade fotoObj, Conexao conexao) {
-        Membro m = membroDAO.getByUsuario(fotoObj.getMembro().getUsuario().getId(), conexao);
+        // Agora usamos os métodos dos Models
+        Membro m = membroModel.getByUsuario(fotoObj.getMembro().getUsuario().getId(), conexao);
         if (m == null)
             throw new RuntimeException("Membro não encontrado para o usuário informado.");
         fotoObj.setMembro(m);
 
-        Atividade a = atividadeDAO.get(fotoObj.getAtividade().getId(), conexao);
+        Atividade a = atividadeModel.getById(fotoObj.getAtividade().getId(), conexao);
         if (a == null)
             throw new RuntimeException("Atividade não encontrada.");
         fotoObj.setAtividade(a);

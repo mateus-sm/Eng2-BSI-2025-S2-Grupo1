@@ -1,16 +1,11 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.CriarRealizacaoAtividades;
-import com.example.dminfo.model.Administrador;
-import com.example.dminfo.model.Atividade;
-import com.example.dminfo.model.Usuario;
-import com.example.dminfo.util.Conexao; // Import necessário
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -48,46 +43,6 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
         return "'TRUE'";
     }
 
-    private CriarRealizacaoAtividades buildAtividade(ResultSet rs) throws SQLException {
-        Administrador admin = new Administrador();
-        admin.setId(rs.getInt("id_admin"));
-
-        try {
-            Usuario usuarioAdmin = new Usuario();
-            usuarioAdmin.setLogin(rs.getString("admin_usuario"));
-            admin.setUsuario(usuarioAdmin);
-        } catch (SQLException ignored) {}
-
-        Atividade atividade = new Atividade();
-        atividade.setId(rs.getInt("id_atividade"));
-        try {
-            atividade.setDescricao(rs.getString("atividade_descricao"));
-        } catch (SQLException ignored) {}
-
-
-        CriarRealizacaoAtividades cra = new CriarRealizacaoAtividades();
-        cra.setId(rs.getInt("id_criacao"));
-        cra.setAdmin(admin);
-        cra.setAtv(atividade);
-
-        cra.setHorario(rs.getTime("horario"));
-        cra.setLocal(rs.getString("local"));
-        cra.setObservacoes(rs.getString("observacoes"));
-
-        if (rs.getDate("dtini") != null) {
-            cra.setDtIni(rs.getDate("dtini").toLocalDate());
-        }
-        if (rs.getDate("dtfim") != null) {
-            cra.setDtFim(rs.getDate("dtfim").toLocalDate());
-        }
-
-        cra.setCustoprevisto(rs.getDouble("custoprevisto"));
-        cra.setCustoreal(rs.getDouble("custoreal"));
-        cra.setStatus(rs.getBoolean("status"));
-
-        return cra;
-    }
-
     @Override
     public CriarRealizacaoAtividades create(CriarRealizacaoAtividades obj, Conexao conexao) {
         return null;
@@ -95,9 +50,6 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
 
     @Override
     public CriarRealizacaoAtividades read(CriarRealizacaoAtividades obj, Conexao conexao) {
-        if(obj != null)
-            return getById(obj.getId(), conexao);
-
         return null;
     }
 
@@ -117,11 +69,10 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
 
     @Override
     public List<CriarRealizacaoAtividades> readAll(String filtro, Conexao conexao) {
-        return listarTodas(conexao);
+        return null;
     }
 
-
-    public List<CriarRealizacaoAtividades> listarTodas(Conexao conexao) {
+    public ResultSet listarTodas(Conexao conexao) {
         String sql = "SELECT cra.*, " +
                 "u.usuario AS admin_usuario, " +
                 "atv.descricao AS atividade_descricao " +
@@ -130,20 +81,10 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
                 "JOIN usuario u ON adm.id_usuario = u.id_usuario " +
                 "JOIN atividade atv ON cra.id_atividade = atv.id_atividade";
 
-        ResultSet rs = conexao.consultar(sql);
-        List<CriarRealizacaoAtividades> atividades = new ArrayList<>();
-
-        try {
-            while (rs != null && rs.next()) {
-                atividades.add(buildAtividade(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar atividades: " + e.getMessage());
-        }
-        return atividades;
+        return conexao.consultar(sql);
     }
 
-    public CriarRealizacaoAtividades getById(Integer id, Conexao conexao) {
+    public ResultSet getById(Integer id, Conexao conexao) {
         String sql = "SELECT cra.*, " +
                 "u.usuario AS admin_usuario, " +
                 "atv.descricao AS atividade_descricao " +
@@ -153,15 +94,7 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
                 "JOIN atividade atv ON cra.id_atividade = atv.id_atividade " +
                 "WHERE cra.id_criacao = " + id;
 
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildAtividade(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar atividade por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 
     public boolean finalizarAtividade(CriarRealizacaoAtividades atividade, Conexao conexao) {

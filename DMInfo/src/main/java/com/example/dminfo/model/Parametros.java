@@ -4,6 +4,8 @@ import com.example.dminfo.dao.ParametrosDAO;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Repository
 public class Parametros {
@@ -46,41 +48,36 @@ public class Parametros {
         this.logoPequeno = logoPequeno;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public String getRazaoSocial() { return razaoSocial; }
-    public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
-    public String getNomeFantasia() { return nomeFantasia; }
-    public void setNomeFantasia(String nomeFantasia) { this.nomeFantasia = nomeFantasia; }
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
-    public String getRua() { return rua; }
-    public void setRua(String rua) { this.rua = rua; }
-    public String getBairro() { return bairro; }
-    public void setBairro(String bairro) { this.bairro = bairro; }
-    public String getCidade() { return cidade; }
-    public void setCidade(String cidade) { this.cidade = cidade; }
-    public String getCep() { return cep; }
-    public void setCep(String cep) { this.cep = cep; }
-    public String getUf() { return uf; }
-    public void setUf(String uf) { this.uf = uf; }
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
-    public String getSite() { return site; }
-    public void setSite(String site) { this.site = site; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getCnpj() { return cnpj; }
-    public void setCnpj(String cnpj) { this.cnpj = cnpj; }
-    public String getLogoGrande() { return logoGrande; }
-    public void setLogoGrande(String logoGrande) { this.logoGrande = logoGrande; }
-    public String getLogoPequeno() { return logoPequeno; }
-    public void setLogoPequeno(String logoPequeno) { this.logoPequeno = logoPequeno; }
-
-
+    private Parametros montarParametros(ResultSet rs) throws SQLException {
+        return new Parametros(
+                rs.getInt("id_parametro"),
+                rs.getString("razao_social"),
+                rs.getString("nome_fantasia"),
+                rs.getString("descricao"),
+                rs.getString("rua"),
+                rs.getString("bairro"),
+                rs.getString("cidade"),
+                rs.getString("cep"),
+                rs.getString("uf"),
+                rs.getString("telefone"),
+                rs.getString("site"),
+                rs.getString("email"),
+                rs.getString("cnpj"),
+                rs.getString("logotipogrande"),
+                rs.getString("logotipopequeno")
+        );
+    }
 
     public Parametros exibir(Conexao conexao) {
-        return dao.get(conexao);
+        ResultSet rs = dao.get(conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return montarParametros(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao exibir parâmetros: " + e.getMessage());
+        }
+        return null;
     }
 
     public Parametros salvar(Parametros parametro, Conexao conexao) {
@@ -89,7 +86,7 @@ public class Parametros {
         if (parametro.getCnpj() == null || parametro.getCnpj().isEmpty())
             throw new RuntimeException("CNPJ é obrigatório.");
 
-        Parametros existente = dao.get(conexao);
+        Parametros existente = this.exibir(conexao);
 
         if (existente == null)
             return dao.create(parametro, conexao);
@@ -109,5 +106,97 @@ public class Parametros {
 
     public boolean existeParametro(Conexao conexao) {
         return dao.count(conexao) > 0;
+    }
+
+    // Getters e Setters
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+    public String getRazaoSocial() {
+        return razaoSocial;
+    }
+    public void setRazaoSocial(String razaoSocial) {
+        this.razaoSocial = razaoSocial;
+    }
+    public String getNomeFantasia() {
+        return nomeFantasia;
+    }
+    public void setNomeFantasia(String nomeFantasia) {
+        this.nomeFantasia = nomeFantasia;
+    }
+    public String getDescricao() {
+        return descricao;
+    }
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+    public String getRua() {
+        return rua;
+    }
+    public void setRua(String rua) {
+        this.rua = rua;
+    }
+    public String getBairro() {
+        return bairro;
+    }
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+    public String getCidade() {
+        return cidade;
+    }
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+    public String getCep() {
+        return cep;
+    }
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+    public String getUf() {
+        return uf;
+    }
+    public void setUf(String uf) {
+        this.uf = uf;
+    }
+    public String getTelefone() {
+        return telefone;
+    }
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+    public String getSite() {
+        return site;
+    }
+    public void setSite(String site) {
+        this.site = site;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public String getCnpj() {
+        return cnpj;
+    }
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
+    public String getLogoGrande() {
+        return logoGrande;
+    }
+    public void setLogoGrande(String logoGrande) {
+        this.logoGrande = logoGrande;
+    }
+    public String getLogoPequeno() {
+        return logoPequeno;
+    }
+    public void setLogoPequeno(String logoPequeno) {
+        this.logoPequeno = logoPequeno;
     }
 }

@@ -16,37 +16,9 @@ public class ParametrosDAO implements IDAO<Parametros> {
         return "'" + input.replace("'", "''") + "'";
     }
 
-    private Parametros buildParametros(ResultSet rs) throws SQLException {
-        return new Parametros(
-                rs.getInt("id_parametro"),
-                rs.getString("razao_social"),
-                rs.getString("nome_fantasia"),
-                rs.getString("descricao"),
-                rs.getString("rua"),
-                rs.getString("bairro"),
-                rs.getString("cidade"),
-                rs.getString("cep"),
-                rs.getString("uf"),
-                rs.getString("telefone"),
-                rs.getString("site"),
-                rs.getString("email"),
-                rs.getString("cnpj"),
-                rs.getString("logotipogrande"),
-                rs.getString("logotipopequeno")
-        );
-    }
-
-    public Parametros get(Conexao conexao) {
+    public ResultSet get(Conexao conexao) {
         String sql = "SELECT * FROM parametros LIMIT 1";
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildParametros(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar parâmetros: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 
     public long count(Conexao conexao) {
@@ -87,7 +59,7 @@ public class ParametrosDAO implements IDAO<Parametros> {
 
     @Override
     public Parametros read(Parametros obj, Conexao conexao) {
-        return get(conexao);
+        return null;
     }
 
     @Override

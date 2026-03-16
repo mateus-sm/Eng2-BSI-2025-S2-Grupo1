@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.time.LocalDate;
-import java.util.List;
 
 @Repository
 public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtividades> {
@@ -68,7 +67,7 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
     }
 
     @Override
-    public List<CriarRealizacaoAtividades> readAll(String filtro, Conexao conexao) {
+    public ResultSet readAll(String filtro, Conexao conexao) {
         return null;
     }
 
@@ -110,5 +109,10 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
         );
 
         return conexao.manipular(sql);
+    }
+
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
+        return null;
     }
 }

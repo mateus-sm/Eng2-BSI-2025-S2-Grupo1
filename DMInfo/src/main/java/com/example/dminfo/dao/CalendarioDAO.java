@@ -76,7 +76,12 @@ public class CalendarioDAO implements IDAO<Calendario> {
     }
 
     @Override
-    public List<Calendario> readAll(String filtro, Conexao conexao) {
+    public ResultSet readAll(String filtro, Conexao conexao) {
+        return null;
+    }
+
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         return null;
     }
 }

@@ -1,18 +1,15 @@
 package com.example.dminfo.dao;
 
-import com.example.dminfo.model.Administrador;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
-public class DistribuicaoDeRecursosDAO {
+public class DistribuicaoDeRecursosDAO implements IDAO<DistribuicaoDeRecursos> {
 
 //    CREATE TABLE IF NOT EXISTS distribuicao_de_recursos (
 //            id_distribuicao SERIAL PRIMARY KEY,
@@ -28,49 +25,31 @@ public class DistribuicaoDeRecursosDAO {
 //    ON UPDATE NO ACTION
 //    );
 
-    private DistribuicaoDeRecursos buildDistribuicao(ResultSet rs) throws SQLException {
-        DistribuicaoDeRecursos d = new DistribuicaoDeRecursos();
-
-        d.setId(rs.getInt("id_distribuicao"));
-        d.setAdmin(rs.getInt("id_admin"));
-        d.setData(rs.getObject("data", LocalDate.class));
-        d.setDescricao(rs.getString("descricao"));
-        d.setInstituicaoReceptora(rs.getString("instituicaoreceptora"));
-        d.setValor(rs.getDouble("valor"));
-
-        return d;
-    }
-
-    public List<DistribuicaoDeRecursos> listar() {
-        List<DistribuicaoDeRecursos> lista = new ArrayList<>();
+    @Override
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM distribuicao_de_recursos ORDER BY id_distribuicao";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                lista.add(buildDistribuicao(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar distribuições de recursos: " + e.getMessage());
-        }
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public DistribuicaoDeRecursos getById(int id) {
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM distribuicao_de_recursos WHERE id_distribuicao = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
-                return buildDistribuicao(rs);
+                return rs;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao buscar distribuição por ID: " + e.getMessage());
         }
+
         return null;
     }
 
-    public DistribuicaoDeRecursos gravar(DistribuicaoDeRecursos dist) {
-        if (dist == null)
-            return null;
+    @Override
+    public DistribuicaoDeRecursos create(DistribuicaoDeRecursos dist, Conexao conexao) {
+        if (dist == null) return null;
 
         String sql = String.format(
                 "INSERT INTO distribuicao_de_recursos (id_admin, data, descricao, instituicaoreceptora, valor) VALUES (%d, '%s', '%s', '%s', " + String.valueOf(dist.getValor()).replace(",", ".") + ") RETURNING id_distribuicao",
@@ -80,7 +59,8 @@ public class DistribuicaoDeRecursosDAO {
                 dist.getInstituicaoReceptora()
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
                 dist.setId(rs.getInt("id_distribuicao"));
@@ -89,10 +69,12 @@ public class DistribuicaoDeRecursosDAO {
         } catch (SQLException e) {
             System.out.println("Erro ao gravar distribuição: " + e.getMessage());
         }
+
         return null;
     }
 
-    public boolean alterar(DistribuicaoDeRecursos dist) {
+    @Override
+    public DistribuicaoDeRecursos update(DistribuicaoDeRecursos dist, Conexao conexao) {
         if (dist != null) {
             String sql = String.format(
                     "UPDATE distribuicao_de_recursos SET id_admin = %d, data = '%s', descricao = '%s', " +
@@ -104,26 +86,38 @@ public class DistribuicaoDeRecursosDAO {
                     dist.getId()
             );
 
-            return SingletonDB.getConexao().manipular(sql);
+            conexao.consultar(sql);
+            return dist;
         }
-        return false;
+
+        return null;
     }
 
-    public boolean excluir(int id) {
+    @Override
+    public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM distribuicao_de_recursos WHERE id_distribuicao = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public DistribuicaoDeRecursos consultar(String descricao) {
-        String sql = String.format("SELECT * FROM distribuicao_de_recursos WHERE descricao = '%s'", descricao);
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+    @Override
+    public DistribuicaoDeRecursos read(DistribuicaoDeRecursos dist, Conexao conexao) {
+        String sql = String.format("SELECT * FROM distribuicao_de_recursos WHERE descricao = '%s'", dist.getDescricao());
+        ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
-                return buildDistribuicao(rs);
+                dist.setId(rs.getInt("id_distribuicao"));
+                dist.setAdmin(rs.getInt("id_admin"));
+                dist.setData(rs.getObject("data", LocalDate.class));
+                dist.setDescricao(rs.getString("descricao"));
+                dist.setInstituicaoReceptora(rs.getString("instituicaoreceptora"));
+                dist.setValor(rs.getDouble("valor"));
+                return dist;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao consultar distribuição: " + e.getMessage());
         }
+
         return null;
     }
 }

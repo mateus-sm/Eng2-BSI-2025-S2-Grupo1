@@ -7,23 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class AtribuirConquistaMembroDAO implements IDAO<AtribuirConquistaMembro> {
 
-    private AtribuirConquistaMembro buildACM(ResultSet rs) throws SQLException {
-        AtribuirConquistaMembro acm = new AtribuirConquistaMembro();
-        acm.setId(rs.getInt("id_atribuir_conquista"));
-        acm.setId_admin(rs.getInt("id_admin"));
-        acm.setId_membro(rs.getInt("id_membro"));
-        acm.setId_conquista(rs.getInt("id_conquista"));
-        acm.setData(rs.getDate("data"));
-        acm.setObservacao(rs.getString("observacao"));
-        return acm;
-    }
-
+    @Override
     public AtribuirConquistaMembro create(AtribuirConquistaMembro acm, Conexao conexao) {
         if (acm == null) return null;
 
@@ -53,13 +41,22 @@ public class AtribuirConquistaMembroDAO implements IDAO<AtribuirConquistaMembro>
         return null;
     }
 
+    @Override
     public AtribuirConquistaMembro read(AtribuirConquistaMembro acm, Conexao conexao) {
         String observacao = acm.getObservacao();
         String sql = String.format("SELECT * FROM atribuir_conquista_membro WHERE observacao = '%s'", observacao);
+
         ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
-                return buildACM(rs);
+                acm.setId(rs.getInt("id_atribuir_conquista"));
+                acm.setId_admin(rs.getInt("id_admin"));
+                acm.setId_membro(rs.getInt("id_membro"));
+                acm.setId_conquista(rs.getInt("id_conquista"));
+                acm.setData(rs.getDate("data"));
+                acm.setObservacao(rs.getString("observacao"));
+                return acm;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao consultar atribuição: " + e.getMessage());
@@ -67,8 +64,8 @@ public class AtribuirConquistaMembroDAO implements IDAO<AtribuirConquistaMembro>
         return null;
     }
 
+    @Override
     public AtribuirConquistaMembro update(AtribuirConquistaMembro acm, Conexao conexao) {
-        System.out.println(acm);
         if (acm == null) return null;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -95,44 +92,27 @@ public class AtribuirConquistaMembroDAO implements IDAO<AtribuirConquistaMembro>
         return acm;
     }
 
+    @Override
     public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;
         return conexao.manipular(sql);
     }
 
-    public List<AtribuirConquistaMembro> readAll(String filtro, Conexao conexao) {
-        List<AtribuirConquistaMembro> acmList = new ArrayList<>();
-
+    @Override
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM atribuir_conquista_membro";
 
         if (filtro != null && !filtro.isBlank()) {
             sql += " WHERE id_atribuir_conquista LIKE '%" + filtro.replace("'", "''") + "%'";
         }
-
         sql += " ORDER BY id_atribuir_conquista";
 
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                acmList.add(buildACM(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar atribuições: " + e.getMessage());
-        }
-
-        return acmList;
+        return conexao.consultar(sql);
     }
 
-    public AtribuirConquistaMembro getById(int id, Conexao conexao) {
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM atribuir_conquista_membro WHERE id_atribuir_conquista = " + id;
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildACM(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar atribuição por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 }

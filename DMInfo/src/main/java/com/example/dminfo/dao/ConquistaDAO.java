@@ -6,19 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class ConquistaDAO implements IDAO<Conquista> {
-
-    private Conquista buildConquista(ResultSet rs) throws SQLException {
-        Conquista c = new Conquista();
-        c.setId(rs.getInt("id_conquista"));
-        c.setDescricao(rs.getString("descricao"));
-        return c;
-    }
-
     @Override
     public Conquista create(Conquista conquista, Conexao conexao) {
         if (conquista == null) {
@@ -52,7 +42,9 @@ public class ConquistaDAO implements IDAO<Conquista> {
 
         try {
             if (rs != null && rs.next()) {
-                return buildConquista(rs);
+                c.setId(rs.getInt("id_conquista"));
+                c.setDescricao(rs.getString("descricao"));
+                return c;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao consultar conquista: " + e.getMessage());
@@ -82,9 +74,7 @@ public class ConquistaDAO implements IDAO<Conquista> {
     }
 
     @Override
-    public List<Conquista> readAll(String filtro, Conexao conexao) {
-        List<Conquista> conquistas = new ArrayList<>();
-
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM conquista";
 
         if (filtro != null && !filtro.isBlank()) {
@@ -93,28 +83,13 @@ public class ConquistaDAO implements IDAO<Conquista> {
 
         sql += " ORDER BY id_conquista";
 
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                conquistas.add(buildConquista(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar conquistas: " + e.getMessage());
-        }
-        return conquistas;
+        return conexao.consultar(sql);
     }
 
-    public Conquista getById(int id, Conexao conexao) {
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM conquista WHERE id_conquista = " + id;
-        ResultSet rs = conexao.consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildConquista(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar conquista por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 
 }

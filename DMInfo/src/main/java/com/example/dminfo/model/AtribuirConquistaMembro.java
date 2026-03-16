@@ -5,6 +5,9 @@ import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -78,12 +81,44 @@ public class AtribuirConquistaMembro {
         this.observacao = observacao;
     }
 
+    //Métodos
+    private AtribuirConquistaMembro buildACM(ResultSet rs) throws SQLException {
+        AtribuirConquistaMembro acm  = new AtribuirConquistaMembro();
+        acm.setId(rs.getInt("id_atribuir_conquista"));
+        acm.setId_admin(rs.getInt("id_admin"));
+        acm.setId_membro(rs.getInt("id_membro"));
+        acm.setId_conquista(rs.getInt("id_conquista"));
+        acm.setData(rs.getDate("data"));
+        acm.setObservacao(rs.getString("observacao"));
+        return acm;
+    }
+
     public List<AtribuirConquistaMembro> listar(String filtro, Conexao conexao) {
-        return dao.readAll("", conexao);
+        List<AtribuirConquistaMembro> acmList = new ArrayList<>();
+        ResultSet rs = dao.readAll(filtro, conexao);
+
+        try {
+            while (rs != null && rs.next()) {
+                acmList.add(buildACM(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao construir Atribuições na Model: " + e.getMessage());
+        }
+
+        return acmList;
     }
 
     public AtribuirConquistaMembro getById(Integer id, Conexao conexao) {
-        return dao.getById(id, conexao);
+        ResultSet rs = dao.getById(id, conexao);
+        try {
+            if (rs != null && rs.next()) {
+                return buildACM(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao construir objeto na Model: " + e.getMessage());
+        }
+
+        return null;
     }
 
     public AtribuirConquistaMembro getByDesc(AtribuirConquistaMembro acm, Conexao conexao) {
@@ -112,10 +147,12 @@ public class AtribuirConquistaMembro {
     }
 
     public boolean excluir(Integer id, Conexao conexao) {
-        AtribuirConquistaMembro conquista = dao.getById(id, conexao);
+        AtribuirConquistaMembro conquista = getById(id, conexao);
+
         if (conquista == null) {
             throw new RuntimeException("Conquista não encontrada.");
         }
+
         return dao.delete(id, conexao);
     }
 }

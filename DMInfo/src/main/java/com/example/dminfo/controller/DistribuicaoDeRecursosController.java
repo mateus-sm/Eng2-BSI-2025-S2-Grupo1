@@ -1,12 +1,13 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.DistribuicaoDeRecursosDAO;
 import com.example.dminfo.dao.RecursoDAO;
 import com.example.dminfo.dao.RecursoHasDistribuicaoDeRecursosDAO;
 import com.example.dminfo.model.ItemDistribuido;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import com.example.dminfo.model.Recurso;
 import com.example.dminfo.model.RecursoHasDistribuicaoDeRecursos;
+import com.example.dminfo.util.Conexao;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +17,21 @@ import java.util.List;
 public class DistribuicaoDeRecursosController {
 
     @Autowired
-    private DistribuicaoDeRecursosDAO distribuicaoDAO;
+    private DistribuicaoDeRecursos distribuicaoModel;
 
     @Autowired
-    private RecursoDAO recursoDAO;
+    private RecursoDAO recursoDAO; //Alterar
 
     @Autowired
-    private RecursoHasDistribuicaoDeRecursosDAO recursoHasDistribuicaoDeRecursosDAO;
+    private RecursoHasDistribuicaoDeRecursosDAO recursoHasDistribuicaoDeRecursosDAO; //Alterar
 
     public List<DistribuicaoDeRecursos> listar() {
-        return distribuicaoDAO.listar();
+        return distribuicaoModel.listar(SingletonDB.getConexao());
     }
 
     public DistribuicaoDeRecursos salvar(DistribuicaoDeRecursos distribuicao) {
+        Conexao conexao = SingletonDB.getConexao();
+
         if (distribuicao == null || distribuicao.getDescricao() == null || distribuicao.getDescricao().isEmpty()) {
             throw new RuntimeException("Objeto DistribuicaoDeRecursos inconsistente (descrição).");
         }
@@ -40,17 +43,19 @@ public class DistribuicaoDeRecursosController {
             throw new RuntimeException("A data da distribuição não pode ser nula.");
         }
 
-        DistribuicaoDeRecursos existente = distribuicaoDAO.consultar(distribuicao.getDescricao());
+        DistribuicaoDeRecursos existente = distribuicaoModel.consultar(distribuicao, conexao);
         if (existente != null) {
             throw new RuntimeException("Distribuição já existe (mesma descrição).");
         }
 
-        return distribuicaoDAO.gravar(distribuicao);
+        return distribuicaoModel.gravar(distribuicao, conexao);
     }
 
-    public boolean atualizar(DistribuicaoDeRecursos distribuicao) {
-        if (distribuicao == null || distribuicao.getId() <= 0 ||
-                distribuicao.getDescricao() == null || distribuicao.getDescricao().isEmpty()) {
+    public DistribuicaoDeRecursos atualizar(DistribuicaoDeRecursos distribuicao) {
+        if (distribuicao == null ||
+                distribuicao.getId() <= 0 ||
+                distribuicao.getDescricao() == null ||
+                distribuicao.getDescricao().isEmpty()) {
             throw new RuntimeException("Objeto DistribuicaoDeRecursos inconsistente ou ID inválido.");
         }
 
@@ -61,14 +66,15 @@ public class DistribuicaoDeRecursosController {
             throw new RuntimeException("A data da distribuição não pode ser nula.");
         }
 
-        return distribuicaoDAO.alterar(distribuicao);
+        distribuicaoModel.alterar(distribuicao, SingletonDB.getConexao());
+        return distribuicao;
     }
 
     public DistribuicaoDeRecursos getById(Integer id) {
         if (id == null || id <= 0) {
             throw new RuntimeException("ID inválido.");
         }
-        DistribuicaoDeRecursos distribuicao = distribuicaoDAO.getById(id);
+        DistribuicaoDeRecursos distribuicao = distribuicaoModel.getById(id, SingletonDB.getConexao());
         if (distribuicao == null) {
             throw new RuntimeException("Distribuição não encontrada.");
         }
@@ -80,7 +86,7 @@ public class DistribuicaoDeRecursosController {
             throw new RuntimeException("ID inválido para exclusão.");
         }
 
-        DistribuicaoDeRecursos existente = distribuicaoDAO.getById(id);
+        DistribuicaoDeRecursos existente = distribuicaoModel.getById(id, SingletonDB.getConexao());
         if (existente == null) {
             throw new RuntimeException("Distribuição não encontrada, exclusão falhou.");
         }
@@ -102,7 +108,7 @@ public class DistribuicaoDeRecursosController {
         }
 
         // Exclusao principal
-        distribuicaoDAO.excluir(id);
+        distribuicaoModel.excluir(id, SingletonDB.getConexao());
     }
 
     public void salvarComItens(DistribuicaoDeRecursos novaDistribuicao) {
@@ -119,7 +125,7 @@ public class DistribuicaoDeRecursosController {
         }
 
         // Salva a distribuição pai no banco
-        novaDistribuicao = distribuicaoDAO.gravar(novaDistribuicao);
+        novaDistribuicao = distribuicaoModel.gravar(novaDistribuicao, SingletonDB.getConexao());
 
         // 2. Processa cada item do carrinho
         if (temItens) {

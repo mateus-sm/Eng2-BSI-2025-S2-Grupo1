@@ -1,9 +1,9 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.RecursoHasDistribuicaoDeRecursosDAO;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import com.example.dminfo.model.Recurso;
 import com.example.dminfo.model.RecursoHasDistribuicaoDeRecursos;
+import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class RecursoHasDistribuicaoDeRecursosController {
 
     @Autowired
-    private RecursoHasDistribuicaoDeRecursosDAO itemDistribuicaoDAO;
+    private RecursoHasDistribuicaoDeRecursos itemDistribuicaoModel;
 
     @Autowired
     private RecursoController recursoController;
@@ -22,14 +22,14 @@ public class RecursoHasDistribuicaoDeRecursosController {
     private DistribuicaoDeRecursosController distribuicaoController;
 
     public List<RecursoHasDistribuicaoDeRecursos> listar() {
-        return itemDistribuicaoDAO.listar();
+        return itemDistribuicaoModel.listar("", SingletonDB.getConexao());
     }
 
     public List<RecursoHasDistribuicaoDeRecursos> listarPorDistribuicao(Integer idDistribuicao) {
         if (idDistribuicao == null || idDistribuicao <= 0) {
             throw new RuntimeException("ID da Distribuição é inválido.");
         }
-        return itemDistribuicaoDAO.listarPorDistribuicao(idDistribuicao);
+        return itemDistribuicaoModel.listarPorDistribuicao(idDistribuicao, SingletonDB.getConexao());
     }
 
     public RecursoHasDistribuicaoDeRecursos getById(Integer idRecurso, Integer idDistribuicao) {
@@ -37,7 +37,7 @@ public class RecursoHasDistribuicaoDeRecursosController {
             throw new RuntimeException("IDs inválidos para a busca (Recurso e Distribuição).");
         }
 
-        RecursoHasDistribuicaoDeRecursos item = itemDistribuicaoDAO.getById(idRecurso, idDistribuicao);
+        RecursoHasDistribuicaoDeRecursos item = itemDistribuicaoModel.getByIds(idRecurso, idDistribuicao, SingletonDB.getConexao());
         if (item == null) {
             throw new RuntimeException("Associação não encontrada.");
         }
@@ -62,7 +62,7 @@ public class RecursoHasDistribuicaoDeRecursosController {
         r.setQuantidade(r.getQuantidade() - item.getQuantidade());
         recursoController.atualizar(r);
 
-        return itemDistribuicaoDAO.gravar(item);
+        return itemDistribuicaoModel.gravar(item, SingletonDB.getConexao());
     }
 
     public boolean atualizar(RecursoHasDistribuicaoDeRecursos item) {
@@ -82,7 +82,7 @@ public class RecursoHasDistribuicaoDeRecursosController {
         r.setQuantidade(r.getQuantidade() - diferenca);
         recursoController.atualizar(r);
 
-        return itemDistribuicaoDAO.alterar(item);
+        return itemDistribuicaoModel.alterar(item, SingletonDB.getConexao());
     }
 
     public void excluir(Integer idRecurso, Integer idDistribuicao) {
@@ -96,6 +96,6 @@ public class RecursoHasDistribuicaoDeRecursosController {
         r.setQuantidade(r.getQuantidade() + existente.getQuantidade());
         recursoController.atualizar(r);
 
-        itemDistribuicaoDAO.excluir(idRecurso, idDistribuicao);
+        itemDistribuicaoModel.excluir(idRecurso, idDistribuicao, SingletonDB.getConexao());
     }
 }

@@ -1,6 +1,7 @@
 package com.example.dminfo.dao;
 
 import com.example.dminfo.model.RecursoHasDistribuicaoDeRecursos;
+import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
@@ -10,67 +11,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class RecursoHasDistribuicaoDeRecursosDAO {
+public class RecursoHasDistribuicaoDeRecursosDAO implements IDAO<RecursoHasDistribuicaoDeRecursos> {
 
-    private RecursoHasDistribuicaoDeRecursos buildItem(ResultSet rs) throws SQLException {
-        RecursoHasDistribuicaoDeRecursos item = new RecursoHasDistribuicaoDeRecursos();
-
-        int idRecurso = rs.getInt("recurso_id_recurso");
-        int idDistribuicao = rs.getInt("distribuicao_de_recursos_id_distribuicao");
-
-        item.setRecurso(idRecurso);
-        item.setDistribuicao(idDistribuicao);
-
-        item.setQuantidade(rs.getInt("quantidade"));
-
-        return item;
-    }
-    public List<RecursoHasDistribuicaoDeRecursos> listar() {
-        List<RecursoHasDistribuicaoDeRecursos> lista = new ArrayList<>();
+    @Override
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM recurso_has_distribuicao_de_recursos";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                lista.add(buildItem(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar associações: " + e.getMessage());
-        }
-        return lista;
+        return conexao.consultar(sql);
     }
 
-    public List<RecursoHasDistribuicaoDeRecursos> listarPorDistribuicao(Integer idDistribuicao) {
-        List<RecursoHasDistribuicaoDeRecursos> lista = new ArrayList<>();
-        String sql = String.format("SELECT * FROM recurso_has_distribuicao_de_recursos WHERE distribuicao_de_recursos_id_distribuicao = %d", idDistribuicao);
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                lista.add(buildItem(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar por distribuição: " + e.getMessage());
-        }
-        return lista;
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
+        String sql = String.format("SELECT * FROM recurso_has_distribuicao_de_recursos WHERE distribuicao_de_recursos_id_distribuicao = %d", id);
+        return conexao.consultar(sql);
     }
 
-    public RecursoHasDistribuicaoDeRecursos getById(Integer idRecurso, Integer idDistribuicao) {
+    public ResultSet getByIds(Integer idRecurso, Integer idDistribuicao, Conexao conexao) {
         String sql = String.format(
                 "SELECT * FROM recurso_has_distribuicao_de_recursos WHERE recurso_id_recurso = %d AND distribuicao_de_recursos_id_distribuicao = %d",
                 idRecurso,
                 idDistribuicao
         );
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildItem(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar associação por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 
-    public RecursoHasDistribuicaoDeRecursos gravar(RecursoHasDistribuicaoDeRecursos item) {
+    @Override
+    public RecursoHasDistribuicaoDeRecursos create(RecursoHasDistribuicaoDeRecursos item, Conexao conexao) {
         if (item == null)
             return null;
 
@@ -82,7 +47,7 @@ public class RecursoHasDistribuicaoDeRecursosDAO {
                 item.getQuantidade()
         );
 
-        if (SingletonDB.getConexao().manipular(sql)) {
+        if (conexao.manipular(sql)) {
             return item;
         } else {
             System.out.println("Erro ao gravar associação.");
@@ -90,7 +55,8 @@ public class RecursoHasDistribuicaoDeRecursosDAO {
         }
     }
 
-    public boolean alterar(RecursoHasDistribuicaoDeRecursos item) {
+    @Override
+    public RecursoHasDistribuicaoDeRecursos update(RecursoHasDistribuicaoDeRecursos item, Conexao conexao) {
         if (item != null) {
             String sql = String.format(
                     "UPDATE recurso_has_distribuicao_de_recursos SET quantidade = %d " +
@@ -100,17 +66,33 @@ public class RecursoHasDistribuicaoDeRecursosDAO {
                     item.getDistribuicao()
             );
 
-            return SingletonDB.getConexao().manipular(sql);
+            if (conexao.manipular(sql)) {
+                return item;
+            } else {
+                System.out.println("Erro ao gravar associação.");
+                return null;
+            }
         }
-        return false;
+
+        return null;
     }
 
-    public boolean excluir(Integer idRecurso, Integer idDistribuicao) {
+    public boolean deletes(int idRecurso, int idDistribuicao, Conexao conexao) {
         String sql = String.format(
                 "DELETE FROM recurso_has_distribuicao_de_recursos WHERE recurso_id_recurso = %d AND distribuicao_de_recursos_id_distribuicao = %d",
                 idRecurso,
                 idDistribuicao
         );
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
+    }
+
+    @Override
+    public boolean delete(int id, Conexao conexao) {
+        return false;
+    }
+
+    @Override
+    public RecursoHasDistribuicaoDeRecursos read(RecursoHasDistribuicaoDeRecursos rhdr, Conexao conexao) {
+        return null;
     }
 }

@@ -1,6 +1,5 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.RecursoHasDistribuicaoDeRecursosDAO;
 import com.example.dminfo.model.ItemDistribuido;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
 import com.example.dminfo.model.Recurso;
@@ -22,7 +21,7 @@ public class DistribuicaoDeRecursosController {
     private Recurso recursoModel;
 
     @Autowired
-    private RecursoHasDistribuicaoDeRecursosDAO recursoHasDistribuicaoDeRecursosDAO; //Alterar
+    private RecursoHasDistribuicaoDeRecursos recursoHasDistribuicaoDeRecursosModel;
 
     public List<DistribuicaoDeRecursos> listar() {
         return distribuicaoModel.listar(SingletonDB.getConexao());
@@ -91,7 +90,7 @@ public class DistribuicaoDeRecursosController {
         }
 
         // Voltar as quantidades para os recursos
-        List<RecursoHasDistribuicaoDeRecursos> itensVinculados = recursoHasDistribuicaoDeRecursosDAO.listarPorDistribuicao(id);
+        List<RecursoHasDistribuicaoDeRecursos> itensVinculados = recursoHasDistribuicaoDeRecursosModel.listarPorDistribuicao(id, SingletonDB.getConexao());
 
         if (itensVinculados != null && !itensVinculados.isEmpty()) {
             for (RecursoHasDistribuicaoDeRecursos item : itensVinculados) {
@@ -102,7 +101,7 @@ public class DistribuicaoDeRecursosController {
                     recursoModel.alterar(recurso, SingletonDB.getConexao());
                 }
 
-                recursoHasDistribuicaoDeRecursosDAO.excluir(item.getRecurso(), id);
+                recursoHasDistribuicaoDeRecursosModel.excluir(item.getRecurso(), id, SingletonDB.getConexao());
             }
         }
 
@@ -145,13 +144,7 @@ public class DistribuicaoDeRecursosController {
                 recursoModel.alterar(recurso, SingletonDB.getConexao());
 
                 // 4. Cria o vínculo na tabela intermediária com os SETs corrigidos
-                RecursoHasDistribuicaoDeRecursos vinculo = new RecursoHasDistribuicaoDeRecursos();
-
-                vinculo.setDistribuicao(novaDistribuicao.getId());
-                vinculo.setRecurso(recurso.getId());
-                vinculo.setQuantidade(itemDist.getQuantidade());
-
-                recursoHasDistribuicaoDeRecursosDAO.gravar(vinculo);
+                recursoHasDistribuicaoDeRecursosModel.gravarFragmentado(novaDistribuicao.getId(), recurso.getId(), itemDist.getQuantidade(), SingletonDB.getConexao());
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.example.dminfo.controller;
 
-import com.example.dminfo.dao.RecursoDAO;
 import com.example.dminfo.dao.RecursoHasDistribuicaoDeRecursosDAO;
 import com.example.dminfo.model.ItemDistribuido;
 import com.example.dminfo.model.DistribuicaoDeRecursos;
@@ -20,7 +19,7 @@ public class DistribuicaoDeRecursosController {
     private DistribuicaoDeRecursos distribuicaoModel;
 
     @Autowired
-    private RecursoDAO recursoDAO; //Alterar
+    private Recurso recursoModel;
 
     @Autowired
     private RecursoHasDistribuicaoDeRecursosDAO recursoHasDistribuicaoDeRecursosDAO; //Alterar
@@ -96,11 +95,11 @@ public class DistribuicaoDeRecursosController {
 
         if (itensVinculados != null && !itensVinculados.isEmpty()) {
             for (RecursoHasDistribuicaoDeRecursos item : itensVinculados) {
-                Recurso recurso = recursoDAO.getById(item.getRecurso());
+                Recurso recurso = recursoModel.getById(item.getRecurso(), SingletonDB.getConexao());
 
                 if (recurso != null) {
                     recurso.setQuantidade(recurso.getQuantidade() + item.getQuantidade());
-                    recursoDAO.alterar(recurso);
+                    recursoModel.alterar(recurso, SingletonDB.getConexao());
                 }
 
                 recursoHasDistribuicaoDeRecursosDAO.excluir(item.getRecurso(), id);
@@ -132,7 +131,7 @@ public class DistribuicaoDeRecursosController {
             for (ItemDistribuido itemDist : novaDistribuicao.getItens()) {
 
                 // Busca o recurso para checar o estoque
-                Recurso recurso = recursoDAO.getById(itemDist.getIdRecurso());
+                Recurso recurso = recursoModel.getById(itemDist.getIdRecurso(), SingletonDB.getConexao());
                 if (recurso == null) {
                     throw new RuntimeException("Recurso ID " + itemDist.getIdRecurso() + " não encontrado.");
                 }
@@ -143,7 +142,7 @@ public class DistribuicaoDeRecursosController {
 
                 // 3. Atualiza o estoque do Recurso
                 recurso.setQuantidade(recurso.getQuantidade() - itemDist.getQuantidade());
-                recursoDAO.alterar(recurso);
+                recursoModel.alterar(recurso, SingletonDB.getConexao());
 
                 // 4. Cria o vínculo na tabela intermediária com os SETs corrigidos
                 RecursoHasDistribuicaoDeRecursos vinculo = new RecursoHasDistribuicaoDeRecursos();

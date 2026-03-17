@@ -1,16 +1,14 @@
 package com.example.dminfo.dao;
 
-import com.example.dminfo.model.Recurso; // Assumindo que o model Recurso existe
-import com.example.dminfo.util.SingletonDB;
+import com.example.dminfo.model.Recurso;
+import com.example.dminfo.util.Conexao;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
-public class RecursoDAO {
+public class RecursoDAO implements IDAO<Recurso> {
 
 //    CREATE TABLE IF NOT EXISTS recurso (
 //        id_recurso SERIAL PRIMARY KEY,
@@ -25,45 +23,20 @@ public class RecursoDAO {
 //            ON UPDATE NO ACTION
 //    );
 
-    private Recurso buildRecurso(ResultSet rs) throws SQLException {
-        Recurso r = new Recurso();
-        r.setId(rs.getInt("id_recurso"));
-        r.setId_doacao(rs.getInt("id_doacao"));
-        r.setDescricao(rs.getString("descricao"));
-        r.setTipo(rs.getString("tipo"));
-        r.setQuantidade(rs.getInt("quantidade"));
-
-        return r;
-    }
-
-    public List<Recurso> listar() {
-        List<Recurso> recursos = new ArrayList<>();
+    @Override
+    public ResultSet readAll(String filtro, Conexao conexao) {
         String sql = "SELECT * FROM recurso ORDER BY id_recurso";
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            while (rs != null && rs.next()) {
-                recursos.add(buildRecurso(rs));
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar recursos: " + e.getMessage());
-        }
-        return recursos;
+        return conexao.consultar(sql);
     }
 
-    public Recurso getById(int id) {
+    @Override
+    public ResultSet getById(int id, Conexao conexao) {
         String sql = "SELECT * FROM recurso WHERE id_recurso = " + id;
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        try {
-            if (rs != null && rs.next()) {
-                return buildRecurso(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao buscar recurso por ID: " + e.getMessage());
-        }
-        return null;
+        return conexao.consultar(sql);
     }
 
-    public Recurso gravar(Recurso recurso) {
+    @Override
+    public Recurso create(Recurso recurso, Conexao conexao) {
         if (recurso == null)
             return null;
 
@@ -75,22 +48,22 @@ public class RecursoDAO {
                 recurso.getQuantidade()
         );
 
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
-                recurso.setId(rs.getInt("id_recurso"));
                 return recurso;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao gravar recurso: " + e.getMessage());
         }
+
         return null;
     }
 
-
-    public boolean alterar(Recurso recurso) {
+    @Override
+    public Recurso update(Recurso recurso, Conexao conexao) {
         if (recurso != null) {
-
             String sql = String.format(
                     "UPDATE recurso SET id_doacao = %d, descricao = '%s', tipo = '%s', quantidade = %d WHERE id_recurso = %d",
                     recurso.getId_doacao(),
@@ -100,26 +73,37 @@ public class RecursoDAO {
                     recurso.getId()
             );
 
-            return SingletonDB.getConexao().manipular(sql);
+            conexao.manipular(sql);
+            return recurso;
         }
-        return false;
+
+        return null;
     }
 
-    public boolean excluir(int id) {
+    @Override
+    public boolean delete(int id, Conexao conexao) {
         String sql = "DELETE FROM recurso WHERE id_recurso = " + id;
-        return SingletonDB.getConexao().manipular(sql);
+        return conexao.manipular(sql);
     }
 
-    public Recurso consultar(int id) {
-        String sql = String.format("SELECT * FROM recurso WHERE id_recurso = '%d'", id);
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+    @Override
+    public Recurso read(Recurso recurso, Conexao conexao) {
+        String sql = String.format("SELECT * FROM recurso WHERE id_recurso = '%d'", recurso.getId());
+        ResultSet rs = conexao.consultar(sql);
+
         try {
             if (rs != null && rs.next()) {
-                return buildRecurso(rs);
+                recurso.setId(rs.getInt("id_recurso"));
+                recurso.setId_doacao(rs.getInt("id_doacao"));
+                recurso.setDescricao(rs.getString("descricao"));
+                recurso.setTipo(rs.getString("tipo"));
+                recurso.setQuantidade(rs.getInt("quantidade"));
+                return recurso;
             }
         } catch (SQLException e) {
             System.out.println("Erro ao consultar recurso: " + e.getMessage());
         }
+
         return null;
     }
 }

@@ -42,6 +42,10 @@ public class FinalizarAtividadesView {
 
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Formato de data inválido.");
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+
         } catch (Exception e) {
             System.err.println("Erro ao finalizar atividade: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao salvar.");

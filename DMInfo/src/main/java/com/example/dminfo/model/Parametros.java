@@ -1,6 +1,7 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.ParametrosDAO;
+import com.example.dminfo.model.template.SalvarParametrosTemplate;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -81,23 +82,43 @@ public class Parametros {
     }
 
     public Parametros salvar(Parametros parametro, Conexao conexao) {
-        if (parametro.getRazaoSocial() == null || parametro.getRazaoSocial().trim().isEmpty())
-            throw new RuntimeException("Razão Social é obrigatória.");
-        if (parametro.getCnpj() == null || parametro.getCnpj().isEmpty())
-            throw new RuntimeException("CNPJ é obrigatório.");
 
-        Parametros existente = this.exibir(conexao);
+        SalvarParametrosTemplate template = new SalvarParametrosTemplate() {
+            @Override
+            protected void validarRegrasDeNegocio(Parametros p) {
+                if (p.getRazaoSocial() == null || p.getRazaoSocial().trim().isEmpty())
+                    throw new RuntimeException("Razão Social é obrigatória.");
+                if (p.getRua() == null || p.getRua().trim().isEmpty())
+                    throw new RuntimeException("Rua é obrigatória.");
+                if (p.getCidade() == null || p.getCidade().trim().isEmpty())
+                    throw new RuntimeException("Cidade é obrigatória.");
+                if (p.getTelefone() == null || p.getTelefone().trim().isEmpty())
+                    throw new RuntimeException("Telefone é obrigatório.");
+                if (p.getLogoPequeno() == null || p.getLogoPequeno().trim().isEmpty())
+                    throw new RuntimeException("Logo Pequeno é obrigatório.");
+            }
 
-        if (existente == null)
-            return dao.create(parametro, conexao);
-        else {
-            parametro.setId(existente.getId());
-            Parametros atualizado = dao.update(parametro, conexao);
-            if (atualizado != null)
+            @Override
+            protected Parametros buscarExistente(Conexao conn) {
+                return exibir(conn);
+            }
+
+            @Override
+            protected Parametros inserirNovo(Parametros p, Conexao conn) {
+                return dao.create(p, conn);
+            }
+
+            @Override
+            protected Parametros atualizarExistente(Parametros p, Conexao conn) {
+                Parametros atualizado = dao.update(p, conn);
+                if (atualizado == null) {
+                    throw new RuntimeException("Erro ao salvar parâmetros.");
+                }
                 return atualizado;
+            }
+        };
 
-        }
-        throw new RuntimeException("Erro ao salvar parâmetros.");
+        return template.executarSalvamento(parametro, conexao);
     }
 
     public void excluir(Integer id, Conexao conexao) {

@@ -1,6 +1,7 @@
 package com.example.dminfo.controller;
 
 import com.example.dminfo.model.CriarRealizacaoAtividades;
+import com.example.dminfo.model.observer.AtividadeObserver;
 import com.example.dminfo.util.SingletonDB;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class FinalizarAtividadesController {
     @Autowired
     private CriarRealizacaoAtividades atividadeModel;
 
+    @Autowired(required = false)
+    private List<AtividadeObserver> observers;
+
     public List<CriarRealizacaoAtividades> listarTodas() {
         return atividadeModel.listarTodas(SingletonDB.getConexao());
     }
@@ -26,18 +30,27 @@ public class FinalizarAtividadesController {
         if (existente == null)
             return false;
 
-        if (dadosNovos.getDtIni() != null)
-            existente.setDtIni(dadosNovos.getDtIni());
-        if (dadosNovos.getDtFim() != null)
-            existente.setDtFim(dadosNovos.getDtFim());
+        existente.setDtIni(dadosNovos.getDtIni());
+        existente.setDtFim(dadosNovos.getDtFim());
 
         existente.setCustoreal(dadosNovos.getCustoreal());
 
         if (dadosNovos.getObservacoes() != null)
             existente.setObservacoes(dadosNovos.getObservacoes());
+
         if (dadosNovos.getStatus() != null)
             existente.setStatus(dadosNovos.getStatus());
 
-        return atividadeModel.finalizar(existente, conexao);
+        // 3. CAPTURAR O RESULTADO DO STATE
+        boolean sucesso = atividadeModel.finalizar(existente, conexao);
+
+        // 4. NOTIFICAR OS OBSERVADORES (CALENDÁRIO)
+        if (sucesso && observers != null) {
+            for (AtividadeObserver observer : observers) {
+                observer.onAtividadeAtualizada(existente);
+            }
+        }
+
+        return sucesso;
     }
 }

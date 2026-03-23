@@ -2,6 +2,9 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
 import com.example.dminfo.util.Conexao;
+import com.example.dminfo.model.state.EstadoAtividade;
+import com.example.dminfo.model.state.EstadoAtividadeAtiva;
+import com.example.dminfo.model.state.EstadoAtividadeFinalizada;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
@@ -30,8 +33,7 @@ public class CriarRealizacaoAtividades {
 
     public CriarRealizacaoAtividades() {}
 
-    public CriarRealizacaoAtividades(int id, Administrador admin, Atividade atv, Time horario, String local,
-                                     String observacoes, LocalDate dtIni, LocalDate dtFim, double custoprevisto, double custoreal, boolean status) {
+    public CriarRealizacaoAtividades(int id, Administrador admin, Atividade atv, Time horario, String local, String observacoes, LocalDate dtIni, LocalDate dtFim, double custoprevisto, double custoreal, boolean status) {
         this.id = id;
         this.admin = admin;
         this.atv = atv;
@@ -53,13 +55,17 @@ public class CriarRealizacaoAtividades {
             Usuario usuarioAdmin = new Usuario();
             usuarioAdmin.setLogin(rs.getString("admin_usuario"));
             admin.setUsuario(usuarioAdmin);
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+
+        }
 
         Atividade atividade = new Atividade();
         atividade.setId(rs.getInt("id_atividade"));
         try {
             atividade.setDescricao(rs.getString("atividade_descricao"));
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+
+        }
 
         CriarRealizacaoAtividades cra = new CriarRealizacaoAtividades();
         cra.setId(rs.getInt("id_criacao"));
@@ -69,8 +75,10 @@ public class CriarRealizacaoAtividades {
         cra.setLocal(rs.getString("local"));
         cra.setObservacoes(rs.getString("observacoes"));
 
-        if (rs.getDate("dtini") != null) cra.setDtIni(rs.getDate("dtini").toLocalDate());
-        if (rs.getDate("dtfim") != null) cra.setDtFim(rs.getDate("dtfim").toLocalDate());
+        if (rs.getDate("dtini") != null)
+            cra.setDtIni(rs.getDate("dtini").toLocalDate());
+        if (rs.getDate("dtfim") != null)
+            cra.setDtFim(rs.getDate("dtfim").toLocalDate());
 
         cra.setCustoprevisto(rs.getDouble("custoprevisto"));
         cra.setCustoreal(rs.getDouble("custoreal"));
@@ -106,11 +114,27 @@ public class CriarRealizacaoAtividades {
         return null;
     }
 
+    //Aplicação do STATE
     public boolean finalizar(CriarRealizacaoAtividades atividadeAtualizada, Conexao conexao) {
-        if (atividadeAtualizada.getId() <= 0) {
+        if (atividadeAtualizada.getId() <= 0)
             throw new RuntimeException("ID inválido.");
-        }
-        return dao.finalizarAtividade(atividadeAtualizada, conexao);
+
+        //Vai à base de dados procurar o estado REAL e atual da atividade
+        CriarRealizacaoAtividades atividadeNoBanco = this.buscarPorId(atividadeAtualizada.getId(), conexao);
+
+        if (atividadeNoBanco == null)
+            throw new RuntimeException("Atividade não encontrada na base de dados.");
+
+        EstadoAtividade estadoAtual;
+
+        //Verifica o status que está na base de dados
+        if (atividadeNoBanco.getStatus() != null && atividadeNoBanco.getStatus() == true)
+            estadoAtual = new EstadoAtividadeFinalizada();
+        else
+            estadoAtual = new EstadoAtividadeAtiva();
+
+        // 3. Delega o comportamento para o padrão State
+        return estadoAtual.finalizar(atividadeAtualizada, dao, conexao);
     }
 
     public int getId() {

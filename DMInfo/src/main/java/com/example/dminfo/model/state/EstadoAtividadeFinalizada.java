@@ -7,7 +7,7 @@ import com.example.dminfo.util.Conexao;
 public class EstadoAtividadeFinalizada implements EstadoAtividade {
 
     @Override
-    public boolean finalizar(CriarRealizacaoAtividades atividadeAtualizada, CriarRealizacaoAtividadesDAO dao, Conexao conexao) {
+    public boolean finalizar (CriarRealizacaoAtividades atividadeAtualizada, CriarRealizacaoAtividades atividadeNoBanco, CriarRealizacaoAtividadesDAO dao, Conexao conexao) {
         return dao.finalizarAtividade(atividadeAtualizada, conexao);
     }
 }

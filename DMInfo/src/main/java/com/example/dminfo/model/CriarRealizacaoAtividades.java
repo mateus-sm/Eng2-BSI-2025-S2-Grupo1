@@ -4,9 +4,11 @@ import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
 import com.example.dminfo.util.Conexao;
 import com.example.dminfo.model.state.EstadoAtividade;
 import com.example.dminfo.model.state.EstadoAtividadeAtiva;
-import com.example.dminfo.model.state.EstadoAtividadeFinalizada;
+import com.example.dminfo.model.observer.Observer;
+import com.example.dminfo.model.observer.Sujeito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class CriarRealizacaoAtividades {
+public class CriarRealizacaoAtividades implements Sujeito {
     private int id;
     private Administrador admin;
     private Atividade atv;
@@ -27,6 +29,8 @@ public class CriarRealizacaoAtividades {
     private double custoprevisto;
     private double custoreal;
     private Boolean status;
+
+    private transient List<Observer> observadores = new ArrayList<>();
 
     @Autowired
     private CriarRealizacaoAtividadesDAO dao;
@@ -75,10 +79,12 @@ public class CriarRealizacaoAtividades {
         cra.setLocal(rs.getString("local"));
         cra.setObservacoes(rs.getString("observacoes"));
 
-        if (rs.getDate("dtini") != null)
+        if (rs.getDate("dtini") != null) {
             cra.setDtIni(rs.getDate("dtini").toLocalDate());
-        if (rs.getDate("dtfim") != null)
+        }
+        if (rs.getDate("dtfim") != null) {
             cra.setDtFim(rs.getDate("dtfim").toLocalDate());
+        }
 
         cra.setCustoprevisto(rs.getDouble("custoprevisto"));
         cra.setCustoreal(rs.getDouble("custoreal"));
@@ -114,93 +120,71 @@ public class CriarRealizacaoAtividades {
         return null;
     }
 
-    //Aplicação do STATE
+    // Aplicação do STATE corrigida (Delegação e Cadeia)
     public boolean finalizar(CriarRealizacaoAtividades atividadeAtualizada, Conexao conexao) {
-        if (atividadeAtualizada.getId() <= 0)
+        if (atividadeAtualizada.getId() <= 0) {
             throw new RuntimeException("ID inválido.");
+        }
 
-        //Vai à base de dados procurar o estado REAL e atual da atividade
         CriarRealizacaoAtividades atividadeNoBanco = this.buscarPorId(atividadeAtualizada.getId(), conexao);
 
-        if (atividadeNoBanco == null)
+        if (atividadeNoBanco == null) {
             throw new RuntimeException("Atividade não encontrada na base de dados.");
+        }
 
-        EstadoAtividade estadoAtual;
+        // SEMPRE chama a classe inicial, não importa qual seja o status no banco
+        EstadoAtividade estadoInicial = new EstadoAtividadeAtiva();
 
-        //Verifica o status que está na base de dados
-        if (atividadeNoBanco.getStatus() != null && atividadeNoBanco.getStatus() == true)
-            estadoAtual = new EstadoAtividadeFinalizada();
-        else
-            estadoAtual = new EstadoAtividadeAtiva();
+        // O estadoInicial fará o "if" internamente. Se não for ele, ele chama a outra.
+        boolean sucesso = estadoInicial.finalizar(atividadeAtualizada, atividadeNoBanco, dao, conexao);
 
-        // 3. Delega o comportamento para o padrão State
-        return estadoAtual.finalizar(atividadeAtualizada, dao, conexao);
+        // Notifica o Calendário e o E-mail se a ação no banco deu certo
+        if (sucesso == true) {
+            atividadeAtualizada.notificar();
+        }
+
+        return sucesso;
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public void add(Observer observer) {
+        if (!observadores.contains(observer)) {
+            observadores.add(observer);
+        }
     }
-    public void setId(int id) {
-        this.id = id;
+
+    @Override
+    public void remover(Observer observer) {
+        observadores.remove(observer);
     }
-    public Administrador getAdmin() {
-        return admin;
+
+    @Override
+    public void notificar() {
+        for (Observer observer : observadores) {
+            observer.update(this);
+        }
     }
-    public void setAdmin(Administrador admin) {
-        this.admin = admin;
-    }
-    public Atividade getAtv() {
-        return atv;
-    }
-    public void setAtv(Atividade atv) {
-        this.atv = atv;
-    }
-    public Time getHorario() {
-        return horario;
-    }
-    public void setHorario(Time horario) {
-        this.horario = horario;
-    }
-    public String getLocal() {
-        return local;
-    }
-    public void setLocal(String local) {
-        this.local = local;
-    }
-    public String getObservacoes() {
-        return observacoes;
-    }
-    public void setObservacoes(String observacoes) {
-        this.observacoes = observacoes;
-    }
-    public LocalDate getDtIni() {
-        return dtIni;
-    }
-    public void setDtIni(LocalDate dtIni) {
-        this.dtIni = dtIni;
-    }
-    public LocalDate getDtFim() {
-        return dtFim;
-    }
-    public void setDtFim(LocalDate dtFim) {
-        this.dtFim = dtFim;
-    }
-    public double getCustoprevisto() {
-        return custoprevisto;
-    }
-    public void setCustoprevisto(double custoprevisto) {
-        this.custoprevisto = custoprevisto;
-    }
-    public double getCustoreal() {
-        return custoreal;
-    }
-    public void setCustoreal(double custoreal) {
-        this.custoreal = custoreal;
-    }
-    public Boolean getStatus() {
-        return status;
-    }
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public Administrador getAdmin() { return admin; }
+    public void setAdmin(Administrador admin) { this.admin = admin; }
+    public Atividade getAtv() { return atv; }
+    public void setAtv(Atividade atv) { this.atv = atv; }
+    public Time getHorario() { return horario; }
+    public void setHorario(Time horario) { this.horario = horario; }
+    public String getLocal() { return local; }
+    public void setLocal(String local) { this.local = local; }
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    public LocalDate getDtIni() { return dtIni; }
+    public void setDtIni(LocalDate dtIni) { this.dtIni = dtIni; }
+    public LocalDate getDtFim() { return dtFim; }
+    public void setDtFim(LocalDate dtFim) { this.dtFim = dtFim; }
+    public double getCustoprevisto() { return custoprevisto; }
+    public void setCustoprevisto(double custoprevisto) { this.custoprevisto = custoprevisto; }
+    public double getCustoreal() { return custoreal; }
+    public void setCustoreal(double custoreal) { this.custoreal = custoreal; }
+    public Boolean getStatus() { return status; }
+    public void setStatus(Boolean status) { this.status = status; }
 }

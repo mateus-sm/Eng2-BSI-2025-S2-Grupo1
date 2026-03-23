@@ -5,5 +5,5 @@ import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
 import com.example.dminfo.util.Conexao;
 
 public interface EstadoAtividade {
-    boolean finalizar(CriarRealizacaoAtividades atividade, CriarRealizacaoAtividadesDAO dao, Conexao conexao);
+    boolean finalizar(CriarRealizacaoAtividades atividadeAtualizada, CriarRealizacaoAtividades atividadeNoBanco, CriarRealizacaoAtividadesDAO dao, Conexao conexao);
 }

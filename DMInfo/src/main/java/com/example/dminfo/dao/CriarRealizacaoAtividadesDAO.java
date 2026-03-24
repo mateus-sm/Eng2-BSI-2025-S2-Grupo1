@@ -111,6 +111,19 @@ public class CriarRealizacaoAtividadesDAO implements IDAO<CriarRealizacaoAtivida
         return conexao.manipular(sql);
     }
 
+    public ResultSet buscarPorData(String data, Conexao conexao) {
+        String sql = String.format("SELECT cra.*, " +
+                "u.usuario AS admin_usuario, " +
+                "atv.descricao AS atividade_descricao " +
+                "FROM criar_realizacao_atividades cra " +
+                "JOIN administrador adm ON cra.id_admin = adm.id_admin " +
+                "JOIN usuario u ON adm.id_usuario = u.id_usuario " +
+                "JOIN atividade atv ON cra.id_atividade = atv.id_atividade " +
+                "WHERE cra.dtini = '%s'", data);
+
+        return conexao.consultar(sql);
+    }
+
     @Override
     public ResultSet getById(int id, Conexao conexao) {
         return null;

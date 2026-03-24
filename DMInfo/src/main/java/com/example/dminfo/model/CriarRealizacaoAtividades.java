@@ -165,6 +165,21 @@ public class CriarRealizacaoAtividades implements Sujeito {
         }
     }
 
+    public List<CriarRealizacaoAtividades> buscarAtividadesPorData(String data, Conexao conexao) {
+        List<CriarRealizacaoAtividades> lista = new ArrayList<>();
+        ResultSet rs = dao.buscarPorData(data, conexao);
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    lista.add(montarAtividade(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar atividades por data: " + e.getMessage());
+        }
+        return lista;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public Administrador getAdmin() { return admin; }

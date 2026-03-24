@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.mail.javamail.JavaMailSender;
 
 @Repository
 public class Calendario {
@@ -22,6 +23,55 @@ public class Calendario {
 
     public Calendario(CriarRealizacaoAtividades id_criacao) {
         this.id_criacao = id_criacao;
+    }
+
+    private List<Usuario> observadores = new ArrayList<>();
+
+    public void adicionarObservador(Usuario u) {
+        this.observadores.add(u);
+    }
+    public void removerObservador(Usuario u) {
+        this.observadores.remove(u);
+    }
+
+    public void carregarEInstanciarObservadores(Conexao conexao) {
+        this.observadores.clear(); // Limpa a lista antes de carregar
+
+        if (this.id_criacao == null || conexao == null) return;
+
+        String sql = String.format(
+                "SELECT u.nome, u.email " +
+                        "FROM criar_realizacao_atividades_membro cram " +
+                        "JOIN membro m ON cram.membro_id_membro = m.id_membro " +
+                        "JOIN usuario u ON m.id_usuario = u.id_usuario " +
+                        "WHERE cram.criar_realizacao_atividades_id_criacao = %d", this.id_criacao.getId());
+
+        try {
+            ResultSet rs = conexao.consultar(sql);
+            while (rs != null && rs.next()) {
+                // Instanciando o usuário dentro do calendário conforme pedido
+                Usuario observador = new Usuario();
+                observador.setNome(rs.getString("nome"));
+                observador.setEmail(rs.getString("email"));
+
+                // Adicionando o usuário à lista de observadores
+                this.adicionarObservador(observador);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao instanciar observadores no calendário: " + e.getMessage());
+        }
+    }
+
+    public void notificarObservadores(String motivo, JavaMailSender mailSender) {
+        if (this.observadores.isEmpty()) {
+            System.out.println("O calendário da atividade não possui observadores para notificar.");
+            return;
+        }
+
+        for (Usuario observador : this.observadores) {
+            // Delega para o observador (usuário) a ação de receber a notificação
+            observador.receberNotificacao(this.id_criacao, motivo, mailSender);
+        }
     }
 
     private CriarRealizacaoAtividades montarAtividade(ResultSet rs) throws SQLException {

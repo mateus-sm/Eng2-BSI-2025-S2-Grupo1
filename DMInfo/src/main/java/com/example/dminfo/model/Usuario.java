@@ -7,6 +7,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.util.regex.Pattern;
 
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 public class Usuario {
 
     private int id;
@@ -102,6 +107,46 @@ public class Usuario {
 
         if (dao.getUsuario(this.login) != null) {
             throw new RuntimeException("Este nome de usuário (login) já está em uso.");
+        }
+    }
+
+    public void receberNotificacao(CriarRealizacaoAtividades atividade, String motivo, JavaMailSender mailSender) {
+        if (this.email == null || this.email.trim().isEmpty()) {
+            return; // Se não tem email, não faz nada
+        }
+
+        DateTimeFormatter formatadorBr = DateTimeFormatter.ofPattern("dd/MM/yyyy", new Locale("pt", "BR"));
+        String dataFormatada = atividade.getDtIni() != null ? atividade.getDtIni().format(formatadorBr) : "Data não definida";
+        String tituloAtividade = atividade.getAtv() != null ? atividade.getAtv().getDescricao() : "Atividade sem título";
+
+        String assunto = String.format("Lembrete: Sua participação na atividade '%s' (%s)", tituloAtividade, motivo);
+
+        String corpo = String.format(
+                "Olá %s,\n\n" +
+                        "Esta é uma notificação sobre a sua participação na seguinte atividade:\n\n" +
+                        "• Título: %s\n" +
+                        "• Data: %s\n" +
+                        "• Horário: %s\n" +
+                        "• Local: %s\n\n" +
+                        "Motivo do Lembrete: %s\n\n" +
+                        "Atenciosamente,\nSistema de Gerenciamento de Atividades.",
+                this.getNome(),
+                tituloAtividade,
+                dataFormatada,
+                atividade.getHorario() != null ? atividade.getHorario().toString() : "Não especificado",
+                atividade.getLocal() != null ? atividade.getLocal() : "Não especificado",
+                motivo);
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(this.email);
+            message.setSubject(assunto);
+            message.setText(corpo);
+
+            mailSender.send(message);
+            System.out.println("SUCESSO: E-mail enviado para o observador: " + this.nome + " (" + this.email + ")");
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar e-mail para " + this.email + ": " + e.getMessage());
         }
     }
 

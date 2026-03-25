@@ -1,4 +1,4 @@
-package com.example.dminfo.controller;
+package com.example.dminfo.controller.bridge;
 
 import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.EnviarFotosAtividade;

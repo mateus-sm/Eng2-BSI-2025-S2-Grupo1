@@ -1,6 +1,6 @@
 package com.example.dminfo.view;
 
-import com.example.dminfo.controller.EnviarFotosAtividadeController;
+import com.example.dminfo.controller.bridge.EnviarFotosAtividadeController;
 import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.EnviarFotosAtividade;
 import com.example.dminfo.model.Evento;

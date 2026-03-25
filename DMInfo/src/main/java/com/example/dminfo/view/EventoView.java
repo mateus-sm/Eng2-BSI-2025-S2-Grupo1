@@ -1,7 +1,7 @@
 package com.example.dminfo.view;
 
 import com.example.dminfo.controller.EventoController;
-import com.example.dminfo.controller.EnviarFotosAtividadeController;
+import com.example.dminfo.controller.bridge.EnviarFotosAtividadeController;
 import com.example.dminfo.model.Evento;
 import com.example.dminfo.model.MembroErro;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,18 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+//Abstração
 @Service
 public class EnviarFotosAtividadeController {
-
-    private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/DMInfo/src/main/resources/static/uploads/";
 
     @Autowired
     private EnviarFotosAtividade fotoModel;
@@ -33,6 +28,10 @@ public class EnviarFotosAtividadeController {
 
     @Autowired
     private Evento eventoModel;
+
+    // Injeção da interface da ponte (Bridge)
+    @Autowired
+    private ProcessadorDeArquivo processadorDeArquivo;
 
     public List<Evento> listarTodosEventos() {
         return eventoModel.getTodos(SingletonDB.getConexao());
@@ -65,19 +64,16 @@ public class EnviarFotosAtividadeController {
         if (arquivo.isEmpty())
             throw new RuntimeException("Nenhum arquivo de foto enviado.");
 
-        String nomeArquivo = "";
-        try {
-            Files.createDirectories(Paths.get(UPLOAD_DIRECTORY));
-
             String originalName = arquivo.getOriginalFilename();
             String extension = (originalName != null && originalName.contains("."))
                     ? originalName.substring(originalName.lastIndexOf("."))
                     : ".png";
+        String nomeArquivo = UUID.randomUUID().toString() + extension;
 
-            nomeArquivo = UUID.randomUUID().toString() + extension;
-            Path caminho = Paths.get(UPLOAD_DIRECTORY + nomeArquivo);
+        // Delega a gravação física para o serviço de armazenamento via interface (Bridge)
+        processadorDeArquivo.salvar(arquivo, nomeArquivo);
 
-            arquivo.transferTo(caminho.toFile());
+        try {
 
             EnviarFotosAtividade foto = new EnviarFotosAtividade();
             foto.setFoto(nomeArquivo);
@@ -86,16 +82,9 @@ public class EnviarFotosAtividadeController {
             foto.setAtividade(a);
 
             return fotoModel.gravar(foto, SingletonDB.getConexao());
-        } catch (IOException e) {
-            throw new RuntimeException("Falha no upload do arquivo físico: " + e.getMessage());
         } catch (RuntimeException e) {
-            if (!nomeArquivo.isEmpty()) {
-                try {
-                    Files.deleteIfExists(Paths.get(UPLOAD_DIRECTORY + nomeArquivo));
-                } catch (IOException ignore) {
-                    // Ignora erro ao deletar se falhar
-                }
-            }
+            // (Bridge)
+            processadorDeArquivo.excluir(nomeArquivo);
             throw new RuntimeException("Falha ao inserir a foto no banco: " + e.getMessage());
         }
     }
@@ -107,14 +96,11 @@ public class EnviarFotosAtividadeController {
 
         boolean excluiuBD = fotoModel.excluir(idFoto, SingletonDB.getConexao());
 
-        if (excluiuBD) {
-            try {
-                Files.deleteIfExists(Paths.get(UPLOAD_DIRECTORY + foto.getFoto()));
-            } catch (IOException e) {
-                System.err.println("Aviso: Registro excluído, mas falha ao apagar arquivo: " + e.getMessage());
-            }
-        }
-        else
+        if (!excluiuBD) {
             throw new RuntimeException("Falha ao excluir o registro da foto no banco.");
+        }
+
+        // (Bridge)
+        processadorDeArquivo.excluir(foto.getFoto());
     }
 }

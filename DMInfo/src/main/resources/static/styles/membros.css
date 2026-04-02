@@ -233,3 +233,31 @@ textarea.form-control {
 #form-membro:not(.edit-mode) #campo-dtFim {
     display: none;
 }
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    border: 1px solid #e0e0e0 !important;
+    background-color: #fff !important; /* Branco fica mais limpo dentro do modal */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #000 !important;
+    box-shadow: 0 0 0 0.25rem rgba(0,0,0,0.1) !important;
+}
+
+.modal-content {
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-footer {
+    border-top: none;
+    padding-top: 0;
+}

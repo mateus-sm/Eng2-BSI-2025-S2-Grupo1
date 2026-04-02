@@ -2,6 +2,7 @@ let membroModal, deleteModal;
 let idParaExcluir = null;
 
 const API_URL = '/apis/membro';
+const USUARIO_API_URL = '/apis/usuario';
 
 let listaMembrosOriginal = [];
 
@@ -92,10 +93,15 @@ function abrirModalAdicionar() {
     const form = document.getElementById('form-membro');
     form.reset();
     form.classList.remove('edit-mode');
+
     document.getElementById('membroId').value = '';
     document.getElementById('dtIniHidden').value = '';
     document.getElementById('membroModalLabel').innerText = 'Adicionar Membro';
-    document.getElementById('usuarioId').disabled = false;
+
+    const usuarioSelect = document.getElementById('usuarioId');
+    usuarioSelect.disabled = false;
+    carregarUsuariosParaSelect();
+
     membroModal.show();
 }
 
@@ -112,11 +118,15 @@ async function abrirModalEditar(id) {
         document.getElementById('membroModalLabel').innerText = 'Editar Membro';
 
         document.getElementById('membroId').value = membro.id;
-        document.getElementById('usuarioId').value = membro.usuario.id;
-        document.getElementById('usuarioId').disabled = true;
+
+        // No modo edição, populamos o select apenas com o usuário atual
+        const select = document.getElementById('usuarioId');
+        select.innerHTML = `<option value="${membro.usuario.id}">${membro.usuario.nome}</option>`;
+        select.value = membro.usuario.id;
+        select.disabled = true; // Mantém a regra de não trocar o usuário de um membro existente
+
         document.getElementById('observacao').value = membro.observacao || '';
         document.getElementById('dtFim').value = membro.dtFim || '';
-
         document.getElementById('dtIniHidden').value = membro.dtIni || '';
 
         membroModal.show();
@@ -249,6 +259,34 @@ function formatarData(data) {
         return '';
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
+}
+
+async function carregarUsuariosParaSelect() {
+    const select = document.getElementById('usuarioId');
+    try {
+        const response = await fetch(USUARIO_API_URL);
+        if (!response.ok) throw new Error('Erro ao carregar usuários');
+
+        const usuarios = await response.json();
+
+        // Limpa o select e adiciona a opção inicial
+        select.innerHTML = '<option value="">Selecione um usuário...</option>';
+
+        // Filtro opcional: remover usuários que já estão na lista de membros atual
+        const idsMembrosAtivos = listaMembrosOriginal.map(m => m.usuario.id);
+        const usuariosDisponiveis = usuarios.filter(u => !idsMembrosAtivos.includes(u.id));
+
+        usuariosDisponiveis.forEach(usuario => {
+            const option = document.createElement('option');
+            option.value = usuario.id;
+            option.textContent = usuario.nome; // Exibe o nome para o humano
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Erro:', error);
+        select.innerHTML = '<option value="">Erro ao carregar lista</option>';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

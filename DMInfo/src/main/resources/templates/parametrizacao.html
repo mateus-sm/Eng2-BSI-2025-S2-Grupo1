@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Parametrizacao</title>
+    <title>Gerenciar Parametrização</title>
     <link rel="shortcut icon" type="image/png" th:href="@{/images/BrasãoDemolay.png}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/styles/membros.css}">
     <link rel="stylesheet" th:href="@{/styles/parametrizacao.css}">
 
     <style>
@@ -14,8 +16,6 @@
             font-weight: bold;
             margin-left: 2px;
         }
-
-        /* Estilo para a div de erro (do JavaScript) */
         .error-message {
             font-size: 0.875em;
             margin-top: 0.25rem;
@@ -23,10 +23,18 @@
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2 class="mb-4">Parametrização</h2>
 
-    <form id="formParametrizacao" class="mb-4 p-4 border rounded bg-white">
+<a href="/app/principal" class="btn-home">
+    <i class="bi bi-house-door-fill"></i> Página Principal
+</a>
+
+<div class="container">
+    <div class="page-header">
+        <img th:src="@{/images/BrasãoDemolay.png}" alt="Logo DM Info" class="logo-img">
+        <h2>Parametrização</h2>
+    </div>
+
+    <form id="formParametrizacao" class="mb-4 p-4 border rounded bg-white shadow-sm">
         <input type="hidden" id="id" name="id">
 
         <div class="row">
@@ -155,13 +163,17 @@
                 </fieldset>
 
             </div>
-        </div> <div class="mt-4">
-        <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
-        <button type="button" class="btn btn-secondary d-none" id="btnCancelar">Cancelar</button>
-    </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary" id="btnSalvar">
+                <i class="bi bi-check-lg"></i> Salvar
+            </button>
+            <button type="button" class="btn btn-secondary d-none" id="btnCancelar">Cancelar</button>
+        </div>
     </form>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/imask"></script>
 <script th:src="@{/js/parametrizacao.js}" defer></script>
 </body>

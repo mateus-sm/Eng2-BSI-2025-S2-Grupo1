@@ -186,7 +186,7 @@ function renderizarTabelaDistribuicoes(lista) {
     lista.forEach(d => {
         const dataFormatada = d.data ? d.data.split('-').reverse().join('/') : "-";
         const valorFormatado = d.valor ? parseFloat(d.valor).toFixed(2) : "0.00";
-        
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td class="text-center fw-bold align-middle">${d.id}</td>
@@ -195,12 +195,14 @@ function renderizarTabelaDistribuicoes(lista) {
             <td class="align-middle">${d.descricao || "-"}</td>
             <td class="text-end align-middle">R$ ${valorFormatado}</td>
             <td class="text-center align-middle">
-                <button type="button" class="btn btn-sm btn-icone" title="Ver Detalhes" onclick="abrirModalDetalhes(${d.id})">
-                    <i class="bi bi-eye-fill fs-5 text-info"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-icone" title="Excluir Distribuição" onclick="excluirDistribuicao(${d.id})">
-                    <i class="bi bi-trash-fill fs-5 text-danger"></i>
-                </button>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-icone" title="Ver Detalhes" onclick="abrirModalDetalhes(${d.id})">
+                        <i class="bi bi-eye-fill fs-5 text-info"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-icone" title="Excluir Distribuição" onclick="excluirDistribuicao(${d.id})">
+                        <i class="bi bi-trash-fill fs-5 text-danger"></i>
+                    </button>
+                </div>
             </td>
         `;
         tabelaListagem.appendChild(tr);

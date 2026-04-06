@@ -118,7 +118,17 @@ public class viewController {
     }
 
     @GetMapping("/app/distribuir-recursos")
-    public String paginaDistribuirRecursos() {return "distribuir-recursos";}
+    public String paginaDistribuirRecursos(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Administrador admin = getAdminLogado(session);
+
+        if (admin == null) {
+            redirectAttributes.addFlashAttribute("erroPermissao", "Acesso Negado! \nSomente administradores podem distribuir recursos.");
+            return "redirect:/app/principal";
+        }
+
+        model.addAttribute("idAdminLogado", admin.getId());
+        return "distribuir-recursos";
+    }
 
     @GetMapping("/app/atribuirconquista")
     public String paginaAtribuirConquista() {return "atribuir-conquista";}

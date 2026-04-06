@@ -1,6 +1,10 @@
 package com.example.dminfo.model;
 
 import com.example.dminfo.dao.CalendarioDAO;
+import com.example.dminfo.dao.MembroAtividadeDAO;
+import com.example.dminfo.dao.MembroDAO;
+import com.example.dminfo.model.observer.ObserverMembro;
+import com.example.dminfo.model.observer.SujeitoCalendario;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -11,67 +15,28 @@ import java.util.List;
 import org.springframework.mail.javamail.JavaMailSender;
 
 @Repository
-public class Calendario {
+public class Calendario implements SujeitoCalendario {
     private int id_calendario;
     private CriarRealizacaoAtividades id_criacao;
+    private List<ObserverMembro> observadores = new ArrayList<>();
 
     @Autowired
     private CalendarioDAO dao;
+
+    @Autowired
+    private MembroAtividadeDAO membroAtividadeDAO;
+
+    @Autowired
+    private MembroDAO membroDAO;
+
+    @Autowired
+    private Membro membro;
 
     public Calendario() {
     }
 
     public Calendario(CriarRealizacaoAtividades id_criacao) {
         this.id_criacao = id_criacao;
-    }
-
-    private List<Usuario> observadores = new ArrayList<>();
-
-    public void adicionarObservador(Usuario u) {
-        this.observadores.add(u);
-    }
-    public void removerObservador(Usuario u) {
-        this.observadores.remove(u);
-    }
-
-    public void carregarEInstanciarObservadores(Conexao conexao) {
-        this.observadores.clear(); // Limpa a lista antes de carregar
-
-        if (this.id_criacao == null || conexao == null) return;
-
-        String sql = String.format(
-                "SELECT u.nome, u.email " +
-                        "FROM criar_realizacao_atividades_membro cram " +
-                        "JOIN membro m ON cram.membro_id_membro = m.id_membro " +
-                        "JOIN usuario u ON m.id_usuario = u.id_usuario " +
-                        "WHERE cram.criar_realizacao_atividades_id_criacao = %d", this.id_criacao.getId());
-
-        try {
-            ResultSet rs = conexao.consultar(sql);
-            while (rs != null && rs.next()) {
-                // Instanciando o usuário dentro do calendário conforme pedido
-                Usuario observador = new Usuario();
-                observador.setNome(rs.getString("nome"));
-                observador.setEmail(rs.getString("email"));
-
-                // Adicionando o usuário à lista de observadores
-                this.adicionarObservador(observador);
-            }
-        } catch (SQLException e) {
-            System.err.println("Erro ao instanciar observadores no calendário: " + e.getMessage());
-        }
-    }
-
-    public void notificarObservadores(String motivo, JavaMailSender mailSender) {
-        if (this.observadores.isEmpty()) {
-            System.out.println("O calendário da atividade não possui observadores para notificar.");
-            return;
-        }
-
-        for (Usuario observador : this.observadores) {
-            // Delega para o observador (usuário) a ação de receber a notificação
-            observador.receberNotificacao(this.id_criacao, motivo, mailSender);
-        }
     }
 
     private CriarRealizacaoAtividades montarAtividade(ResultSet rs) throws SQLException {
@@ -151,6 +116,46 @@ public class Calendario {
     public int getId_calendario() {
         return id_calendario;
     }
+
+    @Override
+    public void adicionarObservador(ObserverMembro observador) {
+        this.observadores.add(observador);
+    }
+
+    @Override
+    public void removerObservador(ObserverMembro observador) {
+        this.observadores.remove(observador);
+    }
+
+    @Override
+    public void notificarObservadores(String motivo, JavaMailSender mailSender) {
+        for (ObserverMembro obs : observadores) {
+            obs.notificarMembros(motivo, mailSender);
+        }
+    }
+
+    public void carregarEInstanciarObservadores(Conexao conexao) {
+        this.observadores.clear();
+
+        if (this.id_criacao != null && this.id_criacao.getId() > 0) {
+            try {
+                List<Integer> idsMembros = membroAtividadeDAO.listarMembrosPorAtividade(this.id_criacao.getId());
+                if (idsMembros != null && !idsMembros.isEmpty()) {
+                    for (Integer idMembro : idsMembros) {
+                        Membro membro = membroDAO.get(idMembro, conexao);
+                        if (membro != null) {
+                            this.adicionarObservador(membro);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao carregar observadores da atividade: " + e.getMessage());
+            }
+        } else {
+            System.err.println("Aviso: Calendário sem ID de criação. Não foi possível carregar observadores.");
+        }
+    }
+
     public void setId_calendario(int id_calendario) {
         this.id_calendario = id_calendario;
     }

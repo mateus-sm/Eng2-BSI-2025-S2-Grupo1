@@ -32,6 +32,7 @@ public class NotificacaoController {
     }
 
     //ROTA MANUAL
+
     @PostMapping("/manual/{idCriacao}")
     public ResponseEntity<String> enviarNotificacaoManual(@PathVariable int idCriacao) {
         Conexao conexao = SingletonDB.getConexao();

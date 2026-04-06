@@ -202,9 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function buscarNomesDosMembros(idAtividade) {
-        if (todosOsMembros.length === 0) {
-            await buscarTodosOsMembros();
-        }
+        await buscarTodosOsMembros();
 
         const idsAssociados = await buscarMembrosPorAtividade(idAtividade);
 
@@ -282,8 +280,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const termo = termoPesquisa.toLowerCase().trim();
 
         const membrosFiltrados = todosOsMembros.filter(membro => {
-            const nomeMembro = membro.usuario ? membro.usuario.nome : membro.nome;
-            return nomeMembro && nomeMembro.toLowerCase().includes(termo);
+            let nomeMembro = '';
+
+            if (membro.usuario && membro.usuario.nome) {
+                nomeMembro = membro.usuario.nome;
+            } else if (membro.nome) {
+                nomeMembro = membro.nome;
+            }
+
+            // Retorna verdadeiro se o termo de pesquisa estiver contido no nome
+            return nomeMembro.toLowerCase().includes(termo);
         });
 
         if (membrosFiltrados.length === 0 && termo !== '') {
@@ -318,9 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function abrirGerenciadorMembros(idCriacao) {
         idAtividadeModal = parseInt(idCriacao);
 
-        if (todosOsMembros.length === 0) {
-            await buscarTodosOsMembros();
-        }
+        await buscarTodosOsMembros();
 
         const idsAtivos = await buscarMembrosPorAtividade(idCriacao);
         membrosAtividadeAtual = idsAtivos;

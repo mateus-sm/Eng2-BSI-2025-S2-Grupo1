@@ -2,23 +2,30 @@ package com.example.dminfo.model;
 
 import com.example.dminfo.dao.MembroDAO;
 import com.example.dminfo.dao.MembroAtividadeDAO;
+import com.example.dminfo.dao.UsuarioDAO;
+import com.example.dminfo.model.observer.ObserverMembro;
 import com.example.dminfo.util.Conexao;
 import com.example.dminfo.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class Membro {
+public class Membro implements ObserverMembro {
     private int id;
     private LocalDate dtIni;
     private LocalDate dtFim;
     private String observacao;
     private Usuario usuario;
+
+    @Autowired
+    private UsuarioDAO usuarioDAO;
 
     @Autowired
     private MembroDAO dao;
@@ -47,17 +54,6 @@ public class Membro {
 
         }
     }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public LocalDate getDtIni() { return dtIni; }
-    public void setDtIni(LocalDate dtIni) { this.dtIni = dtIni; }
-    public LocalDate getDtFim() { return dtFim; }
-    public void setDtFim(LocalDate dtFim) { this.dtFim = dtFim; }
-    public String getObservacao() { return observacao; }
-    public void setObservacao(String observacao) { this.observacao = observacao; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
     public List<Membro> listar(String filtro, Conexao conexao) {
         return dao.get(filtro, conexao);
@@ -128,4 +124,51 @@ public class Membro {
             return membroAtividadeDAO.removerMembroAtividade(idCriacao, idMembro);
         return false;
     }
+
+    @Override
+    public void notificarMembros(String motivo, JavaMailSender javaMailSender) {
+
+        if (this.usuario != null && this.usuario.getId() > 0) {
+            com.example.dminfo.dao.UsuarioDAO daoDoUsuario = new com.example.dminfo.dao.UsuarioDAO();
+
+            Usuario user = daoDoUsuario.get(this.usuario.getId());
+
+            if (user != null && user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
+                try {
+                    org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+
+                    message.setTo(user.getEmail());
+                    message.setSubject("Lembrete do Sistema: " + motivo);
+
+                    String corpo = String.format(
+                            "Olá %s,\n\nEsta é uma notificação sobre suas atividades.\n\nMotivo do Lembrete: %s\n\nAtenciosamente,\nSistema de Gerenciamento.",
+                            user.getNome(),
+                            motivo
+                    );
+                    message.setText(corpo);
+
+                    javaMailSender.send(message);
+
+                    System.out.println("SUCESSO: E-mail enviado para o membro: " + user.getNome() + " (" + user.getEmail() + ")");
+                } catch (Exception e) {
+                    System.err.println("Erro ao enviar e-mail para " + user.getEmail() + ": " + e.getMessage());
+                }
+            } else {
+                System.err.println("Aviso: Não foi possível notificar o membro ID " + this.id + " (Usuário ID: " + this.usuario.getId() + "). E-mail não encontrado.");
+            }
+        } else {
+            System.err.println("Aviso: Não foi possível notificar o membro ID " + this.id + ". Usuário base inválido ou sem ID.");
+        }
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public LocalDate getDtIni() { return dtIni; }
+    public void setDtIni(LocalDate dtIni) { this.dtIni = dtIni; }
+    public LocalDate getDtFim() { return dtFim; }
+    public void setDtFim(LocalDate dtFim) { this.dtFim = dtFim; }
+    public String getObservacao() { return observacao; }
+    public void setObservacao(String observacao) { this.observacao = observacao; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 }

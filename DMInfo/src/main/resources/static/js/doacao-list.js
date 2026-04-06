@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${obs.replace(/\n/g, '<br>').substring(0, 50)}${obs.length > 50 ? '...' : ''}</td>
                         <td>
                             <div class="d-flex justify-content-center gap-1">
-                                <a href="doacao-form?id=${idDoacao}" class="btn btn-sm btn-warning btn-editar">
+                                <a href="doacaoForm?id=${idDoacao}" class="btn btn-sm btn-warning btn-editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button type="button" class="btn btn-sm btn-danger btn-excluir" data-id="${idDoacao}">

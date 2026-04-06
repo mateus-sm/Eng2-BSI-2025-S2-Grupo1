@@ -1,11 +1,11 @@
 package com.example.dminfo.controller;
 
+import com.example.dminfo.model.Calendario;
 import com.example.dminfo.model.CriarRealizacaoAtividades;
-import com.example.dminfo.model.observer.CalendarioLocalObserver;
-import com.example.dminfo.model.observer.NotificacaoObserver;
 import com.example.dminfo.util.SingletonDB;
 import com.example.dminfo.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +17,10 @@ public class FinalizarAtividadesController {
     private CriarRealizacaoAtividades atividadeModel;
 
     @Autowired
-    private CalendarioLocalObserver calendarioLocalObserver;
+    private Calendario calendarioModel;
 
     @Autowired
-    private NotificacaoObserver notificacaoObserver;
+    private JavaMailSender mailSender;
 
     public List<CriarRealizacaoAtividades> listarTodas() {
         return atividadeModel.listarTodas(SingletonDB.getConexao());
@@ -35,10 +35,6 @@ public class FinalizarAtividadesController {
             return false;
         }
 
-        // Padrão Observer: Adicionamos os observadores
-        existente.add(calendarioLocalObserver);
-        existente.add(notificacaoObserver);
-
         existente.setDtIni(dadosNovos.getDtIni());
         existente.setDtFim(dadosNovos.getDtFim());
         existente.setCustoreal(dadosNovos.getCustoreal());
@@ -51,6 +47,17 @@ public class FinalizarAtividadesController {
             existente.setStatus(dadosNovos.getStatus());
         }
 
-        return atividadeModel.finalizar(existente, conexao);
+        boolean resultado = atividadeModel.finalizar(existente, conexao);
+
+        if (resultado) {
+            calendarioModel.setId_criacao(existente);
+
+            calendarioModel.carregarEInstanciarObservadores(conexao);
+
+            String motivo = "Atenção: O status/detalhes da sua atividade foram atualizados (Finalização).";
+            calendarioModel.notificarObservadores(motivo, this.mailSender);
+        }
+
+        return resultado;
     }
 }

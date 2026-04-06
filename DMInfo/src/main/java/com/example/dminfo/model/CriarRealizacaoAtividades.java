@@ -4,8 +4,6 @@ import com.example.dminfo.dao.CriarRealizacaoAtividadesDAO;
 import com.example.dminfo.util.Conexao;
 import com.example.dminfo.model.state.EstadoAtividade;
 import com.example.dminfo.model.state.EstadoAtividadeAtiva;
-import com.example.dminfo.model.observer.Observer;
-import com.example.dminfo.model.observer.Sujeito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class CriarRealizacaoAtividades implements Sujeito {
+public class CriarRealizacaoAtividades{
     private int id;
     private Administrador admin;
     private Atividade atv;
@@ -29,8 +27,6 @@ public class CriarRealizacaoAtividades implements Sujeito {
     private double custoprevisto;
     private double custoreal;
     private Boolean status;
-
-    private transient List<Observer> observadores = new ArrayList<>();
 
     @Autowired
     private CriarRealizacaoAtividadesDAO dao;
@@ -138,31 +134,7 @@ public class CriarRealizacaoAtividades implements Sujeito {
         // O estadoInicial fará o "if" internamente. Se não for ele, ele chama a outra.
         boolean sucesso = estadoInicial.finalizar(atividadeAtualizada, atividadeNoBanco, dao, conexao);
 
-        // Notifica o Calendário e o E-mail se a ação no banco deu certo
-        if (sucesso == true) {
-            atividadeAtualizada.notificar();
-        }
-
         return sucesso;
-    }
-
-    @Override
-    public void add(Observer observer) {
-        if (!observadores.contains(observer)) {
-            observadores.add(observer);
-        }
-    }
-
-    @Override
-    public void remover(Observer observer) {
-        observadores.remove(observer);
-    }
-
-    @Override
-    public void notificar() {
-        for (Observer observer : observadores) {
-            observer.update(this);
-        }
     }
 
     public List<CriarRealizacaoAtividades> buscarAtividadesPorData(String data, Conexao conexao) {

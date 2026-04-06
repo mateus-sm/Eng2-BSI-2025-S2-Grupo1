@@ -27,137 +27,141 @@
         <p class="mt-2">Carregando dados...</p>
     </div>
 
-    <div id="erro" class="alert alert-danger d-none" role="alert"></div>
+    <div id="erro" class="alert alert-danger" style="display: none;" role="alert"></div>
 
-    <div class="table-responsive table-container">
-        <table id="dados-container" class="table table-striped table-hover align-middle d-none">
-            <thead>
-                <tr><th colspan="2">Dados Principais</th></tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="width: 250px;"><strong>ID:</strong></td>
-                    <td><span id="id_display"></span></td>
-                </tr>
-                <tr>
-                    <td><strong>Nome Fantasia:</strong></td>
-                    <td>
-                        <span id="nomeFantasia_display"></span>
-                        <input type="text" id="nomeFantasia_input" class="form-control d-none" data-field="nomeFantasia">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Razão Social:</strong></td>
-                    <td>
-                        <span id="razaoSocial_display"></span>
-                        <input type="text" id="razaoSocial_input" class="form-control d-none" data-field="razaoSocial">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>CNPJ:</strong></td>
-                    <td>
-                        <span id="cnpj_display"></span>
-                        <input type="text" id="cnpj_input" class="form-control d-none" data-field="cnpj">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Descrição:</strong></td>
-                    <td>
-                        <span id="descricao_display"></span>
-                        <textarea id="descricao_input" class="form-control d-none" data-field="descricao" rows="2"></textarea>
-                    </td>
-                </tr>
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="table-responsive table-container">
+                <table id="dados-container" class="table table-striped table-hover align-middle" style="display: none;">
+                    <thead>
+                    <tr><th colspan="2" class="text-center">Dados Principais</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td style="width: 250px;"><strong>ID:</strong></td>
+                        <td><span id="id_display"></span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nome Fantasia:</strong></td>
+                        <td>
+                            <span id="nomeFantasia_display"></span>
+                            <input type="text" id="nomeFantasia_input" class="form-control" style="display: none;" data-field="nomeFantasia">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Razão Social:</strong></td>
+                        <td>
+                            <span id="razaoSocial_display"></span>
+                            <input type="text" id="razaoSocial_input" class="form-control" style="display: none;" data-field="razaoSocial">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>CNPJ:</strong></td>
+                        <td>
+                            <span id="cnpj_display"></span>
+                            <input type="text" id="cnpj_input" class="form-control" style="display: none;" data-field="cnpj">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Descrição:</strong></td>
+                        <td>
+                            <span id="descricao_display"></span>
+                            <textarea id="descricao_input" class="form-control" style="display: none;" data-field="descricao" rows="2"></textarea>
+                        </td>
+                    </tr>
 
-                <tr><td colspan="2"><strong>Endereço</strong></td></tr>
-                <tr>
-                    <td><strong>Rua:</strong></td>
-                    <td>
-                        <span id="rua_display"></span>
-                        <input type="text" id="rua_input" class="form-control d-none" data-field="rua">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Bairro:</strong></td>
-                    <td>
-                        <span id="bairro_display"></span>
-                        <input type="text" id="bairro_input" class="form-control d-none" data-field="bairro">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Cidade:</strong></td>
-                    <td>
-                        <span id="cidade_display"></span>
-                        <input type="text" id="cidade_input" class="form-control d-none" data-field="cidade">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>UF:</strong></td>
-                    <td>
-                        <span id="uf_display"></span>
-                        <input type="text" id="uf_input" class="form-control d-none" data-field="uf" maxlength="2">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>CEP:</strong></td>
-                    <td>
-                        <span id="cep_display"></span>
-                        <input type="text" id="cep_input" class="form-control d-none" data-field="cep">
-                    </td>
-                </tr>
+                    <tr><td colspan="2" class="text-center"><strong>Endereço</strong></td></tr>
+                    <tr>
+                        <td><strong>Rua:</strong></td>
+                        <td>
+                            <span id="rua_display"></span>
+                            <input type="text" id="rua_input" class="form-control" style="display: none;" data-field="rua">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bairro:</strong></td>
+                        <td>
+                            <span id="bairro_display"></span>
+                            <input type="text" id="bairro_input" class="form-control" style="display: none;" data-field="bairro">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cidade:</strong></td>
+                        <td>
+                            <span id="cidade_display"></span>
+                            <input type="text" id="cidade_input" class="form-control" style="display: none;" data-field="cidade">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>UF:</strong></td>
+                        <td>
+                            <span id="uf_display"></span>
+                            <input type="text" id="uf_input" class="form-control" style="display: none;" data-field="uf" maxlength="2">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>CEP:</strong></td>
+                        <td>
+                            <span id="cep_display"></span>
+                            <input type="text" id="cep_input" class="form-control" style="display: none;" data-field="cep">
+                        </td>
+                    </tr>
 
-                <tr><td colspan="2"><strong>Contato</strong></td></tr>
-                <tr>
-                    <td><strong>Telefone:</strong></td>
-                    <td>
-                        <span id="telefone_display"></span>
-                        <input type="text" id="telefone_input" class="form-control d-none" data-field="telefone">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Email:</strong></td>
-                    <td>
-                        <span id="email_display"></span>
-                        <input type="email" id="email_input" class="form-control d-none" data-field="email">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Site:</strong></td>
-                    <td>
-                        <span id="site_display"></span>
-                        <input type="url" id="site_input" class="form-control d-none" data-field="site">
-                    </td>
-                </tr>
+                    <tr><td colspan="2" class="text-center"><strong>Contato</strong></td></tr>
+                    <tr>
+                        <td><strong>Telefone:</strong></td>
+                        <td>
+                            <span id="telefone_display"></span>
+                            <input type="text" id="telefone_input" class="form-control" style="display: none;" data-field="telefone">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email:</strong></td>
+                        <td>
+                            <span id="email_display"></span>
+                            <input type="email" id="email_input" class="form-control" style="display: none;" data-field="email">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Site:</strong></td>
+                        <td>
+                            <span id="site_display"></span>
+                            <input type="url" id="site_input" class="form-control" style="display: none;" data-field="site">
+                        </td>
+                    </tr>
 
-                <tr><td colspan="2"><strong>Logos</strong></td></tr>
-                <tr>
-                    <td><strong>Logo Pequeno (Path):</strong></td>
-                    <td>
-                        <span id="logoPequeno_display"></span>
-                        <input type="text" id="logoPequeno_input" class="form-control d-none" data-field="logoPequeno">
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Logo Grande (Path):</strong></td>
-                    <td>
-                        <span id="logoGrande_display"></span>
-                        <input type="text" id="logoGrande_input" class="form-control d-none" data-field="logoGrande">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    <tr><td colspan="2" class="text-center"><strong>Logos</strong></td></tr>
+                    <tr>
+                        <td><strong>Logo Pequeno (Path):</strong></td>
+                        <td>
+                            <span id="logoPequeno_display"></span>
+                            <input type="text" id="logoPequeno_input" class="form-control" style="display: none;" data-field="logoPequeno">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Logo Grande (Path):</strong></td>
+                        <td>
+                            <span id="logoGrande_display"></span>
+                            <input type="text" id="logoGrande_input" class="form-control" style="display: none;" data-field="logoGrande">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div class="d-flex gap-2 mt-3 justify-content-center">
-        <button id="btnEditar" class="btn btn-primary d-none">
+        <button id="btnEditar" class="btn btn-primary" style="display: none;">
             <i class="bi bi-pencil"></i> Editar
         </button>
-        <button id="btnSalvar" class="btn btn-success d-none">
+        <button id="btnSalvar" class="btn btn-success" style="display: none;">
             <i class="bi bi-check-lg"></i> Salvar
         </button>
-        <button id="btnCancelar" class="btn btn-secondary d-none">
+        <button id="btnCancelar" class="btn btn-secondary" style="display: none;">
             <i class="bi bi-x-lg"></i> Cancelar
         </button>
-        <button id="btnExcluir" class="btn btn-danger d-none">
+        <button id="btnExcluir" class="btn btn-danger" style="display: none;">
             <i class="bi bi-trash"></i> Excluir Registro
         </button>
     </div>

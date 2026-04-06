@@ -395,3 +395,14 @@
 .toast-sucesso { border-left-color: #28a745 !important; }
 .toast-erro { border-left-color: #dc3545 !important; }
 .toast-info { border-left-color: #007bff !important; }
+
+/* Sobrescreve o estilo de link padrão do Bootstrap dentro do FullCalendar */
+#calendario a {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+#calendario a:hover {
+    text-decoration: none !important;
+    color: inherit !important;
+}

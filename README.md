@@ -1,3 +1,4 @@
+[🇺🇸 English](README.en.md)
 # DMInfo
 
 > Sistema de gerenciamento de instituição desenvolvido ao longo de três semestres da disciplina de Engenharia de Software (BSI — UNOESTE), cobrindo desde o levantamento de requisitos até a implementação com padrões de projeto.

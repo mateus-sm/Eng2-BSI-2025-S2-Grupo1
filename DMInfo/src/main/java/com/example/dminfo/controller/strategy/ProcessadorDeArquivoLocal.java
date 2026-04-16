@@ -1,4 +1,4 @@
-package com.example.dminfo.controller.bridge;
+package com.example.dminfo.controller.strategy;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-//Implementador
 @Component
 public class ProcessadorDeArquivoLocal implements ProcessadorDeArquivo {
 

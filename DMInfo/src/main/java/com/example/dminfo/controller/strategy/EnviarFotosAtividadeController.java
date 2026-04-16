@@ -1,4 +1,4 @@
-package com.example.dminfo.controller.bridge;
+package com.example.dminfo.controller.strategy;
 
 import com.example.dminfo.model.Atividade;
 import com.example.dminfo.model.EnviarFotosAtividade;
@@ -29,9 +29,7 @@ public class EnviarFotosAtividadeController {
     @Autowired
     private Evento eventoModel;
 
-    // Injeção da interface da ponte (Bridge)
-    @Autowired
-    private ProcessadorDeArquivo processadorDeArquivo;
+    private ProcessadorDeArquivoLocal processadorDeArquivo;
 
     public List<Evento> listarTodosEventos() {
         return eventoModel.getTodos(SingletonDB.getConexao());
@@ -64,13 +62,13 @@ public class EnviarFotosAtividadeController {
         if (arquivo.isEmpty())
             throw new RuntimeException("Nenhum arquivo de foto enviado.");
 
-            String originalName = arquivo.getOriginalFilename();
-            String extension = (originalName != null && originalName.contains("."))
+        String originalName = arquivo.getOriginalFilename();
+        String extension = (originalName != null && originalName.contains("."))
                     ? originalName.substring(originalName.lastIndexOf("."))
                     : ".png";
         String nomeArquivo = UUID.randomUUID().toString() + extension;
 
-        // Delega a gravação física para o serviço de armazenamento via interface (Bridge)
+        processadorDeArquivo = new  ProcessadorDeArquivoLocal();
         processadorDeArquivo.salvar(arquivo, nomeArquivo);
 
         try {
@@ -83,7 +81,6 @@ public class EnviarFotosAtividadeController {
 
             return fotoModel.gravar(foto, SingletonDB.getConexao());
         } catch (RuntimeException e) {
-            // (Bridge)
             processadorDeArquivo.excluir(nomeArquivo);
             throw new RuntimeException("Falha ao inserir a foto no banco: " + e.getMessage());
         }
@@ -100,7 +97,7 @@ public class EnviarFotosAtividadeController {
             throw new RuntimeException("Falha ao excluir o registro da foto no banco.");
         }
 
-        // (Bridge)
+        processadorDeArquivo = new  ProcessadorDeArquivoLocal();
         processadorDeArquivo.excluir(foto.getFoto());
     }
 }
